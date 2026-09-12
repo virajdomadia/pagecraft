@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 273 64" width="273" height="64">
+<g><rect width="64" height="64" rx="14" fill="#4338CA"/>
+<path d="M18 14 h20 l8 8 v28 h-28 z" fill="#FFFFFF"/>
+<path d="M38 14 v8 h8" fill="#C7D2FE"/>
+<path d="M30 30 l14 6 l-6 2 l-2 6 z" fill="#FF6B6B" stroke="#4338CA" stroke-width="1.5" stroke-linejoin="round"/></g>
+<text x="78" y="45" font-family="'Manrope', system-ui, sans-serif" font-weight="800" font-size="34" letter-spacing="-0.03em" fill="#1B1B2F">Pagecraft</text>
+</svg>
