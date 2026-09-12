@@ -2,7 +2,7 @@
 
 **Build it together.** A landing-page builder two people can edit at the same time, then publish to their own subdomain.
 
-> Status: in progress — planning and design stage. One of six portfolio projects by [Viraj Domadia](https://virajdomadia.vercel.app). Will go live at `pagecraft.virajdomadia.com`.
+> Status: in progress — planning and design stage. One of six portfolio projects by [Viraj Domadia](https://virajdomadia.vercel.app). **Live (landing page):** https://pagecraft-viraj.vercel.app — will move to `pagecraft.virajdomadia.com` later.
 
 ## What it proves
 CRDT co-editing (Yjs) · live cursors · multi-tenant publishing · ISR
