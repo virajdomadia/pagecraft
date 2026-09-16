@@ -102,6 +102,36 @@ flowchart LR
   end
 ```
 
+## Flow 7 — Custom domain (v4)
+
+```mermaid
+flowchart LR
+  S[S10 Settings → Domain] -->|kaapicorner.in| R[Show DNS record to add]
+  R -->|poll every 15 s| C{record resolves?}
+  C -->|no| R
+  C -->|yes| V[Vercel Domains API: add domain]
+  V --> SSL{certificate issued?}
+  SSL -->|pending| V
+  SSL -->|yes| Live[Domain live · canonical set]
+  Vis[Visitor: kaapicorner.in] --> MW[middleware: host → /public/hosts → slug]
+  MW --> Page[/s/kaapi-corner rendered]
+```
+
+## Flow 8 — Export and import (v4)
+
+```mermaid
+flowchart LR
+  P[Publish v(n)] -->|toggle on| G[Push to GitHub: tree + commit]
+  E[S10 Export → Download] --> W[web /api/export renders SiteRenderer to HTML]
+  W --> Z[API zips html · css · images · pagecraft.json]
+  Z --> D[Download]
+  D -->|later| I[S3 Dashboard → Import zip]
+  I --> Val{validate SiteContent}
+  Val -->|ok| Doc[pycrdt builds Y.Doc · images → Blob]
+  Doc --> New[New draft site]
+  Val -->|bad| Err[422 naming the section]
+```
+
 ## Screen index
 
 | # | Screen | Route | Who | Version | Notes |
@@ -121,3 +151,6 @@ flowchart LR
 | S13 | Upgrade to Pro | `/upgrade` | creator | v3 | Razorpay subscription |
 | S14 | Inbox | `/sites/[id]/inbox` | creator | v3 | Contact-form submissions |
 | S15 | History panel | `/sites/[id]/edit` panel | creator | v2 | Snapshots, preview, restore |
+| S16 | Settings · Domain | `/sites/[id]/settings` tab | owner | v4 | DNS record, checking, live, remove |
+| S17 | Settings · Export | `/sites/[id]/settings` tab | owner | v4 | Download zip, GitHub connect + push toggle |
+| S18 | Import | `/sites` dialog | creator | v4 | Drop zip / json, slug check, create |

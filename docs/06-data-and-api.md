@@ -45,6 +45,8 @@ commit;
 **v2 additions:** `site_snapshots (id, site_id fk, seq bigint, snapshot bytea, label text, author_id, created_at)` index (site_id, created_at desc) — keep 10 per site; `invites (token text pk, site_id fk, email citext, role member_role, invited_by, expires_at, accepted_at null)`; `users.last_seen_at`.
 **v3 additions:** `subscriptions (id, user_id fk unique, razorpay_subscription_id text unique, status text, current_end timestamptz, created_at)`; `webhook_events (id text pk, received_at)`; `submissions (id, site_id fk, data jsonb, ip_hash text, created_at)` index (site_id, created_at desc); `page_views (site_id fk, day date, visitor_hash text, primary key (site_id, day, visitor_hash))`; `comments (id, site_id fk, section_id text, author_id, body text, resolved_at null, created_at)` index (site_id, section_id).
 
+**v4 additions:** `sites.custom_domain citext unique null`, `sites.domain_status text`, `sites.github_repo text null`, `sites.github_push bool default false`; `github_connections (user_id fk pk, login text, token_enc bytea, created_at)`.
+
 ## B. Redis keys (v2)
 | Key | Type | Cap / TTL | Written by |
 |---|---|---|---|
@@ -102,6 +104,9 @@ Error envelope everywhere: `{ "error": { "code": "slug_taken", "message": "…",
 | GET 👥 | `/sites/{id}/snapshots` · POST `/sites/{id}/snapshots/{id}/restore` | list · restore (applies a "replace" update, synced + undoable) |
 | GET 👥 | `/sites/{id}/publish/diff` | `{ changed: [{ section_id, type, change: added\|removed\|edited }] }` vs last publication |
 | POST | `/auth/forgot` · `/auth/reset` | Resend link |
+
+### v4 (sketch; detailed when v4 starts)
+`POST/GET/DELETE /sites/{id}/domain` 👑 (POST `{ domain }` → `{ status, record: { type, name, value } }` · 409 `domain_taken` · 402 `pro_required`) · `GET /public/hosts/{host}` → `{ slug }` (`s-maxage=300`) · `GET /sites/{id}/export.zip` 👥 · `GET /auth/github` + `/auth/github/callback` 🔒 · `DELETE /auth/github` 🔒 · `POST /sites/{id}/github` 👑 `{ repo, push_on_publish }` · `POST /sites/{id}/github/push` 👑 · `POST /sites/import` 🔒 (multipart) → `SiteCard` · 422 `invalid_export`.
 
 ### v3 (sketch; detailed when v3 starts)
 `POST /billing/subscribe` → Razorpay subscription params · `POST /webhooks/razorpay` ⚙ · `POST /public/sites/{slug}/submissions` · `GET /sites/{id}/submissions` 👥 · `POST /public/sites/{slug}/views` · `GET /sites/{id}/analytics` 👥 · `POST /sites/{id}/ai/rewrite` 👥 `{ section_id, field, brief }` → `{ suggestions: string[3] }` · `GET/POST /sites/{id}/comments` 👥 · `POST /sites/{id}/duplicate` 🔒.

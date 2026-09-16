@@ -13,6 +13,8 @@
 | Email (v2) | Resend + React Email | Invites, forgot-password, (v3) submissions |
 | Payments (v3) | Razorpay Subscriptions + webhooks, test mode | Pro plan |
 | AI (v3) | pydantic-ai → Claude | Section copy |
+| Domains (v4) | Vercel Domains API (`POST /v10/projects/{id}/domains`, `GET …/domains/{domain}/config`) | Free; token scoped to the `pagecraft` project |
+| Export (v4) | web Node route renders `SiteRenderer` to a string; API zips (`zipfile`) and streams; GitHub Git Data API via OAuth | No clone, one tree + one commit per publish |
 | Contract | `api/openapi.json` → `openapi-typescript` → `web/src/lib/api-types.ts` | Script `pnpm gen:api`; committed; **not** CI-gated |
 | CI | GitHub Actions: `web` (typecheck + build), `api` (ruff + pytest with Postgres service; Redis service from v2) | Nothing else |
 
@@ -121,5 +123,13 @@ Editor routes: dynamic, `no-store`. Dashboard: dynamic. Published sites: ISR 60 
 - v2: `test_stream_replays_after_reconnect` (XADD three, connect from id 2 → receives 3); one Playwright test — two pages, type in one, assert text in the other ≤ 500 ms, both type into one word → equal.
 - v3: `test_subscription_webhook_replay`.
 
+## 12b. v4 — domains, export, import
+- **Custom domains:** `sites.custom_domain` (unique) + `domain_status` (`pending_dns` | `pending_ssl` | `live` | `error`). `POST /sites/{id}/domain` validates the hostname, stores it, returns the DNS instruction; `GET /sites/{id}/domain` is polled by the panel and does the work: `dns.resolver` check → Vercel `add domain` (idempotent) → `config` until `misconfigured = false` → `live`. `www` handled by adding both names with a redirect on the apex. `DELETE` detaches. Host resolution for the middleware: `GET /public/hosts/{host}` → `{ slug }` with `s-maxage=300`; `middleware.ts` treats any host that is not `pagecraft.virajdomadia.com`/`*.pagecraft…`/`localhost` as custom and rewrites to `/s/{slug}` (404 page if unknown). `<link rel="canonical">` prefers the custom domain.
+- **Static export:** the renderer must run in Node, so `web/app/api/export/route.ts` (secret-checked, called by the API) renders `<SiteRenderer content>` with `renderToStaticMarkup`, collects the CSS the sections need (one static `styles.css` built at deploy time from the registry — the same Tailwind output the site uses) and returns `{ html, css }`. The API (`services/export.py`) downloads every image referenced in the content into `/images/`, rewrites the URLs, writes `sitemap.xml`, `robots.txt`, `pagecraft.json` (= `publications.content` + `seo` + `version` + `exported_at`), zips in memory and streams `application/zip`. Badge included on Free.
+- **GitHub push:** OAuth app (scope `repo`), token encrypted with `SESSION_SECRET`-derived key in `github_connections`. `services/github.py`: get ref → create blobs (base64 for images) → create tree → create commit → update ref. Runs after a successful publish when `sites.github_push = true`; failures are logged to the publish response, never block it.
+- **Import:** `POST /sites/import` (multipart zip or json) → find `pagecraft.json` → `SiteContent` validation → `services/templates.py.build_doc(content)` (the same function that builds template docs) → images in the zip uploaded to Blob and URLs rewritten → `sites` + `site_members` rows → editor. Slug from the export, suggestion on collision.
+- **Tests (only these):** `test_host_resolution` (custom host → slug, unknown → 404, taken → 409), `test_export_import_roundtrip` (export → import → export equal modulo ids/timestamps), `test_export_contains` (index.html, styles.css, images, pagecraft.json present; no Blob URLs left).
+- **Failure modes:** Vercel API error → `domain_status = error` with the message in the panel; DNS never resolving → stays `pending_dns` with the instruction shown (no timeout); GitHub token revoked → push skipped with a notice and `github_push` turned off.
+
 ## 13. Environment
-`api/`: `DATABASE_URL`, `SESSION_SECRET`, `WEB_URL`, `REVALIDATE_SECRET`, `BLOB_READ_WRITE_TOKEN`; v2: `REDIS_URL`, `RESEND_API_KEY`; v3: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`. `web/`: `API_URL`, `REVALIDATE_SECRET`, `NEXT_PUBLIC_SITE_HOST` (= `pagecraft.virajdomadia.com`), v3: `NEXT_PUBLIC_RAZORPAY_KEY_ID`.
+`api/`: `DATABASE_URL`, `SESSION_SECRET`, `WEB_URL`, `REVALIDATE_SECRET`, `BLOB_READ_WRITE_TOKEN`; v2: `REDIS_URL`, `RESEND_API_KEY`; v3: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`; v4: `VERCEL_TOKEN`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`. `web/`: `API_URL`, `REVALIDATE_SECRET`, `NEXT_PUBLIC_SITE_HOST` (= `pagecraft.virajdomadia.com`), v3: `NEXT_PUBLIC_RAZORPAY_KEY_ID`.

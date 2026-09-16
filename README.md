@@ -7,7 +7,7 @@
 ## What it proves
 CRDT co-editing (Yjs in the browser, **pycrdt** sync server in Python) · live cursors over SSE · a section-based editor that emits Lighthouse-100 sites · multi-tenant subdomain publishing with ISR
 
-Three versions: **v1 Solo studio** (single-user builder + publish, ≈ 18 h) → **v2 Studio session** (live co-editing, invites, history, ≈ 14 h) → **v3 Pro** (Razorpay plan, forms inbox, AI copy, analytics, comments, ≈ 13 h). See [PRD.md](PRD.md) and [docs/](docs/).
+Four versions: **v1 Solo studio** (single-user builder + publish, ≈ 18 h) → **v2 Studio session** (live co-editing, invites, history, ≈ 14 h) → **v3 Pro** (Razorpay plan, forms inbox, AI copy, analytics, comments, ≈ 13 h) → **v4 Your domain, your code** (custom domains from the same Publish button; export as static files or to your GitHub; import back — the one feature builders usually refuse, ≈ 8 h). See [PRD.md](PRD.md) and [docs/](docs/).
 
 ## Stack
 `web/` Next.js 15 (App Router) · TypeScript · Tailwind 4 · Yjs · `api/` FastAPI (Python 3.12) + pycrdt · SQLAlchemy + Alembic on Neon Postgres · Upstash Redis (v2) · Vercel Blob · Resend (v2) · Razorpay (v3) · pytest + Playwright · Vercel

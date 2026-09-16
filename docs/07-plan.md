@@ -2,9 +2,9 @@
 
 **Lifecycle step:** 7 of 17 · **Written:** 2026-09-16 · **Inputs:** [03-requirements.md](03-requirements.md), [04-technical-design.md](04-technical-design.md), [06-data-and-api.md](06-data-and-api.md).
 **Tracker:** row status lives at https://claude.ai/artifact/AxW5iwEzxWmtSdLdfnjQfB (updated per milestone; rebuild the page with `python mockups/tracker-build.py`).
-**Budget:** v1 ≈ 18 h · v2 ≈ 14 h · v3 ≈ 13 h. v1 is built on a `Y.Doc` from the first editor row so v2 is additive (stream + awareness), not a rewrite. **Cadence:** evenings/weekends; each row = one branch + one PR, squash-merged, and **every PR shows something in the browser**. Milestones end deployed. **Build starts after Tripsmith v3 and the projects ahead of Pagecraft in build order** (1 → 2 → 4 → 5 → 3 → 6).
+**Budget:** v1 ≈ 18 h · v2 ≈ 14 h · v3 ≈ 13 h · v4 ≈ 8 h. v1 is built on a `Y.Doc` from the first editor row so v2 is additive (stream + awareness), not a rewrite. **Cadence:** evenings/weekends; each row = one branch + one PR, squash-merged, and **every PR shows something in the browser**. Milestones end deployed. **Build starts after Tripsmith v3 and the projects ahead of Pagecraft in build order** (1 → 2 → 4 → 5 → 3 → 6).
 
-**Lean rules in force** (2026-09-15): setup is the minimum to deploy both apps with plain CI; no observability, contract gates, e2e workflows or tracker updates per PR; review findings fixed on the same branch; tests only from 04 §12. Hours saved go to the editor, motion and the templates. **Accounts and keys are created just-in-time** — in the row that first needs them, never in a setup batch: Neon in S2, Vercel Blob in F3, Upstash in L1, Resend in L4, Razorpay in A1, Anthropic in A4. Template photos live in `web/public/templates/` (no Blob needed until a user uploads).
+**Lean rules in force** (2026-09-15): setup is the minimum to deploy both apps with plain CI; no observability, contract gates, e2e workflows or tracker updates per PR; review findings fixed on the same branch; tests only from 04 §12. Hours saved go to the editor, motion and the templates. **Accounts and keys are created just-in-time** — in the row that first needs them, never in a setup batch: Neon in S2, Vercel Blob in F3, Upstash in L1, Resend in L4, Razorpay in A1, Anthropic in A4, Vercel API token in D1, GitHub OAuth app in D3. Template photos live in `web/public/templates/` (no Blob needed until a user uploads).
 
 How the lifecycle maps: step 8 = milestone 1.0; steps 9–11 and 14–15 cycle inside every row; step 12 is one checklist row at the end of v1; step 13 is the CI file in 1.0; step 16 is skipped unless something breaks; step 17 is a short doc after v3.
 
@@ -76,4 +76,22 @@ Goal: both apps deployed, DB seeded with six template docs, direction chosen, a 
 | A5 | **Comments** | Comment pins on the canvas, thread panel, resolve, count in layers | `comments` table, `GET/POST /sites/{id}/comments`, new comments broadcast over the site stream | 2.5 h | A comment posted in one tab appears in the other |
 | A6 | **Duplicate + v3 close** | Duplicate on the dashboard; final motion/polish pass; `docs/17-post-launch.md` (½ page); case study | `POST /sites/{id}/duplicate` | 1.5 h | v3 tagged; case study live |
 
-**v3 total ≈ 12.5 h** · **Project total ≈ 44 h**
+**v3 total ≈ 12.5 h**
+
+---
+
+## v4 — Your domain, your code (≈ 8 h) — reach beyond Pagecraft
+
+### Milestone 4.0 — Custom domains (≈ 3.5 h) 🟢🔵
+| # | Part | web/ | api/ | Est. | Done when |
+|---|---|---|---|---|---|
+| D1 | **Domain panel + Vercel** | S16 Settings → Domain: input, the DNS record card, *checking…* poll, live/error states, remove; Pro gate | **Vercel API token created here** (`VERCEL_*`); `sites.custom_domain/domain_status`; `POST/GET/DELETE /sites/{id}/domain` (validate, DNS check, Domains API add + config poll, www redirect) | 2.5 h | A test domain goes pending → live in the panel without a reload; SSL valid |
+| D2 | **Host routing + canonical** | `middleware.ts` custom-host branch → `/public/hosts/{host}` → rewrite; canonical + OG URL prefer the custom domain; 404 for unknown hosts | `GET /public/hosts/{host}` (`s-maxage=300`, invalidated on change); **test:** `host_resolution` | 1 h | `kaapicorner.in` and `kaapi-corner.pagecraft…` serve the same page; canonical points at the domain |
+
+### Milestone 4.1 — Export + import (≈ 4.5 h) 🟢
+| # | Part | web/ | api/ | Est. | Done when |
+|---|---|---|---|---|---|
+| D3 | **Static export + GitHub push** | `app/api/export/route.ts` (secret-checked `renderToStaticMarkup` + static `styles.css`); S17 Settings → Export: Download, Connect GitHub, repo picker, *push on publish* toggle, last-push status | **GitHub OAuth app created here** (`GITHUB_*`); `services/export.py` (fetch images, rewrite URLs, sitemap/robots, `pagecraft.json`, zip stream); `services/github.py` (Git Data API: blobs → tree → commit → ref); push hook after publish; **test:** `export_contains` | 3 h | Download opens from disk and matches the hosted page; two publishes → two commits in the user's repo |
+| D4 | **Import + v4 close** | S18 Import dialog on the dashboard (drop zone, validation errors by section, slug suggestion) | `POST /sites/import` (zip/json → validate → `build_doc` → images to Blob → site); **test:** `export_import_roundtrip`; README section "take your site with you"; `docs/17-post-launch.md` | 1.5 h | Export → import → identical site; round-trip test green; v4 tagged |
+
+**v4 total ≈ 8 h** · **Project total ≈ 52 h**

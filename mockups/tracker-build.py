@@ -25,7 +25,7 @@ for line in read("docs/07-plan.md").splitlines():
     if m: version = f"{m.group(1)} {m.group(2)}"; continue
     m = re.match(r"^### (Milestone [\d.]+) — (.+?) \(≈ ([\d.]+) h\)", line)
     if m: milestone = f"{m.group(1)} · {m.group(2)}"; continue
-    m = re.match(r"^\| ([SFLA]\d+) \| \*\*(.+?)\*\* \|(.*)\|$", line)
+    m = re.match(r"^\| ([SFLAD]\d+) \| \*\*(.+?)\*\* \|(.*)\|$", line)
     if m:
         cells = [c.strip() for c in m.group(3).split("|")]
         # v1 tables carry a Who column; v2/v3 do not
@@ -181,8 +181,9 @@ a{color:var(--guide)}
     ['One-liner', 'A Framer-lite for one-page sites: pick a template, edit sections with a teammate in real time, publish to your own subdomain.'],
     ['URLs', 'pagecraft.virajdomadia.com · sites at {slug}.pagecraft.virajdomadia.com (and /s/{slug}) · api.pagecraft.virajdomadia.com'],
     ['Repo', `<a href="${L.repo}" target="_blank" rel="noopener">github.com/virajdomadia/pagecraft</a> · web/ Next.js 15 · api/ FastAPI + pycrdt`],
-    ['Versions', '<b>v1 Solo studio</b> 18 h → <b>v2 Studio session</b> 14 h → <b>v3 Pro</b> 13 h ≈ 45 h'],
+    ['Versions', '<b>v1 Solo studio</b> 18 h → <b>v2 Studio session</b> 14 h → <b>v3 Pro</b> 13 h → <b>v4 Your domain, your code</b> 8 h ≈ 53 h'],
     ['Engine', 'Yjs in the browser · pycrdt in FastAPI · Postgres update log + compaction · Upstash stream + SSE fan-out (v2) · server-side publish export · ISR + subdomain middleware'],
+    ['Unique feature', 'v4: custom domains from the same Publish button (Vercel Domains API), export as static files or to the user's GitHub, import back — free to run; the round trip is the test'],
     ['Seed', 'Six fictional Bengaluru templates; demo site Kaapi Corner (Indiranagar café); demo logins creator + collaborator'],
     ['Direction', 'C · Blueprint — white chrome on the brand grid, dashed indigo guides, mono section ids; signature = sections draw themselves in as wireframes'],
     ['Lifecycle', 'Steps 1–7 complete (2026-09-17). Next: step 8 = milestone 1.0, after Tripsmith v3 and projects 4 and 5 (order 1 → 2 → 4 → 5 → 3 → 6)'],

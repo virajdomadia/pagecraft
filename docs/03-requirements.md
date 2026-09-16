@@ -2,7 +2,7 @@
 
 **Lifecycle step:** 3 of 17 · **Locked:** 2026-09-16 · **Source:** [PRD.md](../PRD.md) locked decisions. Flows and screen index: [03-user-flows.md](03-user-flows.md).
 
-Actors: **Creator** (owns sites), **Collaborator** (editor on someone else's site, v2), **Visitor** (reads a published site; not signed in). Each requirement ends with **Accept:** — the check that closes it. Ids: R = v1, R2 = v2, R3 = v3.
+Actors: **Creator** (owns sites), **Collaborator** (editor on someone else's site, v2), **Visitor** (reads a published site; not signed in). Each requirement ends with **Accept:** — the check that closes it. Ids: R = v1, R2 = v2, R3 = v3, R4 = v4.
 
 ---
 
@@ -105,5 +105,29 @@ Actors: **Creator** (owns sites), **Collaborator** (editor on someone else's sit
 
 ---
 
+## v4 — Your domain, your code (reach, ≈ 8 h)
+
+### R4-1. Custom domains (Pro)
+- Settings → Domain: enter `kaapicorner.in` (apex or `www`). Pagecraft shows the one record to add at the registrar (apex → `A 76.76.21.21`; subdomain → `CNAME cname.vercel-dns.com`), polls DNS every 15 s with a live *checking…* state, attaches the domain to the `pagecraft` Vercel project through the Domains API, waits for SSL, and marks it *live*. `www` ↔ apex redirect configured automatically. One domain per site; a domain can belong to one site.
+- `middleware.ts` resolves any non-Pagecraft host through `GET /public/hosts/{host}` (cached 5 min, invalidated on change) to the site's slug and rewrites to `/s/{slug}` — the same path the subdomain uses. The Pagecraft subdomain keeps working alongside the custom domain (canonical = the custom domain in `<link rel="canonical">`).
+- Removing the domain detaches it from Vercel and the site falls back to the subdomain. Free plan: the panel shows the flow but the Add button says *Pro*.
+- **Accept:** test — host → slug resolution, unknown host → 404, a domain claimed by another site → 409 `domain_taken`; a real domain resolves with SSL within 10 minutes of the record going live (checked once, by hand, on the demo domain).
+
+### R4-2. Export — Download
+- Settings → Export → *Download zip*: the API renders the **published** version with the same section renderer to static files: `index.html` (inlined critical CSS + one `styles.css`), `/images/*` (copied from Blob / `/templates/`), fonts referenced from Google Fonts, the small interaction script inline, `sitemap.xml`, `robots.txt`, and `pagecraft.json` (the document export + theme + seo + `version`). No badge in the export on Pro; badge kept on Free.
+- Rendering happens in **web** (`POST /api/export` — a Node route that runs `SiteRenderer` to a string, the only place React can render), called by the API's export endpoint with the revalidate secret; the API zips and streams it. Images are fetched and embedded, not linked to Blob.
+- **Accept:** the exported `index.html` opened from disk shows the site with no network beyond fonts; Lighthouse on the export equals the hosted page ±1; the zip contains `pagecraft.json` that validates against `SiteContent`.
+
+### R4-3. Export — Push to GitHub
+- Settings → Export → *Connect GitHub* (OAuth, scope `repo`) → pick or create a repo (`<slug>-site`) → *Push now*, and a toggle *Push on every publish*. Each push commits the same files as the zip with the message `Publish v{n} — {seo.title}`; the commit is made through the Git Data API (one tree, one commit — no clone). The repo README links back to the Pagecraft site and explains `pagecraft.json`.
+- Tokens are stored encrypted per user; disconnecting deletes them. A failed push shows the GitHub error and never blocks Publish.
+- **Accept:** publishing twice yields two commits with the right message; disconnecting revokes and later publishes skip the push with a notice.
+
+### R4-4. Import
+- Dashboard → *Import*: drop a `pagecraft.json` or a whole export zip. The API validates against `SiteContent` (same pydantic mirror as publish), rebuilds a `Y.Doc` with pycrdt (`services/templates.py` already turns JSON into a document), uploads embedded images to Blob, and creates a new draft site. Version and theme are preserved; slug is suggested from the export and checked for collisions.
+- **Accept:** test — export → import → export gives byte-identical `pagecraft.json` (minus ids/timestamps); an export from a different site version still imports.
+
+---
+
 ## Out of scope (all versions)
-Free-form canvas · custom domains · multi-page sites · code export · rich-text formatting inside fields · custom CSS · e-commerce sections · real-money billing · mobile editing · redirects from old slugs · team workspaces (membership is per site).
+Free-form canvas · multi-page sites · rich-text formatting inside fields · custom CSS · e-commerce sections · real-money billing · mobile editing · redirects from old slugs · team workspaces (membership is per site).
