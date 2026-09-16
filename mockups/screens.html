@@ -1,0 +1,771 @@
+<title>Pagecraft Screens</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ───────── review shell ───────── */
+:root{
+  --bg:#FFFFFF; --bg-2:#F6F5FA; --ink:#1B1B2F; --ink-2:#4A4A66; --muted:#6E6E8C; --line:#DCDAE8; --grid:#E7E5F0;
+  --indigo:#4338CA; --indigo-soft:#EEF0FF; --coral:#FF6B6B; --mint:#2EC4B6;
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  /* Kaapi Corner theme */
+  --k-bg:#F7F1E8; --k-surface:#EFE5D6; --k-ink:#2B1B12; --k-ink-2:#6B5548; --k-accent:#2F5D45; --k-accent-ink:#F7F1E8; --k-line:#E1D3BF;
+  --k-head:"Fraunces",Georgia,serif; --k-body:"Inter",system-ui,sans-serif; --k-radius:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#15152A; --bg-2:#1C1C33; --ink:#ECEBF6; --ink-2:#C2C1D6; --muted:#8F8FAD; --line:#2E2E4A; --grid:#242440; --indigo:#8F87FF; --indigo-soft:#262650; } }
+:root[data-theme="dark"]{ --bg:#15152A; --bg-2:#1C1C33; --ink:#ECEBF6; --ink-2:#C2C1D6; --muted:#8F8FAD; --line:#2E2E4A; --grid:#242440; --indigo:#8F87FF; --indigo-soft:#262650; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;padding-inline:clamp(16px,3vw,40px);padding-block:0 80px}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding-block:28px 18px;border-bottom:1px solid var(--line)}
+.top h1{font-size:clamp(22px,2.6vw,30px);font-weight:800;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.top p{margin:6px 0 0;color:var(--ink-2);max-width:66ch}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.index{display:flex;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:20;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line)}
+.index a{text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--bg-2);font:600 12.5px/1 var(--font);padding:8px 11px;border-radius:999px;display:flex;gap:6px;align-items:center}
+.index a b{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--muted)}
+.index a:hover{border-color:var(--indigo)}
+.screen{padding-top:34px;scroll-margin-top:60px}
+.sh{display:grid;grid-template-columns:1fr auto;gap:8px 32px;align-items:end;margin-bottom:12px}
+.sh h2{margin:0;font-size:21px;font-weight:800;letter-spacing:-.01em}
+.sh h2 b{font-family:var(--mono);font-weight:500;font-size:12px;color:var(--indigo);margin-right:10px;letter-spacing:.06em}
+.sh p{margin:4px 0 0;color:var(--ink-2);max-width:80ch}
+.sh .route{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+.sh .route kbd{border:1px solid var(--line);border-radius:5px;padding:1px 6px;font:inherit}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:28px;align-items:start}
+.row.one{grid-template-columns:1fr}
+.row.half{grid-template-columns:1fr 1fr}
+@media (max-width:900px){.row,.row.half{grid-template-columns:1fr}.sh{grid-template-columns:1fr}.sh .route{text-align:left}}
+.cap{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:8px}
+.demo{display:inline-flex;gap:8px;align-items:center;margin-top:10px;font:600 12.5px var(--font);color:var(--indigo);border:1px solid var(--line);background:var(--bg-2);padding:7px 11px;border-radius:999px;cursor:pointer}
+
+/* ───────── stage (any 1280-wide app screen, scaled to fit) ───────── */
+.stage-wrap{position:relative;width:100%;overflow:hidden;border-radius:6px;border:1px solid var(--line)}
+.stage{width:1280px;height:820px;transform-origin:0 0;position:relative;font-family:var(--font);font-size:13px;line-height:1.4;color:#1B1B2F;background:#F7F7FC;
+  --c-panel:#FFFFFF;--c-ink:#1B1B2F;--c-ink-2:#4A4A66;--c-muted:#6E6E8C;--c-line:#DCDAE8;--c-desk:#F7F7FC;--c-accent:#4338CA;--c-accent-soft:#EEF0FF;--c-sel:#4338CA;--c-radius:3px;--c-mono:var(--mono)}
+.stage.tall{height:1100px}
+.stage *{box-sizing:border-box}
+.gridbg{background-image:linear-gradient(#E7E5F0 1px,transparent 1px),linear-gradient(90deg,#E7E5F0 1px,transparent 1px),linear-gradient(#DCDAE8 1px,transparent 1px),linear-gradient(90deg,#DCDAE8 1px,transparent 1px);background-size:12px 12px,12px 12px,96px 96px,96px 96px;background-color:#F7F7FC}
+.stage a{color:inherit;text-decoration:none}
+/* app top bar */
+.bar{height:52px;display:flex;align-items:center;gap:12px;padding:0 14px;background:var(--c-panel);border-bottom:1px solid var(--c-line);color:var(--c-ink)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;letter-spacing:-.01em}
+.logo i{width:22px;height:22px;border-radius:5px;background:var(--c-accent);display:grid;place-items:center}
+.logo i:before{content:"";width:10px;height:10px;border:2px solid #fff;border-radius:2px;border-right-color:transparent}
+.crumb{color:var(--c-muted)}.crumb b{color:var(--c-ink);font-weight:600}
+.pill{font-family:var(--c-mono);font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--c-line);color:var(--c-ink-2);display:inline-flex;gap:6px;align-items:center;background:var(--c-panel)}
+.pill i{width:6px;height:6px;border-radius:50%;background:#2EC4B6}
+.pill.warn i{background:#FF6B6B}.pill.off i{background:#B8B8CC}
+.sp{flex:1}
+.ib{width:30px;height:30px;border-radius:3px;border:1px solid transparent;background:transparent;color:var(--c-ink-2);display:grid;place-items:center;font-size:13px;cursor:pointer}
+.ib:hover{background:var(--c-accent-soft);border-color:var(--c-line)}
+.seg{display:flex;border:1px solid var(--c-line);border-radius:3px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--c-ink-2);padding:6px 10px;font:500 12px var(--c-mono);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--c-accent);color:#fff}
+.btn{border:0;border-radius:3px;padding:8px 14px;font:700 13px var(--font);cursor:pointer;background:var(--c-accent);color:#fff;display:inline-flex;align-items:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--c-ink-2);border:1px solid var(--c-line)}
+.btn.danger{background:#fff;color:#C62F3B;border:1px solid #FFB3B3}
+.btn.lg{padding:12px 18px;font-size:14px}
+.btn:focus-visible,.ib:focus-visible,.seg button:focus-visible,.stage input:focus-visible{outline:3px solid #2EC4B6;outline-offset:1px}
+.avatar{width:28px;height:28px;border-radius:50%;background:#4338CA;color:#fff;display:grid;place-items:center;font:700 11px var(--font)}
+.mono{font-family:var(--c-mono)}
+.lbl{font-family:var(--c-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c-muted)}
+.stage h1,.stage h2,.stage h3{margin:0;font-weight:800;letter-spacing:-.015em;text-wrap:balance}
+.card{background:var(--c-panel);border:1px solid var(--c-line);border-radius:4px}
+.in{border:1px solid var(--c-line);border-radius:3px;padding:8px 10px;font-size:13px;color:var(--c-ink);background:#fff;min-height:36px;display:flex;align-items:center;gap:8px}
+.in .ph{color:#9A9AB8}
+.in.mono{font-family:var(--c-mono);font-size:12.5px}
+.in.ta{min-height:64px;align-items:flex-start;line-height:1.45;color:var(--c-ink-2)}
+.in.sel{justify-content:space-between}.in.sel:after{content:"⌄";color:var(--c-muted)}
+.in.err{border-color:#FF6B6B}
+.f label{display:block;font:500 10.5px var(--c-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--c-muted);margin-bottom:5px}
+.f .help{font-size:11.5px;color:var(--c-muted);margin-top:4px}
+.f .help.err{color:#C62F3B}
+.corner{position:relative}
+.corner:before,.corner:after{content:"";position:absolute;z-index:4;width:12px;height:12px;border:1px solid var(--c-sel);pointer-events:none}
+.corner:before{left:-1px;top:-1px;border-right:0;border-bottom:0}
+.corner:after{right:-1px;bottom:-1px;border-left:0;border-top:0}
+
+/* ───────── editor ───────── */
+.ed{display:grid;grid-template-rows:52px 1fr;grid-template-columns:236px 1fr 300px;height:100%}
+.ed .bar{grid-column:1/-1}
+.pane{background:var(--c-panel);color:var(--c-ink);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.pane.left{border-right:1px solid var(--c-line)}
+.pane.right{border-left:1px solid var(--c-line);overflow:auto}
+.pane h4{margin:0;padding:12px 14px 8px;font-family:var(--c-mono);font-weight:500;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c-accent);display:flex;justify-content:space-between;align-items:center}
+.pane h4 .k{color:var(--c-muted);font-weight:400}
+.layers{list-style:none;margin:0;padding:0 8px}
+.layers li{display:flex;align-items:center;gap:8px;padding:8px 8px;border-radius:3px;color:var(--c-ink-2);font:500 12px var(--c-mono);cursor:grab}
+.layers li .g{color:var(--c-muted);font-size:11px;letter-spacing:-1px}
+.layers li .t{width:22px;height:16px;border:1px solid var(--c-line);border-radius:2px;background:linear-gradient(90deg,var(--c-line) 40%,transparent 40%);opacity:.8}
+.layers li.sel{background:var(--c-accent-soft);color:var(--c-ink);font-weight:700}
+.layers li.sel .t{border-color:var(--c-sel)}
+.layers li .n{flex:1}.layers li .k{font-size:10px;color:var(--c-muted)}
+.addsec{margin:10px 14px;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;border:1px dashed var(--c-sel);border-radius:3px;background:transparent;color:var(--c-accent);font:500 12px var(--c-mono);cursor:pointer}
+.lib{margin:0 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lib div{border:1px solid var(--c-line);border-radius:3px;padding:8px;font:500 11px var(--c-mono);color:var(--c-ink-2)}
+.lib div i{display:block;height:26px;border-radius:2px;background:repeating-linear-gradient(90deg,var(--c-line) 0 6px,transparent 6px 10px);margin-bottom:6px;opacity:.7}
+.fields{padding:6px 14px 14px;display:flex;flex-direction:column;gap:10px}
+.fields .in{min-height:32px;font-size:12.5px}
+.fields .img{display:flex;gap:10px;align-items:center}
+.fields .img img{width:64px;height:44px;object-fit:cover;border-radius:3px}
+.fields .img small{color:var(--c-muted);font:400 10px var(--c-mono);display:block}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.list{border:1px solid var(--c-line);border-radius:3px}
+.list div{display:flex;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px solid var(--c-line);font-size:12px}
+.list div:last-child{border-bottom:0}
+.list .g{color:var(--c-muted);letter-spacing:-1px;font-size:11px}
+.list .n{flex:1}.list .p{font:500 11px var(--c-mono);color:var(--c-accent)}
+.theme{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw button{width:40px;height:28px;border-radius:3px;border:2px solid transparent;cursor:pointer;padding:0;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
+.sw button span{display:block}
+.sw button[aria-pressed="true"]{border-color:var(--c-sel);box-shadow:0 0 0 2px var(--c-panel) inset}
+.fp{display:flex;gap:6px;flex-wrap:wrap}
+.fp button{border:1px solid var(--c-line);background:transparent;color:var(--c-ink-2);border-radius:3px;padding:5px 8px;font-size:11px;cursor:pointer}
+.fp button[aria-pressed="true"]{border-color:var(--c-sel);color:var(--c-ink);font-weight:700}
+.canvas{overflow:auto;padding:26px 28px;position:relative}
+.frame{position:relative;width:100%;max-width:724px;margin:0 auto;outline:1px solid #C9C6DE;background:var(--k-bg)}
+.frame .page{container-type:inline-size;position:relative}
+.sec{position:relative}
+.sec.selected{outline:2px dashed var(--c-sel);outline-offset:-2px}
+.sec.selected:before{content:attr(data-name);position:absolute;top:0;left:0;z-index:3;background:var(--c-sel);color:#fff;font:500 10px/1 var(--c-mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px}
+.sec:hover:not(.selected){outline:1px solid color-mix(in srgb,var(--c-sel) 55%,transparent);outline-offset:-1px}
+.sec.drawing .content{opacity:0;transition:opacity .45s ease .55s}
+.sec.drawing.filled .content{opacity:1}
+.bp{position:absolute;inset:0;z-index:5;pointer-events:none}
+.bp rect{fill:none;stroke:var(--c-sel);stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1;vector-effect:non-scaling-stroke}
+.sec.drawing .bp rect{animation:draw .55s ease-out forwards}
+.sec.drawing.filled .bp rect{animation:fade .4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{to{opacity:0}}
+.sec.drawing .bp text{font:500 9px var(--c-mono);fill:var(--c-sel);letter-spacing:.08em}
+.ripple{position:absolute;inset:0;z-index:4;container-type:inline-size;transition:clip-path .75s cubic-bezier(.2,.7,.2,1)}
+.k-badge{position:absolute;right:12px;bottom:12px;background:#1B1B2F;color:#fff;font:600 10.5px var(--font);padding:6px 9px;border-radius:999px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:2}
+.k-badge i{width:10px;height:10px;border-radius:3px;background:#4338CA;display:inline-block}
+/* modal */
+.scrim{position:absolute;inset:0;background:rgba(27,27,47,.45);display:grid;place-items:center;z-index:30}
+.modal{width:560px;background:#fff;border-radius:4px;border:1px solid var(--c-line);box-shadow:0 30px 60px -20px rgba(27,27,47,.5)}
+.modal .mh{padding:16px 20px;border-bottom:1px solid var(--c-line);display:flex;align-items:center;gap:12px}
+.modal .mh h3{font-size:16px}
+.modal .mb{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.modal .mf{padding:14px 20px;border-top:1px solid var(--c-line);display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.ogpick{display:flex;gap:8px}
+.ogpick img{width:84px;height:56px;object-fit:cover;border-radius:3px;border:2px solid transparent}
+.ogpick img.on{border-color:var(--c-sel)}
+.urlrow{font:500 12.5px var(--c-mono);background:#F7F7FC;border:1px solid var(--c-line);border-radius:3px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.urlrow b{font-weight:500;color:#4338CA}
+.success{padding:26px 22px;text-align:center}
+.success .ok{width:44px;height:44px;border-radius:50%;background:#2EC4B6;color:#fff;display:grid;place-items:center;margin:0 auto 12px;font-size:20px}
+.success h3{font-size:19px;margin-bottom:4px}
+.success p{color:var(--c-ink-2);margin:0 0 14px;font-size:13px}
+.success .urlrow{text-align:left}
+.rise{animation:rise .3s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+
+/* ───────── landing (S1) ───────── */
+.land{overflow:auto;height:100%}
+.land .nav{display:flex;align-items:center;gap:28px;padding:18px 64px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--c-line);position:sticky;top:0;z-index:5}
+.land .nav ul{display:flex;gap:22px;list-style:none;margin:0;padding:0;font-weight:600;color:var(--c-ink-2);font-size:13.5px}
+.land .hero{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:center;padding:64px 64px 56px}
+.land .hero h1{font-size:50px;line-height:1.04;margin:14px 0 16px}
+.land .lede{font-size:17px;color:var(--c-ink-2);max-width:48ch;margin:0}
+.land .actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.land .demobox{margin-top:26px;border:1px dashed var(--c-sel);border-radius:4px;padding:12px 14px;display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.7)}
+.land .demobox .lbl{color:var(--c-accent)}
+.land .demobox .btn{padding:7px 11px;font-size:12px}
+.mini{position:relative;border:1px solid #C9C6DE;background:#fff;border-radius:4px;box-shadow:0 30px 60px -30px rgba(27,27,47,.35);overflow:hidden;font-size:11px}
+.mini .mbar{height:34px;border-bottom:1px solid var(--c-line);display:flex;align-items:center;gap:8px;padding:0 10px}
+.mini .mbar i{width:8px;height:8px;border-radius:50%;background:var(--c-line)}
+.mini .mbody{display:grid;grid-template-columns:120px 1fr 130px;height:330px}
+.mini .ml,.mini .mr{border-right:1px solid var(--c-line);padding:10px;font:500 9.5px var(--c-mono);color:var(--c-ink-2)}
+.mini .mr{border-right:0;border-left:1px solid var(--c-line)}
+.mini .ml div,.mini .mr div{padding:5px 6px;border-radius:2px;margin-bottom:2px}
+.mini .ml div.on{background:var(--c-accent-soft);color:var(--c-accent);font-weight:700}
+.mini .mr .fld{border:1px solid var(--c-line);margin-bottom:6px;height:18px}
+.mini .mc{background-image:linear-gradient(#E7E5F0 1px,transparent 1px),linear-gradient(90deg,#E7E5F0 1px,transparent 1px);background-size:12px 12px;padding:14px;position:relative}
+.mini .mc .sheet{background:var(--k-bg);outline:2px dashed var(--c-sel);outline-offset:-2px;padding:16px 14px;height:100%;color:var(--k-ink);font-family:var(--k-body);position:relative}
+.mini .mc .sheet h3{font-family:var(--k-head);font-weight:600;font-size:17px;line-height:1.1;letter-spacing:-.01em;margin:4px 0 6px}
+.mini .mc .sheet .eb{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--k-accent);font-weight:600}
+.mini .mc .sheet p{font-size:9.5px;color:var(--k-ink-2);margin:0;max-width:22ch}
+.mini .mc .sheet .ph{position:absolute;right:12px;top:14px;width:86px;height:64px;border-radius:6px;background:url(img/cafe-latte.jpg) center/cover}
+.mini .mc .sheet .tag{position:absolute;left:0;top:0;background:var(--c-sel);color:#fff;font:500 7.5px var(--c-mono);letter-spacing:.06em;padding:3px 6px;text-transform:uppercase}
+.mini .mc .wire{position:absolute;left:14px;right:14px;bottom:14px;height:70px;pointer-events:none}
+.mini .mc .wire rect{fill:none;stroke:var(--c-sel);stroke-width:1.2;stroke-dasharray:1;stroke-dashoffset:1;vector-effect:non-scaling-stroke;animation:draw .8s ease-out forwards}
+.mini .mc .wire text{font:500 7px var(--c-mono);fill:var(--c-sel)}
+.land .strip{display:flex;gap:28px;padding:18px 64px;border-top:1px solid var(--c-line);border-bottom:1px solid var(--c-line);background:#fff;font:500 11.5px var(--c-mono);color:var(--c-muted);flex-wrap:wrap}
+.land .strip b{color:var(--c-ink);font-weight:500}
+.land .feat{padding:56px 64px}
+.land .feat h2{font-size:30px;max-width:26ch;margin-bottom:24px}
+.land .fg{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.land .fg div{border:1px solid var(--c-line);background:#fff;padding:18px;border-radius:4px}
+.land .fg .lbl{color:var(--c-accent);margin-bottom:8px}
+.land .fg h3{font-size:15px;margin-bottom:6px}
+.land .fg p{margin:0;color:var(--c-ink-2);font-size:12.5px}
+.land .plans{padding:0 64px 56px;display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:820px}
+.land .tier{border:1px solid var(--c-line);background:#fff;padding:22px;border-radius:4px}
+.land .tier.pro{border-color:var(--c-sel);outline:1px solid var(--c-sel);outline-offset:-2px}
+.land .tier h3{font-size:14px;color:var(--c-muted);font-family:var(--c-mono);font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.land .price{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:6px 0 10px}
+.land .price small{font-size:13px;font-weight:600;color:var(--c-muted)}
+.land .tier ul{margin:0 0 14px;padding-left:18px;color:var(--c-ink-2);font-size:13px}
+.land .foot{padding:22px 64px;border-top:1px solid var(--c-line);color:var(--c-muted);font:500 11.5px var(--c-mono);display:flex;justify-content:space-between}
+
+/* ───────── auth (S2) ───────── */
+.auth{height:100%;display:grid;place-items:center}
+.auth .card{width:420px;padding:28px}
+.auth .card h2{font-size:22px;margin:14px 0 4px}
+.auth .sub{color:var(--c-ink-2);margin:0 0 18px;font-size:13.5px}
+.auth .fs{display:flex;flex-direction:column;gap:12px}
+.auth .or{display:flex;align-items:center;gap:10px;color:var(--c-muted);font:500 10.5px var(--c-mono);letter-spacing:.08em;text-transform:uppercase;margin:16px 0 10px}
+.auth .or:before,.auth .or:after{content:"";flex:1;height:1px;background:var(--c-line)}
+.auth .demo2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.auth .demo2 .btn{justify-content:center}
+.auth .foot{margin-top:16px;font-size:12.5px;color:var(--c-muted);text-align:center}
+.auth .foot a{color:var(--c-accent);font-weight:600}
+
+/* ───────── dashboard (S3) ───────── */
+.dash{padding:28px 48px}
+.dash .hd{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:22px}
+.dash h1{font-size:26px}
+.dash .sub{color:var(--c-ink-2);margin:4px 0 0;font-size:13.5px}
+.sites{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.sitecard{border:1px solid var(--c-line);background:#fff;border-radius:4px;overflow:hidden}
+.sitecard .prev{height:190px;overflow:hidden;position:relative;border-bottom:1px solid var(--c-line);background:#F7F7FC}
+.sitecard .prev .page{transform:scale(.5);transform-origin:0 0;width:200%;pointer-events:none}
+.sitecard .meta{padding:14px 16px}
+.sitecard .meta h3{font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sitecard .meta .url{font:400 11px var(--c-mono);color:var(--c-accent);margin-top:4px}
+.sitecard .meta .when{font:400 11px var(--c-mono);color:var(--c-muted);margin-top:8px;display:flex;justify-content:space-between}
+.sitecard.new{border:1px dashed var(--c-sel);display:grid;place-items:center;min-height:290px;color:var(--c-accent);font:500 13px var(--c-mono);background:transparent}
+.sitecard.new span{text-align:center}
+.sitecard.new b{display:block;font-size:34px;font-weight:400;margin-bottom:6px}
+.plannote{margin-top:22px;border:1px solid var(--c-line);background:#fff;border-radius:4px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--c-ink-2)}
+
+/* ───────── template picker (S4) ───────── */
+.tpl{display:grid;grid-template-columns:400px 1fr;height:100%}
+.tpl .list{border:0;border-right:1px solid var(--c-line);background:#fff;padding:24px 22px;overflow:auto;display:block}
+.tpl .list h1{font-size:22px;margin-bottom:4px}
+.tpl .list .sub{color:var(--c-ink-2);margin:0 0 18px;font-size:13px}
+.tplcard{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;border:1px solid var(--c-line);border-radius:3px;padding:10px;margin-bottom:8px;cursor:pointer}
+.tplcard.on{border-color:var(--c-sel);outline:1px solid var(--c-sel);outline-offset:-2px;background:var(--c-accent-soft)}
+.tplcard .th{height:64px;border-radius:2px;background:#eee center/cover}
+.tplcard h3{font-size:13.5px}
+.tplcard p{margin:2px 0 0;font:400 11px var(--c-mono);color:var(--c-muted)}
+.tplcard .pro{font:500 9.5px var(--c-mono);color:#fff;background:var(--c-ink);padding:2px 6px;border-radius:2px;margin-left:6px;letter-spacing:.06em}
+.tpl .prev{padding:24px 28px;display:grid;grid-template-rows:auto 1fr;gap:16px;overflow:hidden}
+.tpl .prev .form{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;background:#fff;border:1px solid var(--c-line);padding:14px 16px;border-radius:4px}
+.tpl .prevframe{overflow:auto;position:relative}
+.tpl .prevframe .frame{max-width:800px}
+
+/* ───────── settings (S10) ───────── */
+.set{padding:28px 48px;display:grid;grid-template-columns:200px 1fr;gap:32px;max-width:1000px}
+.set nav a{display:block;padding:8px 10px;border-radius:3px;font:500 12.5px var(--c-mono);color:var(--c-ink-2)}
+.set nav a.on{background:var(--c-accent-soft);color:var(--c-accent)}
+.set .grp{border:1px solid var(--c-line);background:#fff;border-radius:4px;margin-bottom:18px}
+.set .grp h3{font-size:14px;padding:14px 18px;border-bottom:1px solid var(--c-line)}
+.set .grp .b{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.set .grp.danger{border-color:#FFB3B3}
+.set .grp.danger h3{color:#C62F3B}
+.set .inline{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:var(--c-ink-2)}
+.set .inline b{color:var(--c-ink);display:block;font-size:13.5px}
+
+/* ───────── not published (S11) ───────── */
+.np{height:100%;display:grid;place-items:center;text-align:center}
+.np .mark{width:48px;height:48px;border-radius:10px;background:var(--c-accent);margin:0 auto 18px;display:grid;place-items:center}
+.np .mark:before{content:"";width:20px;height:20px;border:3px solid #fff;border-radius:3px;border-right-color:transparent}
+.np h1{font-size:24px;margin-bottom:6px}
+.np p{color:var(--c-ink-2);margin:0 0 18px;max-width:40ch}
+.np .url{font:500 12.5px var(--c-mono);color:var(--c-muted);margin-bottom:14px}
+
+/* ───────── phone ───────── */
+.phone{width:390px;max-width:100%;margin:0 auto;border-radius:44px;border:10px solid #17172A;background:#17172A;box-shadow:0 30px 60px -30px rgba(0,0,0,.5);overflow:hidden;position:relative}
+.phone .screen{height:780px;overflow:auto;background:var(--k-bg);position:relative;border-radius:34px}
+.phone .screen::-webkit-scrollbar{width:0}
+.phone .page{container-type:inline-size;position:relative}
+.phone .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:28px;background:#17172A;border-radius:999px;z-index:5}
+.phone .url{position:sticky;top:0;z-index:4;background:rgba(247,241,232,.92);backdrop-filter:blur(8px);font:500 11.5px var(--mono);color:var(--k-ink-2);padding:44px 14px 8px;text-align:center;border-bottom:1px solid var(--k-line)}
+.phone.app .screen{background:#F7F7FC}
+.phone.app .url{background:rgba(255,255,255,.92);color:var(--c-muted);border-bottom-color:#DCDAE8}
+.ro{background:#fff;border-bottom:1px solid #DCDAE8;padding:10px 14px;display:flex;gap:10px;align-items:center;font:600 12px var(--font);color:#1B1B2F}
+.ro .pill{margin-left:auto}
+.ro-note{background:#EEF0FF;color:#4338CA;font:500 11px var(--mono);padding:8px 14px;border-bottom:1px solid #DCDAE8}
+
+/* ───────── Kaapi Corner — the user's site ───────── */
+.page{background:var(--k-bg);color:var(--k-ink);font-family:var(--k-body);font-size:15px;line-height:1.55}
+.page *{box-sizing:border-box}
+.page h1,.page h2,.page h3{font-family:var(--k-head);font-weight:600;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.page p{margin:0}.page img{display:block;max-width:100%}
+.k-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--k-line)}
+.k-nav .brand{font-family:var(--k-head);font-weight:700;font-size:18px}
+.k-nav ul{display:none;list-style:none;margin:0;padding:0;gap:22px;font-size:13.5px;color:var(--k-ink-2)}
+.k-nav .k-btn{font-size:12.5px;padding:8px 12px}
+.k-btn{display:inline-block;background:var(--k-accent);color:var(--k-accent-ink);border-radius:calc(var(--k-radius) * .6);padding:11px 18px;font-weight:600;font-size:14px;text-decoration:none}
+.k-btn.o{background:transparent;color:var(--k-ink);border:1px solid var(--k-line)}
+.k-hero{display:grid;gap:22px;padding:34px 28px}
+.k-hero .eyebrow{font-family:var(--k-body);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--k-accent);font-weight:600}
+.k-hero h1{font-size:34px;line-height:1.08;margin:10px 0 12px}
+.k-hero p.lead{color:var(--k-ink-2);max-width:44ch;font-size:15px}
+.k-hero .ctas{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.k-hero img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--k-radius)}
+.k-hero.full{padding:0;position:relative;display:block}
+.k-hero.full img{aspect-ratio:16/11;border-radius:0}
+.k-hero.full .over{position:absolute;inset:auto 0 0 0;padding:28px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff}
+.k-hero.full .over .eyebrow{color:#fff;opacity:.85}
+.k-hero.full .over p.lead{color:#fff;opacity:.9}
+.k-sec{padding:34px 28px}
+.k-sec .kicker{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--k-accent);font-weight:600;margin-bottom:8px}
+.k-sec h2{font-size:26px;margin-bottom:18px}
+.k-menu{display:grid;gap:14px}
+.k-menu article{background:var(--k-surface);border-radius:var(--k-radius);overflow:hidden}
+.k-menu img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.k-menu .b{padding:14px 16px}
+.k-menu h3{font-size:17px;display:flex;justify-content:space-between;gap:10px}
+.k-menu h3 span{font-family:var(--k-body);font-weight:600;font-size:14px;color:var(--k-accent);font-variant-numeric:tabular-nums}
+.k-menu p{color:var(--k-ink-2);font-size:13.5px;margin-top:4px}
+.k-feat{display:grid;gap:14px}
+.k-feat div{background:var(--k-surface);border-radius:var(--k-radius);padding:18px}
+.k-feat h3{font-size:16px;margin-bottom:6px}
+.k-feat p{color:var(--k-ink-2);font-size:13.5px}
+.k-feat .ic{width:30px;height:30px;border-radius:8px;background:var(--k-accent);margin-bottom:12px;opacity:.9}
+.k-gal{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.k-gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:calc(var(--k-radius) * .7)}
+.k-gal img:first-child{grid-column:1/-1;aspect-ratio:16/9}
+.k-quotes{display:grid;gap:12px}
+.k-quotes blockquote{margin:0;background:var(--k-surface);border-radius:var(--k-radius);padding:18px}
+.k-quotes q{font-family:var(--k-head);font-size:17px;line-height:1.35;quotes:"“" "”"}
+.k-quotes cite{display:block;margin-top:10px;font-style:normal;font-size:12.5px;color:var(--k-ink-2)}
+.k-quotes .stars{color:var(--k-accent);letter-spacing:2px;font-size:12px;margin-bottom:6px}
+.k-price{display:grid;gap:12px}
+.k-price div{background:var(--k-surface);border-radius:var(--k-radius);padding:20px;border:1px solid transparent}
+.k-price div.hi{border-color:var(--k-accent)}
+.k-price h3{font-size:16px}
+.k-price .amt{font-family:var(--k-head);font-size:30px;font-weight:600;margin:6px 0 10px;font-variant-numeric:tabular-nums}
+.k-price .amt small{font-family:var(--k-body);font-size:12px;color:var(--k-ink-2);font-weight:500}
+.k-price ul{margin:0 0 14px;padding-left:18px;color:var(--k-ink-2);font-size:13.5px}
+.k-faq{display:grid;gap:8px}
+.k-faq details{background:var(--k-surface);border-radius:calc(var(--k-radius) * .6);padding:12px 16px}
+.k-faq summary{font-weight:600;cursor:pointer;font-size:14.5px}
+.k-faq p{color:var(--k-ink-2);font-size:13.5px;margin-top:8px}
+.k-cta{background:var(--k-accent);color:var(--k-accent-ink);border-radius:var(--k-radius);padding:28px;display:grid;gap:14px;align-items:center}
+.k-cta h2{color:inherit;margin:0 0 6px}
+.k-cta p{opacity:.85}
+.k-cta .k-btn{background:var(--k-accent-ink);color:var(--k-accent)}
+.k-visit{display:grid;gap:18px}
+.k-visit dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px}
+.k-visit dt{color:var(--k-ink-2)}.k-visit dd{margin:0;font-weight:500}
+.k-map{border-radius:var(--k-radius);min-height:180px;background:linear-gradient(var(--k-line) 1px,transparent 1px) 0 0/28px 28px,linear-gradient(90deg,var(--k-line) 1px,transparent 1px) 0 0/28px 28px,var(--k-surface);position:relative}
+.k-map:before{content:"";position:absolute;left:52%;top:46%;width:18px;height:18px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--k-accent);box-shadow:0 0 0 6px color-mix(in srgb,var(--k-accent) 20%,transparent)}
+.k-map:after{content:"12th Main · Indiranagar";position:absolute;left:52%;top:56%;transform:translateX(-50%);font-size:11px;background:var(--k-bg);padding:3px 8px;border-radius:6px;white-space:nowrap}
+.k-foot{padding:22px 28px;border-top:1px solid var(--k-line);font-size:12.5px;color:var(--k-ink-2);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@container (min-width:600px){
+  .k-nav ul{display:flex}
+  .k-hero{grid-template-columns:1.05fr 1fr;align-items:center;padding:48px 40px}
+  .k-hero h1{font-size:44px}
+  .k-hero.full .over{padding:48px 40px}
+  .k-sec{padding:44px 40px}
+  .k-menu,.k-feat,.k-price{grid-template-columns:repeat(3,1fr)}
+  .k-gal{grid-template-columns:2fr 1fr 1fr}
+  .k-gal img:first-child{grid-column:auto;grid-row:1/3;aspect-ratio:auto;height:100%}
+  .k-quotes{grid-template-columns:repeat(3,1fr)}
+  .k-visit{grid-template-columns:1fr 1.2fr;align-items:start}
+  .k-cta{grid-template-columns:1fr auto;padding:36px 40px}
+  .k-nav,.k-foot{padding-inline:40px}
+}
+/* Nimbus — product launch template theme */
+.page[data-palette="graphite"]{--k-bg:#F4F4F6;--k-surface:#FFFFFF;--k-ink:#17181F;--k-ink-2:#5C5E6B;--k-accent:#1F4FD8;--k-accent-ink:#FFFFFF;--k-line:#DEDFE6;--k-head:"Manrope",system-ui,sans-serif;--k-radius:8px}
+.page[data-palette="graphite"] h1,.page[data-palette="graphite"] h2,.page[data-palette="graphite"] h3{font-weight:800;letter-spacing:-.02em}
+.page[data-palette="monsoon"]{--k-bg:#F3F6F5;--k-surface:#E4ECE9;--k-ink:#12302B;--k-ink-2:#4E6A64;--k-accent:#0E7C66;--k-accent-ink:#F3F6F5;--k-line:#CFDCD8}
+.page[data-palette="saffron"]{--k-bg:#FFF8EE;--k-surface:#FBEBD2;--k-ink:#3A2410;--k-ink-2:#7A5A3A;--k-accent:#C2410C;--k-accent-ink:#FFF8EE;--k-line:#EED9BC}
+.page[data-palette="midnight"]{--k-bg:#17181F;--k-surface:#22242E;--k-ink:#F2EEE6;--k-ink-2:#B4AFA4;--k-accent:#E2B96B;--k-accent-ink:#17181F;--k-line:#33363F}
+.page[data-fonts="manrope-inter"]{--k-head:"Manrope",system-ui,sans-serif}
+.page[data-fonts="mono-inter"]{--k-head:"JetBrains Mono",monospace}
+
+.pane1{width:300px;max-width:100%;border:1px solid var(--line);border-radius:6px;background:#fff;color:#1B1B2F;font-family:var(--font);font-size:13px;line-height:1.4;overflow:hidden;
+  --c-panel:#FFFFFF;--c-ink:#1B1B2F;--c-ink-2:#4A4A66;--c-muted:#6E6E8C;--c-line:#DCDAE8;--c-accent:#4338CA;--c-accent-soft:#EEF0FF;--c-sel:#4338CA;--c-mono:var(--mono)}
+.pane1 *{box-sizing:border-box}
+.pane1.wide{width:236px}
+.panes{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.libfull{margin:0 14px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.libfull div{border:1px solid var(--c-line);border-radius:3px;padding:8px;font:500 10.5px var(--c-mono);color:var(--c-ink-2);cursor:pointer}
+.libfull div:hover{border-color:var(--c-sel);color:var(--c-ink)}
+.libfull div i{display:block;height:34px;border-radius:2px;margin-bottom:6px;opacity:.75}
+.libfull div small{display:block;color:var(--c-muted);font-size:9.5px;margin-top:2px}
+.libsearch{margin:0 14px 10px}
+@media (prefers-reduced-motion: reduce){
+  .sec.drawing .content{transition:none;opacity:1}.sec.drawing .bp{display:none}.ripple{transition:none}.rise{animation:none}.mini .mc .wire rect{animation:none;stroke-dashoffset:0}
+}
+</style>
+
+<header class="top">
+  <div>
+    <div class="eyebrow">Pagecraft · step 4 · screens · direction C · Blueprint</div>
+    <h1>Every v1 screen, drawn in Blueprint</h1>
+    <p>Eleven screens from the screen index, in the chosen direction. App screens are the 1280 px layout scaled to fit; published sites are the user's own theme (Kaapi Corner café, Nimbus kettle) on desktop and a 390 px phone. Live moments are marked <kbd>try</kbd>.</p>
+  </div>
+</header>
+<nav class="index" aria-label="Screens">
+  <a href="#s1"><b>S1</b> Landing</a><a href="#s2"><b>S2</b> Sign in</a><a href="#s3"><b>S3</b> Dashboard</a><a href="#s4"><b>S4</b> Templates</a><a href="#s5"><b>S5</b> Editor</a><a href="#s6"><b>S6</b> Library</a><a href="#s7"><b>S7</b> Inspector</a><a href="#s8"><b>S8</b> Publish</a><a href="#s9"><b>S9</b> Published</a><a href="#s10"><b>S10</b> Settings</a><a href="#s11"><b>S11</b> 404</a>
+</nav>
+
+<!-- ═══ S1 ═══ -->
+<section class="screen" id="s1">
+  <div class="sh"><div><h2><b>S1</b>Landing</h2><p>The existing landing restyled onto the Blueprint grid: the hero's editor illustration draws its next section in (the signature, seen before sign-up), a dashed demo box with the two demo logins, and the plans block from the live page (Free ₹0 · Pro ₹299).</p></div><div class="route">/ · visitor</div></div>
+  <div class="stage-wrap"><div class="stage tall gridbg"><div class="land">
+    <nav class="nav"><div class="logo"><i></i>Pagecraft</div><ul><li>Features</li><li>Templates</li><li>Plans</li></ul><div class="sp"></div><button class="btn ghost">Sign in</button><button class="btn">Start a page, free</button></nav>
+    <section class="hero">
+      <div>
+        <div class="lbl" style="color:#4338CA">Build it together</div>
+        <h1>Build the page together. Publish it in one click.</h1>
+        <p class="lede">A one-page site editor two people can use at the same time — you write the headline while your designer swaps the photos — then it's live on its own address, fast enough to score 100 on Lighthouse.</p>
+        <div class="actions"><button class="btn lg">Start a page, free</button><button class="btn ghost lg">See what you can build</button></div>
+        <div class="demobox"><span class="lbl">Try the demo</span><button class="btn">Sign in as the creator</button><button class="btn ghost">…as the collaborator</button><span class="mono" style="font-size:11px;color:#6E6E8C">Kaapi Corner · Indiranagar</span></div>
+      </div>
+      <div class="mini corner">
+        <div class="mbar"><i></i><i></i><i></i><span class="mono" style="font-size:10px;color:#6E6E8C;margin-left:6px">Sites / Kaapi Corner</span><span class="sp"></span><span class="pill" style="font-size:9.5px;padding:2px 7px"><i></i>Saved</span></div>
+        <div class="mbody">
+          <div class="ml"><div>nav <span style="float:right;opacity:.6">s_nav</span></div><div class="on">hero <span style="float:right;opacity:.6">s_hero</span></div><div>features</div><div>gallery</div><div>reviews</div><div style="border:1px dashed #4338CA;color:#4338CA;margin-top:6px;text-align:center">+ add section</div></div>
+          <div class="mc"><div class="sheet"><span class="tag">Hero · Split</span><div class="eb" style="margin-top:8px">Indiranagar · since 2019</div><h3>Filter coffee, done properly.</h3><p>Single-origin Chikmagalur beans, brass filters, a courtyard that catches the morning sun.</p><div class="ph"></div>
+            <svg class="wire" viewBox="0 0 300 70" preserveAspectRatio="none"><rect x="1" y="1" width="298" height="68" rx="4" pathLength="1"/><rect x="10" y="12" width="130" height="14" pathLength="1" style="animation-delay:.2s"/><rect x="10" y="34" width="180" height="8" pathLength="1" style="animation-delay:.4s"/><rect x="210" y="12" width="80" height="46" pathLength="1" style="animation-delay:.6s"/><text x="12" y="9">s_menu · features</text></svg></div></div>
+          <div class="mr"><div style="color:#4338CA;font-weight:700">HERO · s_hero</div><div class="fld"></div><div class="fld" style="height:26px"></div><div class="fld" style="height:40px"></div><div style="color:#4338CA;font-weight:700;margin-top:8px">THEME</div><div style="display:flex;gap:4px;padding:0"><i style="width:18px;height:12px;background:#2F5D45;display:block"></i><i style="width:18px;height:12px;background:#0E7C66;display:block;opacity:.4"></i><i style="width:18px;height:12px;background:#C2410C;display:block;opacity:.4"></i><i style="width:18px;height:12px;background:#E2B96B;display:block;opacity:.4"></i></div></div>
+        </div>
+      </div>
+    </section>
+    <div class="strip"><span><b>6</b> templates</span><span><b>10</b> section types</span><span><b>100 / 100 / 100</b> Lighthouse on every published page</span><span><b>&lt; 250 ms</b> to your teammate's screen</span><span><b>₹0</b> to start</span></div>
+    <section class="feat"><h2>Everything a one-page site needs, nothing you'd have to explain</h2>
+      <div class="fg">
+        <div><div class="lbl">01 · Edit together</div><h3>At the same time, without stepping on each other</h3><p>Every change merges instantly. You see who's editing what, and nobody's work is overwritten — even on a bad connection.</p></div>
+        <div><div class="lbl">02 · Publish</div><h3>Live on its own address</h3><p>Publish and it's served fast, with proper titles and previews for sharing. kaapi-corner.pagecraft.virajdomadia.com, yours in a click.</p></div>
+        <div><div class="lbl">03 · Undo anything</div><h3>Autosave plus history</h3><p>Every keystroke is saved. The last ten versions are a click away, restorable without losing anything since.</p></div>
+        <div><div class="lbl">04 · Templates</div><h3>Start from a template, keep your look</h3><p>Sections for cafés, salons, freelancers, gyms and launches. Pick a palette and a font pair; every section follows.</p></div>
+      </div></section>
+    <div class="plans">
+      <div class="tier"><h3>Free</h3><div class="price">₹0</div><ul><li>Three pages, one collaborator</li><li>Pagecraft address</li><li>Small "Made with Pagecraft" badge</li></ul><button class="btn ghost">Start free</button></div>
+      <div class="tier pro"><h3>Pro</h3><div class="price">₹299 <small>/ month</small></div><ul><li>Twenty pages, unlimited collaborators</li><li>No badge</li><li>All templates and font pairs</li><li>Contact-form inbox, analytics</li></ul><button class="btn">Go Pro</button></div>
+    </div>
+    <footer class="foot"><span>© 2026 Pagecraft · a portfolio project by Viraj Domadia</span><span>github · case study</span></footer>
+  </div></div></div>
+</section>
+
+<!-- ═══ S2 ═══ -->
+<section class="screen" id="s2">
+  <div class="sh"><div><h2><b>S2</b>Sign in / Sign up</h2><p>One card on the grid. The demo logins sit under the form so a reviewer never types a password. Sign-up is the same card with a name field and the button relabelled.</p></div><div class="route">/sign-in · /sign-up</div></div>
+  <div class="stage-wrap"><div class="stage gridbg"><div class="auth"><div class="card corner">
+    <div class="logo"><i></i>Pagecraft</div>
+    <h2>Welcome back</h2><p class="sub">Sign in to your sites.</p>
+    <div class="fs">
+      <div class="f"><label>Email</label><div class="in">viraj@example.com</div></div>
+      <div class="f"><label>Password</label><div class="in"><span class="ph">••••••••••</span><span class="sp"></span><span class="mono" style="font-size:10.5px;color:#6E6E8C">Forgot?</span></div></div>
+      <button class="btn lg" style="justify-content:center">Sign in</button>
+    </div>
+    <div class="or">or try the demo</div>
+    <div class="demo2"><button class="btn ghost">Creator · Kaapi Corner</button><button class="btn ghost">Collaborator · Ananya</button></div>
+    <div class="foot">New here? <a href="#">Create an account</a></div>
+  </div></div></div></div>
+</section>
+
+<!-- ═══ S3 ═══ -->
+<section class="screen" id="s3">
+  <div class="sh"><div><h2><b>S3</b>Sites dashboard</h2><p>Each card renders the site's real hero at half scale from its document (no screenshots to store), with status, address and last edit. The free plan's limit is stated where it applies, not in a modal.</p></div><div class="route">/sites · creator</div></div>
+  <div class="stage-wrap"><div class="stage gridbg">
+    <div class="bar"><div class="logo"><i></i>Pagecraft</div><div class="crumb"><b>Sites</b></div><div class="sp"></div><span class="pill off"><i></i>Free plan · 2 of 3 sites</span><div class="avatar">V</div></div>
+    <div class="dash">
+      <div class="hd"><div><h1>Your sites</h1><p class="sub">Two sites. One published.</p></div><button class="btn lg">+ New site</button></div>
+      <div class="sites">
+        <div class="sitecard corner"><div class="prev" data-prev="cafe"></div><div class="meta"><h3>Kaapi Corner <span class="pill"><i></i>Published</span></h3><div class="url">kaapi-corner.pagecraft.virajdomadia.com</div><div class="when"><span>edited 12 min ago · v4</span><span>owner + 1</span></div></div></div>
+        <div class="sitecard"><div class="prev" data-prev="nimbus"></div><div class="meta"><h3>Nimbus <span class="pill off"><i></i>Draft</span></h3><div class="url" style="color:#6E6E8C">not published yet</div><div class="when"><span>edited yesterday</span><span>owner</span></div></div></div>
+        <div class="sitecard new"><span><b>+</b>New site<br><small style="color:#6E6E8C">from a template</small></span></div>
+      </div>
+      <div class="plannote"><span>Free includes three sites and a small badge on published pages. <b>Pro</b> removes the badge and unlocks premium templates — coming in v3.</span><button class="btn ghost">Plans</button></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ═══ S4 ═══ -->
+<section class="screen" id="s4">
+  <div class="sh"><div><h2><b>S4</b>Template picker</h2><p>Six templates on the left, the chosen one rendered live on the right at full width (it is the real section registry, not a screenshot). Name and slug up top; the slug is checked as you type and suggests <span class="mono">-2</span> on a collision.</p></div><div class="route">/sites/new · creator</div></div>
+  <div class="stage-wrap"><div class="stage"><div class="tpl">
+    <div class="list">
+      <h1>New site</h1><p class="sub">Pick a template. You can change every section afterwards.</p>
+      <div class="tplcard on"><div class="th" style="background-image:url(img/cafe-latte.jpg)"></div><div><h3>Café</h3><p>Kaapi Corner · 7 sections</p></div></div>
+      <div class="tplcard"><div class="th" style="background:#EFE5D6"></div><div><h3>Salon</h3><p>Loop Studio · 7 sections</p></div></div>
+      <div class="tplcard"><div class="th" style="background:#E4ECE9"></div><div><h3>Freelancer portfolio</h3><p>Meera Rao · 6 sections</p></div></div>
+      <div class="tplcard"><div class="th" style="background:#22242E"></div><div><h3>Gym</h3><p>Ironline · 7 sections</p></div></div>
+      <div class="tplcard"><div class="th" style="background-image:url(img/cafe-brew.jpg)"></div><div><h3>Product launch</h3><p>Nimbus · 7 sections</p></div></div>
+      <div class="tplcard"><div class="th" style="background-image:url(img/cafe-pastry.jpg)"></div><div><h3>Restaurant</h3><p>Bistro Nine · 7 sections</p></div></div>
+      <div class="tplcard" style="opacity:.55"><div class="th" style="background:#DEDFE6"></div><div><h3>Photographer <span class="pro">PRO</span></h3><p>v3 · premium</p></div></div>
+    </div>
+    <div class="prev">
+      <div class="form">
+        <div class="f"><label>Site name</label><div class="in">Kaapi Corner</div></div>
+        <div class="f"><label>Address</label><div class="in mono"><span class="ph">kaapi-corner</span>.pagecraft.virajdomadia.com</div><div class="help err">Taken — try <b>kaapi-corner-2</b></div></div>
+        <button class="btn lg">Create site</button>
+      </div>
+      <div class="prevframe"><div class="frame corner" data-site="cafe" data-plain></div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ═══ S5 ═══ -->
+<section class="screen" id="s5">
+  <div class="sh"><div><h2><b>S5</b>Editor</h2><p>The signature screen: layers · canvas · inspector on the grid, hero selected with its dashed outline and id label. <kbd>try</kbd> <b>+ Add section</b> to see a CTA band draw itself in; click any section to select it. On a phone the same route is a read-only preview.</p></div><div class="route">/sites/[id]/edit · creator · 1280 px + 390 px</div></div>
+  <div class="row">
+    <div><div class="stage-wrap"><div class="stage" data-editor="s5"></div></div><div class="cap">Desktop 1280 × 820 · width toggle Desktop / Tablet / Phone re-renders the sheet at 1280 / 834 / 390 with container queries</div></div>
+    <div><div class="phone app" data-phone="ro"></div><div class="cap" style="text-align:center">Same route under 1024 px · read-only</div></div>
+  </div>
+</section>
+
+<!-- ═══ S6 ═══ -->
+<section class="screen" id="s6">
+  <div class="sh"><div><h2><b>S6</b>Section library</h2><p>Opens over the layers pane when you press + Add section: ten types with a wireframe thumbnail each and the variant count. Picking one inserts it below the selected section and runs the draw-in. Shown 1:1.</p></div><div class="route">/sites/[id]/edit · panel</div></div>
+  <div class="panes">
+    <div class="pane1 wide">
+      <h4>Add a section <span class="k">esc</span></h4>
+      <div class="libsearch"><div class="in mono" style="min-height:32px;font-size:12px"><span class="ph">Search sections…</span></div></div>
+      <div class="libfull">
+        <div><i style="background:linear-gradient(90deg,#DCDAE8 30%,transparent 30%) 0 0/100% 8px no-repeat,linear-gradient(90deg,transparent 60%,#DCDAE8 60%) 0 0/100% 8px no-repeat"></i>Nav<small>3 variants</small></div>
+        <div><i style="background:linear-gradient(90deg,#DCDAE8 45%,transparent 45% 55%,#C9C6DE 55%)"></i>Hero<small>split · full · centered</small></div>
+        <div><i style="background:repeating-linear-gradient(90deg,#DCDAE8 0 30%,transparent 30% 35%)"></i>Features<small>grid-3 · list · icons</small></div>
+        <div><i style="background:linear-gradient(90deg,#C9C6DE 60%,transparent 60%),repeating-linear-gradient(0deg,#DCDAE8 0 45%,transparent 45% 55%)"></i>Gallery<small>mosaic · grid · strip</small></div>
+        <div><i style="background:repeating-linear-gradient(90deg,#DCDAE8 0 30%,transparent 30% 35%);opacity:.5"></i>Testimonials<small>cards · single</small></div>
+        <div><i style="background:repeating-linear-gradient(90deg,#DCDAE8 0 30%,transparent 30% 35%)"></i>Pricing<small>3 plans · 2 plans</small></div>
+        <div><i style="background:repeating-linear-gradient(0deg,#DCDAE8 0 22%,transparent 22% 33%)"></i>FAQ<small>accordion · two-col</small></div>
+        <div><i style="background:linear-gradient(90deg,#DCDAE8 45%,transparent 45%),linear-gradient(#C9C6DE,#C9C6DE) 100% 0/50% 100% no-repeat"></i>Contact<small>map · form (v3)</small></div>
+        <div><i style="background:#C9C6DE"></i>CTA band<small>band · centered</small></div>
+        <div><i style="background:linear-gradient(#DCDAE8 0 40%,transparent 40%)"></i>Footer<small>simple · columns</small></div>
+      </div>
+    </div>
+    <div class="pane1 wide">
+      <h4>Sections <span class="k">7</span></h4>
+      <ul class="layers"><li><span class="g">⋮⋮</span><span class="t"></span><span class="n">Nav</span><span class="k">s_nav</span></li><li class="sel"><span class="g">⋮⋮</span><span class="t"></span><span class="n">Hero · Split</span><span class="k">s_hero</span></li><li><span class="g">⋮⋮</span><span class="t"></span><span class="n">Features · Grid 3</span><span class="k">s_menu</span></li><li><span class="g">⋮⋮</span><span class="t"></span><span class="n">Gallery · Mosaic</span><span class="k">s_gallery</span></li><li><span class="g">⋮⋮</span><span class="t"></span><span class="n">Testimonials</span><span class="k">s_reviews</span></li><li><span class="g">⋮⋮</span><span class="t"></span><span class="n">Contact · Map</span><span class="k">s_visit</span></li><li><span class="g">⋮⋮</span><span class="t"></span><span class="n">Footer</span><span class="k">s_footer</span></li></ul>
+      <button class="addsec">+ Add section</button>
+      <div style="padding:0 14px 14px;font:400 11px var(--mono);color:#6E6E8C">Drag ⋮⋮ to reorder · ⌘D duplicate · ⌫ delete (undoable)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S7 ═══ -->
+<section class="screen" id="s7">
+  <div class="sh"><div><h2><b>S7</b>Inspector + theme</h2><p>Fields come from the section's schema (text, textarea, image, link, list). With nothing selected the pane shows the theme: 8 palettes, 6 font pairs, radius. Shown 1:1 for the hero and for a features section (list editing).</p></div><div class="route">/sites/[id]/edit · panel</div></div>
+  <div class="panes">
+    <div class="pane1">
+      <h4>Hero <span class="k">s_hero · split</span></h4>
+      <div class="fields">
+        <div class="f"><label>Variant</label><div class="in sel">Split — text left, photo right</div></div>
+        <div class="f"><label>Eyebrow</label><div class="in">Indiranagar · since 2019</div></div>
+        <div class="f"><label>Headline</label><div class="in">Filter coffee, done properly.</div></div>
+        <div class="f"><label>Body</label><div class="in ta">Single-origin Chikmagalur beans, brass filters, and a courtyard that catches the morning sun. Open 7 am – 10 pm, every day.</div></div>
+        <div class="f"><label>Photo</label><div class="img"><img src="img/cafe-latte.jpg" alt=""><div>cafe-latte.jpg<small>1400 × 1050 · Replace</small></div></div></div>
+        <div class="f"><label>Alt text</label><div class="in">A cappuccino with latte art on a wooden table</div></div>
+        <div class="row2"><div class="f"><label>Button</label><div class="in">See the menu</div></div><div class="f"><label>Link</label><div class="in mono">#menu</div></div></div>
+        <div class="row2"><div class="f"><label>Second button</label><div class="in">Find us</div></div><div class="f"><label>Link</label><div class="in mono">#visit</div></div></div>
+      </div>
+    </div>
+    <div class="pane1">
+      <h4>Features <span class="k">s_menu · grid-3</span></h4>
+      <div class="fields">
+        <div class="f"><label>Kicker</label><div class="in">Menu highlights</div></div>
+        <div class="f"><label>Heading</label><div class="in">What people come back for</div></div>
+        <div class="f"><label>Items <span style="float:right;color:#4338CA">+ add</span></label>
+          <div class="list"><div><span class="g">⋮⋮</span><span class="n">Filter kaapi</span><span class="p">₹60</span></div><div><span class="g">⋮⋮</span><span class="n">Morning plate</span><span class="p">₹180</span></div><div><span class="g">⋮⋮</span><span class="n">Pour-over flight</span><span class="p">₹240</span></div></div></div>
+        <div class="f"><label>Item · Filter kaapi</label><div class="in">Filter kaapi</div></div>
+        <div class="row2"><div class="f"><label>Price</label><div class="in mono">₹60</div></div><div class="f"><label>Photo</label><div class="in mono" style="font-size:11px">cafe-filter.jpg</div></div></div>
+        <div class="f"><label>Description</label><div class="in ta">Chikmagalur peaberry, brewed in a brass filter, served in a dabara set.</div></div>
+      </div>
+    </div>
+    <div class="pane1">
+      <h4>Theme <span class="k">site</span></h4>
+      <div class="theme">
+        <div class="f"><label>Palette · Espresso</label>
+          <div class="sw"><button aria-pressed="true"><span style="background:#F7F1E8"></span><span style="background:#2F5D45"></span></button><button aria-pressed="false"><span style="background:#F3F6F5"></span><span style="background:#0E7C66"></span></button><button aria-pressed="false"><span style="background:#FFF8EE"></span><span style="background:#C2410C"></span></button><button aria-pressed="false"><span style="background:#17181F"></span><span style="background:#E2B96B"></span></button><button aria-pressed="false"><span style="background:#F4F4F6"></span><span style="background:#1F4FD8"></span></button><button aria-pressed="false"><span style="background:#FBF4F6"></span><span style="background:#9D174D"></span></button><button aria-pressed="false"><span style="background:#F5F3FF"></span><span style="background:#5B21B6"></span></button><button aria-pressed="false"><span style="background:#101418"></span><span style="background:#34D399"></span></button></div></div>
+        <div class="f"><label>Fonts · Fraunces + Inter</label>
+          <div class="fp"><button aria-pressed="true"><b style="font-family:Fraunces">Fraunces</b> + Inter</button><button aria-pressed="false"><b style="font-family:Manrope;font-weight:800">Manrope</b> + Inter</button><button aria-pressed="false"><b style="font-family:'JetBrains Mono'">Mono</b> + Inter</button><button aria-pressed="false"><b style="font-family:Georgia">Georgia</b> + Inter</button><button aria-pressed="false"><b style="font-family:Manrope">Manrope</b> + Manrope</button><button aria-pressed="false"><b style="font-family:Fraunces">Fraunces</b> + Fraunces</button></div></div>
+        <div class="f"><label>Corners · Soft</label><div class="seg"><button aria-pressed="false">Sharp</button><button aria-pressed="true">Soft</button><button aria-pressed="false">Round</button></div></div>
+        <div class="f"><label>SEO</label><div class="in">Kaapi Corner · Filter coffee in Indiranagar</div><div class="help">Edited fully in the Publish dialog</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ S8 ═══ -->
+<section class="screen" id="s8">
+  <div class="sh"><div><h2><b>S8</b>Publish dialog + success</h2><p>Slug, SEO title and description with live character counts, OG image picked from the site's photos. <kbd>try</kbd> <b>Publish</b> in the dialog: the API compacts, exports and validates the document, then the success card rises with the address.</p></div><div class="route">/sites/[id]/edit · modal</div></div>
+  <div class="stage-wrap"><div class="stage" data-editor="s8"></div></div>
+</section>
+
+<!-- ═══ S9 ═══ -->
+<section class="screen" id="s9">
+  <div class="sh"><div><h2><b>S9</b>Published sites</h2><p>The output. No Pagecraft chrome — the user's palette, font pair and radius; server-rendered, next/image, one small script for the nav, FAQ and lightbox; the free badge bottom-right. Two templates shown so the registry's range is visible: a café (Fraunces, cream, leaf green) and a product launch (Manrope 800, graphite, electric blue).</p></div><div class="route">/s/[slug] · {slug}.pagecraft.virajdomadia.com · visitor</div></div>
+  <div class="row"><div><div class="stage-wrap"><div class="stage" style="height:1120px;background:#F7F7FC"><div class="canvas" style="padding:0;height:100%"><div class="frame" data-site="cafe" data-plain style="max-width:1280px;outline:0"></div></div></div></div><div class="cap">Kaapi Corner · café template · desktop</div></div>
+    <div><div class="phone" data-phone="cafe"></div><div class="cap" style="text-align:center">kaapi-corner.pagecraft.virajdomadia.com</div></div></div>
+  <div class="row" style="margin-top:34px"><div><div class="stage-wrap"><div class="stage" style="height:1120px;background:#F7F7FC"><div class="canvas" style="padding:0;height:100%"><div class="frame" data-site="nimbus" data-plain style="max-width:1280px;outline:0"></div></div></div></div><div class="cap">Nimbus · product-launch template · desktop</div></div>
+    <div><div class="phone" data-phone="nimbus"></div><div class="cap" style="text-align:center">nimbus.pagecraft.virajdomadia.com</div></div></div>
+</section>
+
+<!-- ═══ S10 ═══ -->
+<section class="screen" id="s10">
+  <div class="sh"><div><h2><b>S10</b>Site settings</h2><p>General, address, SEO defaults, plan, and a danger zone that asks you to type the site's name. Members (v2) and Inbox (v3) will appear in the left rail when they ship.</p></div><div class="route">/sites/[id]/settings · owner</div></div>
+  <div class="stage-wrap"><div class="stage gridbg">
+    <div class="bar"><div class="logo"><i></i>Pagecraft</div><div class="crumb">Sites / <b>Kaapi Corner</b> / Settings</div><div class="sp"></div><button class="btn ghost">Open editor</button><div class="avatar">V</div></div>
+    <div class="set">
+      <nav><a class="on">General</a><a>Address & SEO</a><a>Plan</a><a style="color:#6E6E8C">Members · v2</a><a style="color:#6E6E8C">Inbox · v3</a><a style="color:#C62F3B">Danger zone</a></nav>
+      <div>
+        <div class="grp"><h3>General</h3><div class="b"><div class="f"><label>Site name</label><div class="in" style="max-width:420px">Kaapi Corner</div></div><div class="f"><label>Template</label><div class="in" style="max-width:420px;color:#6E6E8C">Café · chosen at creation, sections are yours now</div></div></div></div>
+        <div class="grp"><h3>Address &amp; SEO</h3><div class="b">
+          <div class="f"><label>Address</label><div class="in mono" style="max-width:520px">kaapi-corner<span style="color:#6E6E8C">.pagecraft.virajdomadia.com</span><span class="sp"></span><span class="pill"><i></i>live · v4</span></div><div class="help">Changing the address makes the old one stop working. No redirects in v1.</div></div>
+          <div class="row2" style="max-width:720px"><div class="f"><label>Title <span style="float:right">41 / 60</span></label><div class="in">Kaapi Corner · Filter coffee in Indiranagar</div></div><div class="f"><label>Description <span style="float:right">118 / 160</span></label><div class="in">Single-origin filter coffee, benne dosa and a quiet courtyard on 12th Main. Open 7 am – 10 pm, every day.</div></div></div>
+          <div class="f"><label>Preview image</label><div class="ogpick"><img class="on" src="img/cafe-latte.jpg" alt=""><img src="img/cafe-interior.jpg" alt=""><img src="img/cafe-brew.jpg" alt=""><span class="in" style="width:84px;height:56px;justify-content:center;color:#6E6E8C">+</span></div></div>
+        </div></div>
+        <div class="grp"><h3>Plan</h3><div class="b"><div class="inline"><span><b>Free</b>Published pages show a small "Made with Pagecraft" badge.</span><button class="btn ghost">Pro · coming in v3</button></div></div></div>
+        <div class="grp danger"><h3>Danger zone</h3><div class="b">
+          <div class="inline"><span><b>Unpublish</b>The address stops working; your document is kept.</span><button class="btn danger">Unpublish</button></div>
+          <div class="inline"><span><b>Delete this site</b>Removes the document, its history and all publications. Type <span class="mono">Kaapi Corner</span> to confirm.</span><div style="display:flex;gap:8px"><div class="in" style="width:180px"><span class="ph">Kaapi Corner</span></div><button class="btn danger" style="opacity:.5">Delete</button></div></div>
+        </div></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ═══ S11 ═══ -->
+<section class="screen" id="s11">
+  <div class="sh"><div><h2><b>S11</b>Not published</h2><p>What a visitor sees at an unpublished or unknown address — honest, small, with one way out.</p></div><div class="route">/s/[slug] · 404</div></div>
+  <div class="row half">
+    <div><div class="stage-wrap"><div class="stage gridbg" style="height:520px"><div class="np"><div><div class="mark"></div><div class="url">kaapi-corner.pagecraft.virajdomadia.com</div><h1>This page isn't published</h1><p>The owner may be working on it. If it's yours, sign in and press Publish in the editor.</p><button class="btn">Build your own page</button></div></div></div></div><div class="cap">Unpublished (site exists, not live)</div></div>
+    <div><div class="stage-wrap"><div class="stage gridbg" style="height:520px"><div class="np"><div><div class="mark"></div><div class="url">kaapi-korner.pagecraft.virajdomadia.com</div><h1>No page at this address</h1><p>Check the spelling, or start one here — it takes about ten minutes.</p><button class="btn">Build your own page</button></div></div></div></div><div class="cap">Unknown slug</div></div>
+  </div>
+</section>
+
+<!-- ═══ templates ═══ -->
+<template id="t-cafe">
+  <div class="page" data-palette="espresso" data-fonts="fraunces-inter">
+    <header class="sec k-nav" data-name="Nav" data-id="s_nav"><div class="brand">Kaapi Corner</div><ul><li>Menu</li><li>Our story</li><li>Visit</li></ul><a class="k-btn" href="#">Order on WhatsApp</a></header>
+    <section class="sec k-hero selected" data-name="Hero · Split" data-id="s_hero">
+      <div><div class="eyebrow">Indiranagar · since 2019</div><h1>Filter coffee, done properly.</h1><p class="lead">Single-origin Chikmagalur beans, brass filters, and a courtyard that catches the morning sun. Open 7 am – 10 pm, every day.</p><div class="ctas"><a class="k-btn" href="#menu">See the menu</a><a class="k-btn o" href="#visit">Find us</a></div></div>
+      <img src="img/cafe-latte.jpg" alt="A cappuccino with latte art on a wooden table beside trays of roasted beans">
+    </section>
+    <section class="sec k-sec" data-name="Features · Grid 3" data-id="s_menu"><div class="kicker">Menu highlights</div><h2>What people come back for</h2>
+      <div class="k-menu"><article><img src="img/cafe-filter.jpg" alt="South Indian filter coffee in a steel dabara set"><div class="b"><h3>Filter kaapi <span>₹60</span></h3><p>Chikmagalur peaberry, brewed in a brass filter, served in a dabara set.</p></div></article><article><img src="img/cafe-pastry.jpg" alt="Croissant, a cappuccino and a glass of juice on a café table"><div class="b"><h3>Morning plate <span>₹180</span></h3><p>Butter croissant or benne dosa with a cappuccino and fresh juice.</p></div></article><article><img src="img/cafe-brew.jpg" alt="Pour-over coffee being brewed with a gooseneck kettle"><div class="b"><h3>Pour-over flight <span>₹240</span></h3><p>Three single-origins side by side, brewed to order at the bar.</p></div></article></div></section>
+    <section class="sec k-sec" data-name="Gallery · Mosaic" data-id="s_gallery"><div class="kicker">The room</div><h2>Brick, brass and morning light</h2>
+      <div class="k-gal"><img src="img/cafe-interior.jpg" alt="Café interior with a brick wall, wooden table and yellow chairs"><img src="img/cafe-beans.jpg" alt="Roasted coffee beans"><img src="img/cafe-brew.jpg" alt="Pour-over brewing"><img src="img/cafe-latte.jpg" alt="Cappuccino with latte art"><img src="img/cafe-pastry.jpg" alt="Breakfast plate"></div></section>
+    <section class="sec k-sec" data-name="Testimonials · Cards" data-id="s_reviews"><div class="kicker">Reviews</div><h2>Regulars say</h2>
+      <div class="k-quotes"><blockquote><div class="stars">★★★★★</div><q>The only place in Indiranagar where the decoction is fresh at 7 am.</q><cite>Priya N. · comes in before work</cite></blockquote><blockquote><div class="stars">★★★★★</div><q>Pour-over flight on a Sunday with the courtyard to yourself. That's the whole plan.</q><cite>Arjun M. · weekend regular</cite></blockquote><blockquote><div class="stars">★★★★☆</div><q>Best benne dosa this side of Basavanagudi. Gets busy after nine.</q><cite>Sneha R. · brings her parents</cite></blockquote></div></section>
+    <section class="sec k-sec" data-name="Contact · Map" data-id="s_visit"><div class="kicker">Visit</div><h2>Find us</h2>
+      <div class="k-visit"><dl><dt>Address</dt><dd>212, 12th Main Road, Indiranagar, Bengaluru 560038</dd><dt>Hours</dt><dd>7 am – 10 pm, every day</dd><dt>Phone</dt><dd>+91 98450 12345</dd><dt>Parking</dt><dd>Two-wheelers out front; cars on 13th Cross</dd></dl><div class="k-map" role="img" aria-label="Map showing 12th Main Road, Indiranagar"></div></div></section>
+    <footer class="sec k-foot" data-name="Footer" data-id="s_footer"><span>© 2026 Kaapi Corner · Indiranagar</span><span>Instagram · WhatsApp · Directions</span></footer>
+  </div>
+</template>
+
+<template id="t-nimbus">
+  <div class="page" data-palette="graphite" data-fonts="manrope-inter">
+    <header class="sec k-nav" data-name="Nav" data-id="s_nav"><div class="brand" style="font-family:Manrope;font-weight:800">Nimbus</div><ul><li>Why</li><li>Specs</li><li>Pricing</li><li>FAQ</li></ul><a class="k-btn" href="#">Pre-order</a></header>
+    <section class="sec k-hero full" data-name="Hero · Full-bleed" data-id="s_hero"><img src="img/cafe-brew.jpg" alt="Nimbus gooseneck kettle pouring into a pour-over dripper"><div class="over"><div class="eyebrow">Shipping November · Bengaluru made</div><h1 style="font-size:44px;line-height:1.05;margin:8px 0 10px;color:#fff">The pour-over kettle that holds 92 °C for an hour.</h1><p class="lead">Gooseneck spout, 0.8 L, PID-held temperature and a counterweight handle. Pre-order for ₹5,990.</p><div class="ctas"><a class="k-btn" href="#">Pre-order Nimbus</a></div></div></section>
+    <section class="sec k-sec" data-name="Features · Icons" data-id="s_feat"><div class="kicker">Why Nimbus</div><h2>Three things a good pour needs</h2>
+      <div class="k-feat"><div><div class="ic"></div><h3>Holds temperature</h3><p>A PID loop keeps the water within 1 °C of your setting for 60 minutes. No re-boiling between cups.</p></div><div><div class="ic"></div><h3>Pours at 4 g/s</h3><p>The gooseneck is tuned for a slow, steady spiral — the flow rate the SCA recommends.</p></div><div><div class="ic"></div><h3>Balanced in hand</h3><p>A counterweight in the handle means the last 100 ml pours as easily as the first.</p></div></div></section>
+    <section class="sec k-sec" data-name="Gallery · Strip" data-id="s_gallery"><div class="kicker">Details</div><h2>Brushed steel, walnut handle</h2><div class="k-gal"><img src="img/cafe-brew.jpg" alt="Kettle pouring"><img src="img/cafe-beans.jpg" alt="Roasted beans"><img src="img/cafe-latte.jpg" alt="A finished cup"></div></section>
+    <section class="sec k-sec" data-name="Pricing · 3 plans" data-id="s_price"><div class="kicker">Pre-order</div><h2>Pick a bundle</h2>
+      <div class="k-price"><div><h3>Nimbus</h3><div class="amt">₹5,990</div><ul><li>Kettle + base</li><li>2-year warranty</li></ul><a class="k-btn o" href="#">Pre-order</a></div><div class="hi"><h3>Nimbus + Dripper</h3><div class="amt">₹6,990 <small>save ₹800</small></div><ul><li>Kettle + base</li><li>Ceramic dripper + 100 filters</li><li>2-year warranty</li></ul><a class="k-btn" href="#">Pre-order</a></div><div><h3>Café pack</h3><div class="amt">₹27,500 <small>× 5</small></div><ul><li>Five kettles</li><li>Priority support</li></ul><a class="k-btn o" href="#">Talk to us</a></div></div></section>
+    <section class="sec k-sec" data-name="FAQ · Accordion" data-id="s_faq"><div class="kicker">FAQ</div><h2>Before you order</h2>
+      <div class="k-faq"><details open><summary>When does it ship?</summary><p>First batch ships in November 2026 to Indian addresses. You are charged only when it ships.</p></details><details><summary>Does it work on induction?</summary><p>Nimbus has its own base — plug it in anywhere with a 230 V socket.</p></details><details><summary>What's the warranty?</summary><p>Two years on the heating element and electronics; lifetime on the handle.</p></details></div></section>
+    <footer class="sec k-foot" data-name="Footer" data-id="s_footer"><span>© 2026 Nimbus Goods · Bengaluru</span><span>Instagram · Email · Returns</span></footer>
+  </div>
+</template>
+
+<template id="t-editor">
+  <div class="ed">
+    <div class="bar"><div class="logo"><i></i>Pagecraft</div><div class="crumb">Sites / <b>Kaapi Corner</b></div><span class="pill"><i></i>Saved</span><div class="sp"></div><button class="ib" title="Undo">↶</button><button class="ib" title="Redo">↷</button><div class="seg"><button aria-pressed="true">Desktop</button><button aria-pressed="false">Tablet</button><button aria-pressed="false">Phone</button></div><button class="btn ghost">Preview</button><button class="btn" data-publish>Publish</button></div>
+    <aside class="pane left"><h4>Sections <span class="k">7</span></h4><ul class="layers" data-layers></ul><button class="addsec" data-add>+ Add section</button><h4>Library</h4><div class="lib"><div><i></i>testimonials</div><div><i></i>pricing</div><div><i></i>faq</div><div><i></i>cta band</div></div></aside>
+    <main class="canvas gridbg" data-canvas><div class="frame corner" data-frame></div></main>
+    <aside class="pane right"><h4>Hero <span class="k">s_hero · split</span></h4>
+      <div class="fields"><div class="f"><label>Variant</label><div class="in sel">Split — text left, photo right</div></div><div class="f"><label>Eyebrow</label><div class="in">Indiranagar · since 2019</div></div><div class="f"><label>Headline</label><div class="in">Filter coffee, done properly.</div></div><div class="f"><label>Body</label><div class="in ta">Single-origin Chikmagalur beans, brass filters, and a courtyard that catches the morning sun. Open 7 am – 10 pm, every day.</div></div><div class="f"><label>Photo</label><div class="img"><img src="img/cafe-latte.jpg" alt=""><div>cafe-latte.jpg<small>1400 × 1050 · Replace · Alt ✓</small></div></div></div><div class="row2"><div class="f"><label>Button</label><div class="in">See the menu</div></div><div class="f"><label>Link</label><div class="in mono">#menu</div></div></div></div>
+      <h4>Theme <span class="k">site</span></h4>
+      <div class="theme"><div class="f"><label>Palette</label><div class="sw" data-swatches><button aria-pressed="true" data-pal="espresso"><span style="background:#F7F1E8"></span><span style="background:#2F5D45"></span></button><button aria-pressed="false" data-pal="monsoon"><span style="background:#F3F6F5"></span><span style="background:#0E7C66"></span></button><button aria-pressed="false" data-pal="saffron"><span style="background:#FFF8EE"></span><span style="background:#C2410C"></span></button><button aria-pressed="false" data-pal="midnight"><span style="background:#17181F"></span><span style="background:#E2B96B"></span></button></div></div><div class="f"><label>Fonts</label><div class="fp"><button aria-pressed="true"><b style="font-family:Fraunces">Fraunces</b> + Inter</button><button aria-pressed="false"><b style="font-family:Manrope;font-weight:800">Manrope</b> + Inter</button></div></div></div>
+    </aside>
+  </div>
+</template>
+
+<template id="t-publish">
+  <div class="scrim"><div class="modal" data-modal>
+    <div class="mh"><h3>Publish Kaapi Corner</h3><span class="sp"></span><span class="pill off"><i></i>v4 → v5</span></div>
+    <div class="mb">
+      <div class="f"><label>Address</label><div class="in mono">kaapi-corner<span style="color:#6E6E8C">.pagecraft.virajdomadia.com</span><span class="sp"></span><span class="pill"><i></i>yours</span></div></div>
+      <div class="f"><label>Title <span style="float:right">41 / 60</span></label><div class="in">Kaapi Corner · Filter coffee in Indiranagar</div></div>
+      <div class="f"><label>Description <span style="float:right">118 / 160</span></label><div class="in ta">Single-origin filter coffee, benne dosa and a quiet courtyard on 12th Main. Open 7 am – 10 pm, every day.</div></div>
+      <div class="f"><label>Preview image</label><div class="ogpick"><img class="on" src="img/cafe-latte.jpg" alt=""><img src="img/cafe-interior.jpg" alt=""><img src="img/cafe-brew.jpg" alt=""><img src="img/cafe-pastry.jpg" alt=""></div></div>
+    </div>
+    <div class="mf"><span class="mono" style="font-size:11px;color:#6E6E8C;margin-right:auto">7 sections · validated on the server</span><button class="btn ghost" data-cancel>Cancel</button><button class="btn" data-go>Publish</button></div>
+  </div></div>
+</template>
+
+<script>
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const T = id => document.getElementById(id).content.cloneNode(true).firstElementChild;
+  const cafeLayers = [['Nav','s_nav'],['Hero · Split','s_hero'],['Features · Grid 3','s_menu'],['Gallery · Mosaic','s_gallery'],['Testimonials','s_reviews'],['Contact · Map','s_visit'],['Footer','s_footer']];
+
+  function badge(){ const b=document.createElement('div'); b.className='k-badge'; b.innerHTML='<i></i>Made with Pagecraft'; return b; }
+  function plainSite(kind){ const p=T('t-'+kind); p.querySelectorAll('.sec').forEach(s=>{s.classList.remove('sec','selected')}); p.appendChild(badge()); return p; }
+
+  // published frames (S4 preview, S9 desktop)
+  document.querySelectorAll('[data-site][data-plain]').forEach(f=>f.appendChild(plainSite(f.dataset.site)));
+  // dashboard previews
+  document.querySelectorAll('[data-prev]').forEach(el=>{ const p=plainSite(el.dataset.prev); p.querySelector('.k-badge').remove(); el.appendChild(p); });
+  // phones
+  document.querySelectorAll('[data-phone]').forEach(el=>{
+    const kind=el.dataset.phone;
+    if(kind==='ro'){
+      el.innerHTML='<div class="notch"></div><div class="screen"><div class="url">pagecraft.virajdomadia.com/sites/7/edit</div><div class="ro"><span style="width:18px;height:18px;border-radius:4px;background:#4338CA;display:inline-block"></span>Kaapi Corner<span class="pill"><i></i>Saved</span></div><div class="ro-note">Read-only preview · edit on a desktop to change sections</div></div>';
+      el.querySelector('.screen').appendChild(plainSite('cafe'));
+    } else {
+      el.innerHTML=`<div class="notch"></div><div class="screen"><div class="url">${kind==='cafe'?'kaapi-corner':'nimbus'}.pagecraft.virajdomadia.com</div></div>`;
+      el.querySelector('.screen').appendChild(plainSite(kind));
+    }
+  });
+
+  function buildEditor(stage){
+    stage.appendChild(T('t-editor'));
+    const frame=stage.querySelector('[data-frame]'), page=T('t-cafe'); frame.appendChild(page); page.appendChild(badge());
+    const ul=stage.querySelector('[data-layers]');
+    cafeLayers.forEach(([n,id],i)=>{ const li=document.createElement('li'); if(i===1) li.className='sel'; li.innerHTML=`<span class="g">⋮⋮</span><span class="t"></span><span class="n">${n}</span><span class="k">${id}</span>`; ul.appendChild(li); });
+    page.addEventListener('click',e=>{ const s=e.target.closest('.sec'); if(!s) return; e.preventDefault(); page.querySelectorAll('.sec.selected').forEach(x=>x.classList.remove('selected')); s.classList.add('selected'); ul.querySelectorAll('li').forEach(li=>li.classList.toggle('sel', li.querySelector('.k').textContent===s.dataset.id)); });
+    // draw-in
+    const add=stage.querySelector('[data-add]'); let added=null;
+    add.addEventListener('click',()=>{
+      if(added){ added.remove(); ul.querySelector('li[data-new]')?.remove(); added=null; add.textContent='+ Add section'; return; }
+      const sec=document.createElement('section'); sec.className='sec k-sec drawing'; sec.dataset.name='CTA · Band'; sec.dataset.id='s_cta';
+      sec.innerHTML=`<div class="content k-cta"><div><h2 style="font-size:24px">Book the courtyard for your next morning meeting.</h2><p>Seats twelve · filter coffee included · weekdays 7–11 am</p></div><a class="k-btn">Reserve on WhatsApp</a></div>
+        <svg class="bp" preserveAspectRatio="none" viewBox="0 0 724 150"><rect x="40" y="18" width="644" height="114" rx="10" pathLength="1"/><rect x="68" y="44" width="360" height="26" pathLength="1" style="animation-delay:.12s"/><rect x="68" y="80" width="280" height="14" pathLength="1" style="animation-delay:.24s"/><rect x="520" y="52" width="136" height="42" rx="6" pathLength="1" style="animation-delay:.36s"/><text x="46" y="14">s_cta · cta / band</text><text x="70" y="40">h2</text><text x="524" y="48">button</text></svg>`;
+      page.insertBefore(sec, page.querySelector('[data-id="s_visit"]'));
+      page.querySelectorAll('.sec.selected').forEach(x=>x.classList.remove('selected')); sec.classList.add('selected');
+      const li=document.createElement('li'); li.dataset.new='1'; li.className='sel'; li.innerHTML='<span class="g">⋮⋮</span><span class="t"></span><span class="n">CTA · Band</span><span class="k">s_cta</span>';
+      ul.querySelectorAll('li').forEach(x=>x.classList.remove('sel')); ul.insertBefore(li, ul.children[5]);
+      sec.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'}); added=sec; add.textContent='Undo add';
+      setTimeout(()=>sec.classList.add('filled'), reduce?0:600);
+    });
+    // theme ripple
+    const sw=stage.querySelector('[data-swatches]'); let busy=false;
+    sw.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||busy) return; const pal=b.dataset.pal; if(pal===page.dataset.palette) return;
+      sw.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+      if(reduce){ page.dataset.palette=pal; return; } busy=true;
+      const clone=page.cloneNode(true); clone.className='page ripple'; clone.dataset.palette=pal;
+      const r=frame.getBoundingClientRect(), br=b.getBoundingClientRect(); const sc=r.width/frame.offsetWidth;
+      const x=(br.left+br.width/2-r.left)/sc, y=(br.top+br.height/2-r.top)/sc + frame.parentElement.scrollTop;
+      clone.style.clipPath=`circle(0px at ${x}px ${y}px)`; frame.appendChild(clone);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ clone.style.clipPath=`circle(2200px at ${x}px ${y}px)`; }));
+      setTimeout(()=>{ page.dataset.palette=pal; clone.remove(); busy=false; }, 800);
+    });
+    return {frame,page,ul};
+  }
+  document.querySelectorAll('[data-editor]').forEach(stage=>{
+    const ed=buildEditor(stage);
+    if(stage.dataset.editor==='s8'){
+      const scrim=T('t-publish'); stage.appendChild(scrim); const modal=scrim.querySelector('[data-modal]');
+      const dialogHTML=modal.innerHTML;
+      function showSuccess(){ modal.innerHTML=`<div class="success rise"><div class="ok">✓</div><h3>Kaapi Corner is live</h3><p>Version 5 · published just now · 7 sections</p><div class="urlrow"><b>kaapi-corner.pagecraft.virajdomadia.com</b><span class="mono" style="color:#6E6E8C">Copy · Open ↗</span></div><div style="margin-top:14px;display:flex;gap:8px;justify-content:center"><button class="btn ghost" data-again>Back to the dialog</button><button class="btn">Keep editing</button></div></div>`; modal.querySelector('[data-again]').onclick=()=>{ modal.innerHTML=dialogHTML; wire(); }; }
+      function wire(){ modal.querySelector('[data-go]').onclick=e=>{ e.target.textContent='Publishing…'; setTimeout(showSuccess, reduce?0:700); }; modal.querySelector('[data-cancel]').onclick=()=>{ scrim.hidden=true; }; }
+      wire();
+      stage.querySelector('[data-publish]').addEventListener('click',()=>{ scrim.hidden=false; modal.innerHTML=dialogHTML; wire(); });
+      stage.querySelector('.pill').innerHTML='<i></i>Saved';
+    }
+  });
+
+  function fit(){ document.querySelectorAll('.stage-wrap').forEach(w=>{ const s=w.firstElementChild; const k=Math.min(1, w.clientWidth/1280); s.style.transform=`scale(${k})`; w.style.height=(s.offsetHeight*k)+'px'; }); }
+  addEventListener('resize', fit); addEventListener('load', fit); fit();
+})();
+</script>
