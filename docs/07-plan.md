@@ -108,7 +108,7 @@ Goal: both apps deployed, DB seeded with six template docs, direction chosen, a 
 | Add-ons (in priority order) | A scheduled publish (2) · B focal point + crop (3) · C save as template (2) · D form builder (3) · E offline editing (4) · F embed a section (3) · G replay (4) · H multi-page (8) | up to 29 | up to 81 |
 
 ## Add-ons (only from time saved)
-Taken in this order, each only when its enclosing version is fully done including docs, and only if the version came in under budget. None is a version; none touches the CRDT engine. All free to run.
+**Nice-to-have, not priority** (Viraj, 2026-09-17): considered only after v4 is fully done (docs and case study included), in this order, from time saved — and skipping all of them is a fine outcome. None is a version; none changes the engine. All free to run.
 
 | # | Add-on | What | Version it extends | ~h |
 |---|---|---|---|---|
