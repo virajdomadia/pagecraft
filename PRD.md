@@ -1,10 +1,10 @@
 # PRD — Pagecraft: Website builder with live co-editing
 
-**Status:** v1 · lifecycle steps 1–3 and 5–7 locked (2026-09-16) — see [docs/](docs/) · step 4 in progress (direction variants → screens) · next: step 8 Project Setup (= milestone 1.0), **after Tripsmith v3 and the projects ahead of it in build order**
+**Status:** v1 · lifecycle steps 1–7 complete (2026-09-17) — see [docs/](docs/) · next: step 8 Project Setup (= milestone 1.0), **after Tripsmith v3 and the projects ahead of it in build order**
 **Name:** Pagecraft · *build it together*
 **URL:** https://pagecraft.virajdomadia.com (landing live at https://pagecraft-viraj.vercel.app until DNS) · published sites at `{slug}.pagecraft.virajdomadia.com` (and `/s/{slug}` until the wildcard DNS exists)
 **Slot:** #3 · Budget ~45 h (v1 18 · v2 14 · v3 13) · Build fifth
-**Live artifacts:** Tracker, direction variants and screens are linked from [docs/04-ui-mockups.md](docs/04-ui-mockups.md) once built · Landing: https://pagecraft-viraj.vercel.app
+**Live artifacts:** [Tracker](https://claude.ai/artifact/AxW5iwEzxWmtSdLdfnjQfB) (plan rows with status, all docs, mockups, project facts) · [Screens](https://claude.ai/artifact/UKnMgDx9dvkEmFUrxWSLjS) (all 11 v1 screens, direction C) · [Direction variants](https://claude.ai/artifact/EiUg98AJqi2ZH5UnR71CJo) (A–D, C chosen) · Landing: https://pagecraft-viraj.vercel.app
 
 ## One-liner
 A Framer-lite for one-page websites: pick a template, edit sections inline with a teammate in the same page at the same time (live cursors, nothing ever lost), hit Publish and the site is live on its own subdomain — fast, SEO-clean, Lighthouse 100s.
@@ -70,7 +70,7 @@ Free-form canvas positioning · custom domains (subdomains only) · multi-page s
 - The published page is a pure function of the CRDT: `publications.content` equals pycrdt's export of the site document at publish time (tested).
 - Published sites score Lighthouse mobile 100 perf / 100 a11y / 100 SEO on every seeded template; the editor's own pages stay ≥ 90 perf.
 - v2: a text edit or cursor move is visible in the other tab within ~250 ms.
-- A visible frontend signature: the editor's authored motion (chosen in step 4), themed browser surfaces, reduced-motion fallbacks.
+- A visible frontend signature: the Blueprint draw-in (every new section traces itself as a wireframe before it fills — chosen in step 4), themed browser surfaces, reduced-motion fallbacks.
 
 ## Resolved questions
 - *Self-hosted y-websocket vs Liveblocks?* Neither — own Python sync (pycrdt) over SSE on Vercel; see decision 4 (Viraj, 2026-09-16).

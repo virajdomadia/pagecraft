@@ -1,7 +1,7 @@
 # Pagecraft — Development Plan
 
 **Lifecycle step:** 7 of 17 · **Written:** 2026-09-16 · **Inputs:** [03-requirements.md](03-requirements.md), [04-technical-design.md](04-technical-design.md), [06-data-and-api.md](06-data-and-api.md).
-**Tracker:** row status lives in the tracker artifact (link in [04-ui-mockups.md](04-ui-mockups.md) once published; updated per milestone).
+**Tracker:** row status lives at https://claude.ai/artifact/AxW5iwEzxWmtSdLdfnjQfB (updated per milestone; rebuild the page with `python mockups/tracker-build.py`).
 **Budget:** v1 ≈ 18 h · v2 ≈ 14 h · v3 ≈ 13 h. v1 is built on a `Y.Doc` from the first editor row so v2 is additive (stream + awareness), not a rewrite. **Cadence:** evenings/weekends; each row = one branch + one PR, squash-merged, and **every PR shows something in the browser**. Milestones end deployed. **Build starts after Tripsmith v3 and the projects ahead of Pagecraft in build order** (1 → 2 → 4 → 5 → 3 → 6).
 
 **Lean rules in force** (2026-09-15): setup is the minimum to deploy both apps with plain CI; no observability, contract gates, e2e workflows or tracker updates per PR; review findings fixed on the same branch; tests only from 04 §12. Hours saved go to the editor, motion and the templates. **Accounts and keys are created just-in-time** — in the row that first needs them, never in a setup batch: Neon in S2, Vercel Blob in F3, Upstash in L1, Resend in L4, Razorpay in A1, Anthropic in A4. Template photos live in `web/public/templates/` (no Blob needed until a user uploads).

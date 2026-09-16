@@ -81,7 +81,7 @@ Actors: **Creator** (owns sites), **Collaborator** (editor on someone else's sit
 ## v3 — Pro (advanced, ≈ 13 h)
 
 ### R3-1. Pro plan
-- Razorpay subscription (test mode, ₹499/month): removes the badge, unlocks three premium templates (photographer, boutique, clinic), raises the site limit to 20. Webhook `subscription.activated / charged / cancelled` deduped by event id; plan state on `users`.
+- Razorpay subscription (test mode, ₹299/month): removes the badge, unlocks three premium templates (photographer, boutique, clinic), raises the site limit to 20. Webhook `subscription.activated / charged / cancelled` deduped by event id; plan state on `users`.
 - **Accept:** test — webhook replay is a no-op; downgrade re-adds the badge on next publish.
 
 ### R3-2. Contact-form backend
