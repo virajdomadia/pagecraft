@@ -3,7 +3,7 @@
 **Status:** v1 · lifecycle steps 1–7 complete (2026-09-17) — see [docs/](docs/) · next: step 8 Project Setup (= milestone 1.0), **after Tripsmith v3 and the projects ahead of it in build order**
 **Name:** Pagecraft · *build it together*
 **URL:** https://pagecraft.virajdomadia.com (landing live at https://pagecraft-viraj.vercel.app until DNS) · published sites at `{slug}.pagecraft.virajdomadia.com` (and `/s/{slug}` until the wildcard DNS exists)
-**Slot:** #3 · Budget ~53 h (v1 18 · v2 14 · v3 13 · v4 8) · Build fifth
+**Slot:** #3 · Budget ~53 h (v1 18 · v2 14 · v3 13 · v4 8) + add-ons only from time saved (up to 29 h, see [docs/07-plan.md](docs/07-plan.md#add-ons-only-from-time-saved)) · Build fifth
 **Live artifacts:** [Tracker](https://claude.ai/artifact/AxW5iwEzxWmtSdLdfnjQfB) (plan rows with status, all docs, mockups, project facts) · [Screens](https://claude.ai/artifact/UKnMgDx9dvkEmFUrxWSLjS) (all 11 v1 screens, direction C) · [Direction variants](https://claude.ai/artifact/EiUg98AJqi2ZH5UnR71CJo) (A–D, C chosen) · Landing: https://pagecraft-viraj.vercel.app
 
 ## One-liner
