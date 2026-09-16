@@ -95,3 +95,28 @@ Goal: both apps deployed, DB seeded with six template docs, direction chosen, a 
 | D4 | **Import + v4 close** | S18 Import dialog on the dashboard (drop zone, validation errors by section, slug suggestion) | `POST /sites/import` (zip/json → validate → `build_doc` → images to Blob → site); **test:** `export_import_roundtrip`; README section "take your site with you"; `docs/17-post-launch.md` | 1.5 h | Export → import → identical site; round-trip test green; v4 tagged |
 
 **v4 total ≈ 8 h** · **Project total ≈ 52 h**
+
+---
+
+## Whole-product summary
+| Version | Milestones | Hours | Cumulative |
+|---|---|---|---|
+| v1 Solo studio | 1.0 – 1.2 | 17.5 | 17.5 |
+| v2 Studio session | 2.0 – 2.1 | 14 | 31.5 |
+| v3 Pro | 3.0 – 3.1 | 12.5 | 44 |
+| v4 Your domain, your code | 4.0 – 4.1 | 8 | 52 |
+| Add-ons (in priority order) | A scheduled publish (2) · B focal point + crop (3) · C save as template (2) · D form builder (3) · E offline editing (4) · F embed a section (3) · G replay (4) · H multi-page (8) | up to 29 | up to 81 |
+
+## Add-ons (only from time saved)
+Taken in this order, each only when its enclosing version is fully done including docs, and only if the version came in under budget. None is a version; none touches the CRDT engine. All free to run.
+
+| # | Add-on | What | Version it extends | ~h |
+|---|---|---|---|---|
+| A | **Scheduled publish** | Pick a date/time in the publish dialog; Vercel Cron publishes the pending version (a "Diwali offer" goes live at midnight) | v1 | 2 |
+| B | **Focal point + crop** | Drag a focal point on any image field; per-variant crops rendered through `next/image` — photos stop cutting off faces on phones | v1 | 3 |
+| C | **Save as my template** | Turn a site into a private template for the creator (or, on Pro, shareable by link); the template picker grows a "Mine" tab | v3 | 2 |
+| D | **Form builder** | The contact section gets custom fields (text, choice, date), required flags and a thank-you message; submissions inbox shows the columns | v3 | 3 |
+| E | **Offline editing** | The editor as an installable PWA: edit with no connection, the `localStorage` queue becomes IndexedDB, everything merges on reconnect — the CRDT proving itself on a train | v2 | 4 |
+| F | **Embed a section** | Any section as a `<script>` embed for another site (renders through `/embed/[slug]/[sectionId]`, updates on publish) — the renderer with reach | v4 | 3 |
+| G | **Replay** | Scrub a site's edit history like a video from the update log; per-section "who changed this, when"; a shareable "watch it get built" link | v2 | 4 |
+| H | **Multi-page** | Pages inside one document (`pages` array, nav links across pages, per-page SEO), published under `/{page}` on the same domain (the largest out-of-scope item, lifted last) | v1 | 8 |
