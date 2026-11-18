@@ -3,16 +3,16 @@ export function Hero() {
     <section className="wrap hero">
       <h1>Build the page together. Publish it in one click.</h1>
       <p className="lede">A landing-page editor two people can use at the same time — you write the headline while your designer swaps the images — then it's live on its own address.</p>
-      <div className="actions"><a className="btn btn-indigo" href="#">Start a page, free</a><a className="btn btn-line" href="#features">See what you can build</a></div>
+      <div className="actions"><a className="btn btn-indigo" href="#early-access">Start a page, free</a><a className="btn btn-line" href="#features">See what you can build</a></div>
 
-      <div className="editor" aria-label="Editor preview">
-        <div className="topbar">
+      <div className="editor" role="img" aria-label="Preview of the Pagecraft editor: two people editing a café landing page at the same time">
+        <div className="topbar" aria-hidden="true">
           <div className="dots"><i></i><i></i><i></i></div>
           <div className="url">pagecraft.virajdomadia.com/edit/chai-house</div>
           <div className="who"><span className="av m">V</span><span className="av c">M</span></div>
           <span className="pub">Publish<span className="toast">Published to chai-house.pagecraft.virajdomadia.com</span></span>
         </div>
-        <div className="body">
+        <div className="body" aria-hidden="true">
           <aside className="side">
             <div className="lbl">Sections</div>
             <ul><li className="on"><i></i>Hero</li><li><i></i>Menu highlights</li><li><i></i>Gallery</li><li><i></i>Opening hours</li><li><i></i>Find us</li><li><i></i>Footer</li></ul>

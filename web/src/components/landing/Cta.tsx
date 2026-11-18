@@ -3,7 +3,7 @@ export function Cta() {
     <section className="wrap cta">
       <h2>Your page, live before lunch</h2>
       <p>Invite one person, pick a template, and publish. It really is that short.</p>
-      <a className="btn btn-indigo" href="#">Start a page, free</a>
+      <a className="btn btn-indigo" href="#early-access">Start a page, free</a>
     </section>
   );
 }
