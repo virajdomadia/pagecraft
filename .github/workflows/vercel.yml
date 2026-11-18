@@ -2,6 +2,8 @@
 # The project is connected to this repo with Root Directory `web`; web/vercel.json and the project
 # setting skip Vercel's own Git builds, so this workflow is the only production deploy.
 # Needs repo secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+# The api (project pagecraft-api, Root Directory `api`, secret VERCEL_PROJECT_ID_API) is created and
+# skips Vercel builds too; add an `api` job here, before `web`, once api/ has code (see frontrow).
 name: vercel
 on:
   workflow_run:
