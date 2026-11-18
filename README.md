@@ -2,7 +2,7 @@
 
 **Build it together.** A landing-page builder two people can edit at the same time, then publish to their own subdomain.
 
-> Status: **lifecycle steps 1–7 complete (2026-09-17)** — PRD v1, docs 03–07, direction C · Blueprint and all v1 screens; build starts at milestone 1.0 after Tripsmith v3 (build order 1 → 2 → 4 → 5 → 3 → 6). [Tracker](https://claude.ai/artifact/AxW5iwEzxWmtSdLdfnjQfB) · [Screens](https://claude.ai/artifact/UKnMgDx9dvkEmFUrxWSLjS). One of six portfolio projects by [Viraj Domadia](https://virajdomadia.vercel.app). **Live (landing page):** https://pagecraft-viraj.vercel.app — will move to `pagecraft.virajdomadia.com` later.
+> Status: **lifecycle steps 1–7 complete (2026-09-17)** — PRD v1, docs 03–07, direction C · Blueprint and all v1 screens; build starts at milestone 1.0 after Tripsmith v3 (build order 1 → 2 → 4 → 5 → 3 → 6). [Tracker](https://claude.ai/artifact/AxW5iwEzxWmtSdLdfnjQfB) · [Screens](https://claude.ai/artifact/UKnMgDx9dvkEmFUrxWSLjS). One of six portfolio projects by [Viraj Domadia](https://virajdomadia.com). **Live (landing page):** https://pagecraft.virajdomadia.com
 
 ## What it proves
 CRDT co-editing (Yjs in the browser, **pycrdt** sync server in Python) · live cursors over SSE · a section-based editor that emits Lighthouse-100 sites · multi-tenant subdomain publishing with ISR
