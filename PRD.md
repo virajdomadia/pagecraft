@@ -1,9 +1,9 @@
 # PRD — Pagecraft: Website builder with live co-editing
 
-**Status:** v1 · lifecycle steps 1–7 complete (2026-09-17) — see [docs/](docs/) · next: step 8 Project Setup (= milestone 1.0), **after Tripsmith v3 and the projects ahead of it in build order**
+**Status:** v1 · lifecycle steps 1–7 complete (2026-09-17) — see [docs/](docs/) · next: step 8 Project Setup (= milestone 1.0), **after Frontrow** (build order 1 → 2 → 3 → 4 → 5 → 6, revised 2026-11-19 — moved up from fifth so the three strongest stories ship first)
 **Name:** Pagecraft · *build it together*
 **URL:** https://pagecraft.virajdomadia.com (landing live at https://pagecraft-viraj.vercel.app until DNS) · published sites at `{slug}.pagecraft.virajdomadia.com` (and `/s/{slug}` until the wildcard DNS exists)
-**Slot:** #3 · Budget ~53 h (v1 18 · v2 14 · v3 13 · v4 8) + add-ons only from time saved (up to 29 h, see [docs/07-plan.md](docs/07-plan.md#add-ons-only-from-time-saved)) · Build fifth
+**Slot:** #3 · Budget ~53 h (v1 18 · v2 14 · v3 13 · v4 8) + add-ons only from time saved (up to 29 h, see [docs/07-plan.md](docs/07-plan.md#add-ons-only-from-time-saved)) · Build third
 **Live artifacts:** [Tracker](https://claude.ai/artifact/AxW5iwEzxWmtSdLdfnjQfB) (plan rows with status, all docs, mockups, project facts) · [Screens](https://claude.ai/artifact/UKnMgDx9dvkEmFUrxWSLjS) (all 11 v1 screens, direction C) · [Direction variants](https://claude.ai/artifact/EiUg98AJqi2ZH5UnR71CJo) (A–D, C chosen) · Landing: https://pagecraft-viraj.vercel.app
 
 ## One-liner
@@ -70,7 +70,7 @@ Free-form canvas positioning · multi-page sites · rich-text formatting inside 
 ## Success criteria
 - Two clients editing the same `Y.Text` concurrently always converge to the same document with neither edit lost — covered by a test in CI, and (v2) by a two-page Playwright test.
 - The published page is a pure function of the CRDT: `publications.content` equals pycrdt's export of the site document at publish time (tested).
-- Published sites score Lighthouse mobile 100 perf / 100 a11y / 100 SEO on every seeded template; the editor's own pages stay ≥ 90 perf.
+- Target: published sites score Lighthouse mobile 100 perf / 100 a11y / 100 SEO on every seeded template, measured in CI (scores depend on the creator's own images and copy, so this is a target for the seeded templates, not a promise for every site); the editor's own pages stay ≥ 90 perf.
 - v2: a text edit or cursor move is visible in the other tab within ~250 ms.
 - v4: export → import reproduces the site exactly (tested); a custom domain resolves with SSL within 10 minutes of the DNS record going live; the exported `index.html` scores the same Lighthouse numbers as the hosted page.
 - A visible frontend signature: the Blueprint draw-in (every new section traces itself as a wireframe before it fills — chosen in step 4), themed browser surfaces, reduced-motion fallbacks.
