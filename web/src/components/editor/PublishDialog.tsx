@@ -63,9 +63,10 @@ export function PublishDialog({
   const firstIssue = useMemo(() => content.sections.map(validateSection).find(Boolean) ?? null, [content.sections]);
 
   useEffect(() => {
+    // No close() in a cleanup: it fires `close` → onClose, which StrictMode's double effect run
+    // would turn into "the dialog never opens". Unmounting removes the dialog anyway.
     const d = ref.current;
-    d?.showModal();
-    return () => d?.close();
+    if (d && !d.open) d.showModal();
   }, []);
 
   async function publish() {
@@ -144,7 +145,7 @@ export function PublishDialog({
       ) : (
         <form
           method="dialog"
-          className="grid gap-4 p-6"
+          className="grid grid-cols-[minmax(0,1fr)] gap-4 p-6"
           onSubmit={(e) => {
             e.preventDefault();
             void publish();
@@ -210,7 +211,7 @@ export function PublishDialog({
             <textarea className={`${inp} min-h-[64px]`} value={description} maxLength={160} rows={2} onChange={(e) => setDescription(e.target.value)} />
           </label>
 
-          <fieldset>
+          <fieldset className="min-w-0">
             <legend className={lbl}>Share image</legend>
             <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-1">
               <button

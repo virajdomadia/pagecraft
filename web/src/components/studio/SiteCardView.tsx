@@ -21,11 +21,13 @@ export function SiteCardView({ site }: { site: SiteCard }) {
   const content = site.preview as unknown as SiteContent;
   return (
     <article className="group overflow-hidden rounded-[4px] border border-line bg-paper transition hover:border-guide">
-      <Link href={`/sites/${site.id}/edit`} className="block border-b border-line no-underline" aria-label={`Edit ${site.name}`}>
-        <Scaled width={1280} height={800} className="bg-desk">
+      <div className="relative border-b border-line">
+        <Scaled width={1280} height={720} className="bg-desk">
           <SiteRenderer content={content} as="div" />
         </Scaled>
-      </Link>
+        {/* A sibling, not a wrapper: the preview contains the site's own links. */}
+        <Link href={`/sites/${site.id}/edit`} className="absolute inset-0" aria-label={`Edit ${site.name}`} />
+      </div>
       <div className="grid gap-2 p-4">
         <div className="flex items-start justify-between gap-3">
           <h2 className="truncate text-[17px] font-extrabold tracking-tight">

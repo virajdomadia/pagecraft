@@ -34,6 +34,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Published sites live and die by their <head> (title, description, OG): render metadata
+  // before the body for every client, not only for the user agents Next recognises as bots.
+  htmlLimitedBots: /.*/,
   // Images are pre-sized: template photos are 1000–1600 px JPEGs and uploads are resized to
   // ≤ 2000 px by the API. Off, so no request can spend Vercel Hobby's monthly transformations.
   images: { unoptimized: true },

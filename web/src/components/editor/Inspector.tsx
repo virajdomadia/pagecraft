@@ -49,7 +49,7 @@ export function Inspector({
         </p>
       )}
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className={lbl}>Layout</legend>
         <div className="mt-1.5 grid grid-cols-3 gap-2" role="radiogroup" aria-label="Layout">
           {def.variants.map((v) => {
@@ -220,7 +220,7 @@ function FieldInput({
       const s = typeof v === "string" ? v : f.options[0].value;
       if (f.display === "icons")
         return (
-          <fieldset>
+          <fieldset className="min-w-0">
             <legend className={lbl}>{f.label}</legend>
             <div className="mt-1 grid grid-cols-8 gap-1">
               {f.options.map((o) => (
@@ -239,7 +239,7 @@ function FieldInput({
           </fieldset>
         );
       return (
-        <fieldset>
+        <fieldset className="min-w-0">
           <legend className={lbl}>{f.label}</legend>
           <div className="mt-1 flex overflow-hidden rounded-[3px] border border-line">
             {f.options.map((o) => (
@@ -326,7 +326,7 @@ function ListInput({
   const full = items.length >= field.max;
   const btn = "grid h-6 w-6 place-items-center rounded-[3px] text-xs text-ink-2 hover:bg-desk disabled:opacity-30";
   return (
-    <fieldset>
+    <fieldset className="min-w-0">
       <legend className={`${lbl} flex w-full justify-between`}>
         <span>{field.label}</span>
         <span>

@@ -25,27 +25,19 @@
   background: var(--pc-accent);
   color: var(--pc-accent-ink);
 }
-.pc-site a {
+/* :where keeps resets at zero specificity, so component colours (buttons, badge) win. */
+:where(.pc-site) a {
   color: inherit;
 }
 .pc-site :focus-visible {
   outline: 3px solid var(--pc-accent);
   outline-offset: 3px;
 }
-.pc-site ul,
-.pc-site ol,
-.pc-site dl,
-.pc-site dd,
-.pc-site figure,
-.pc-site blockquote,
-.pc-site p,
-.pc-site h1,
-.pc-site h2,
-.pc-site h3 {
+:where(.pc-site) :where(ul, ol, dl, dd, figure, blockquote, p, h1, h2, h3) {
   margin: 0;
   padding: 0;
 }
-.pc-site ul {
+:where(.pc-site) ul {
   list-style: none;
 }
 
@@ -508,7 +500,8 @@
     grid-column: span 2;
     grid-row: span 2;
   }
-  .pc-gallery--mosaic .pc-photo:nth-child(4n + 4) {
+  /* four photos: the last one closes the gap the big first one leaves */
+  .pc-gallery--mosaic .pc-photo:nth-child(4):last-child {
     grid-column: span 2;
   }
   .pc-gallery--mosaic .pc-photo .pc-img {

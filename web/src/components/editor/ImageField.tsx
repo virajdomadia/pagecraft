@@ -36,7 +36,8 @@ export function ImageField({
     setError(null);
     try {
       const res = await uploadImage(siteId, file);
-      onChange({ url: res.url, alt: alt.trim() ? alt : altFromFilename(file.name) });
+      // A new photo gets a fresh starting alt (the old one described a different picture).
+      onChange({ url: res.url, alt: altFromFilename(file.name) });
     } catch (err) {
       setError(errorMessage(err));
     } finally {

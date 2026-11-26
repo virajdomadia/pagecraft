@@ -45,7 +45,7 @@ export function ThemePanel({
         <p className="mt-1 text-xs text-ink-2">Every section follows. Select a section on the canvas to edit it.</p>
       </header>
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className={lbl}>Palette</legend>
         <div className="mt-2 grid grid-cols-2 gap-2">
           {PALETTE_KEYS.map((k) => {
@@ -72,7 +72,7 @@ export function ThemePanel({
         </div>
       </fieldset>
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className={lbl}>Font pair</legend>
         <div className={`mt-2 grid gap-1.5 ${siteFontVariables}`}>
           {FONT_PAIR_KEYS.map((k) => {
@@ -105,7 +105,7 @@ export function ThemePanel({
         </div>
       </fieldset>
 
-      <fieldset>
+      <fieldset className="min-w-0">
         <legend className={lbl}>Corners</legend>
         <div className="mt-2 grid grid-cols-3 gap-2">
           {RADII.map((r) => {

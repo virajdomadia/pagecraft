@@ -134,7 +134,11 @@ function Row({
           {variant} · {section.id}
         </span>
       </button>
-      <span className={`flex items-center ${selected ? "" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}>
+      <span
+        className={`absolute right-1 top-1/2 -translate-y-1/2 items-center rounded-[3px] pl-2 ${
+          selected ? "flex bg-guide-soft" : "hidden bg-desk group-hover:flex group-focus-within:flex"
+        }`}
+      >
         <button type="button" className={iconBtn} aria-label={`Move ${name} up`} disabled={index === 0} onClick={() => onMove(index, index - 1)}>
           ↑
         </button>
