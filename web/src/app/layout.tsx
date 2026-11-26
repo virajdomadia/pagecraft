@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import { site } from "@/lib/site";
 import "./globals.css";
 
 // Product chrome type (Blueprint): Manrope for everything, JetBrains Mono for ids, slugs, labels.
-// Published sites use their own pair (lib/site-fonts.ts) and never load these.
-const sans = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap", preload: false });
+// Self-hosted from src/assets/fonts (OFL), so builds never fetch from Google. Not preloaded:
+// published sites share this root layout and use their own pair (lib/site-fonts.ts).
+const sans = localFont({ src: "../assets/fonts/manrope-400-800.woff2", weight: "400 800", variable: "--font-manrope", display: "swap", preload: false });
+const mono = localFont({ src: "../assets/fonts/jetbrains-400-500.woff2", weight: "400 500", variable: "--font-jetbrains", display: "swap", preload: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
