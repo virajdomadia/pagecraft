@@ -1,0 +1,228 @@
+"""`/templates`, `/sites/*` and `/uploads` (06 §C). Every `/sites/{id}/*` route resolves the
+member row first; a non-member gets 404, never a hint that the site exists."""
+
+import uuid
+from typing import Annotated
+
+from fastapi import APIRouter, File, Form, Response, UploadFile
+from pycrdt import Array, Map
+from sqlalchemy import select
+
+from app.deps import AppSettings, CurrentUser, Db, Member, Owner, load_access
+from app.errors import ApiError
+from app.models import Template
+from app.schemas.models import (
+    CreateSite,
+    DocOut,
+    PatchSite,
+    PublishIn,
+    PublishOut,
+    SeqOut,
+    SiteCard,
+    SiteContentModel,
+    SiteDetail,
+    SitesOut,
+    SlugCheck,
+    TemplateOut,
+    UpdatesIn,
+    UploadOut,
+)
+from app.services import crdt, documents, publish, sites, slugs, uploads
+from app.services.revalidate import revalidate, site_tag
+
+router = APIRouter(tags=["sites"])
+
+PROTECTED = "The demo site's address stays fixed — create your own site to try this"
+
+
+@router.get("/templates", response_model=list[TemplateOut])
+async def list_templates(db: Db, user: CurrentUser, settings: AppSettings) -> list[TemplateOut]:
+    rows = (await db.execute(select(Template).order_by(Template.sort))).scalars()
+    return [
+        TemplateOut(
+            key=t.key,
+            name=t.name,
+            business=t.business,
+            description=t.description,
+            premium=t.premium,
+            locked=t.premium and user.plan != "pro",
+            preview_url=t.preview_url,
+            content=SiteContentModel(**crdt.export(crdt.load(t.snapshot))),
+        )
+        for t in rows
+    ]
+
+
+@router.get("/sites", response_model=SitesOut)
+async def list_sites(db: Db, user: CurrentUser, settings: AppSettings) -> SitesOut:
+    return SitesOut(
+        sites=await sites.list_cards(db, user, settings),
+        limit=sites.site_limit(user),
+        owned=await sites.owned_count(db, user),
+    )
+
+
+@router.get("/sites/slug-check", response_model=SlugCheck)
+async def slug_check(
+    slug: str, db: Db, user: CurrentUser, site_id: uuid.UUID | None = None
+) -> SlugCheck:
+    """Live check for the template picker, the publish dialog and settings (R2)."""
+    if site_id is not None:
+        await load_access(db, site_id, user)
+    slug = slug.strip().lower()
+    issue = slugs.problem(slug)
+    if issue is not None:
+        code, message = issue
+        return SlugCheck(
+            slug=slug,
+            available=False,
+            reason="reserved" if code == "reserved_slug" else "invalid",
+            message=message,
+            suggestion=None,
+        )
+    if await publish.slug_taken(db, slug, site_id):
+        suggestion = await sites.slug_suggestion(db, slug, site_id)
+        return SlugCheck(
+            slug=slug,
+            available=False,
+            reason="taken",
+            message=f"{slug} is taken",
+            suggestion=suggestion,
+        )
+    return SlugCheck(slug=slug, available=True, reason="ok", message="Available", suggestion=None)
+
+
+@router.post("/sites", response_model=SiteCard, status_code=201)
+async def create_site(
+    body: CreateSite, db: Db, user: CurrentUser, settings: AppSettings
+) -> SiteCard:
+    site = await sites.create_site(
+        db, user, name=body.name, template_key=body.template, slug=body.slug
+    )
+    content = await documents.current_content(db, site)
+    return sites.card(site, "owner", content, settings, user)
+
+
+@router.get("/sites/{site_id}", response_model=SiteDetail)
+async def get_site(access: Member, db: Db, settings: AppSettings) -> SiteDetail:
+    return await sites.detail(db, access, settings)
+
+
+@router.get("/sites/{site_id}/doc", response_model=DocOut)
+async def get_doc(access: Member, db: Db, since: int | None = None) -> DocOut:
+    """Snapshot + tail (04 §4). With `since` ≥ the snapshot's seq only the newer tail is sent —
+    the v2 polling fallback; otherwise the whole document."""
+    site = access.site
+    if since is not None and since >= site.snapshot_seq:
+        rows = await documents.tail(db, site, since)
+        return DocOut(snapshot="", updates=[documents.b64(r.update) for r in rows], seq=site.seq)
+    rows = await documents.tail(db, site)
+    return DocOut(
+        snapshot=documents.b64(site.snapshot),
+        updates=[documents.b64(r.update) for r in rows],
+        seq=site.seq,
+    )
+
+
+@router.post("/sites/{site_id}/updates", response_model=SeqOut)
+async def post_updates(body: UpdatesIn, access: Member, db: Db) -> SeqOut:
+    seq = await documents.append(db, access.site.id, body.updates, access.user.id)
+    return SeqOut(seq=seq)
+
+
+@router.post("/sites/{site_id}/publish", response_model=PublishOut)
+async def publish_site(
+    body: PublishIn, access: Member, db: Db, settings: AppSettings
+) -> PublishOut:
+    if access.protected and body.slug.strip().lower() != access.site.slug:
+        raise ApiError("forbidden", PROTECTED)
+    pub = await publish.publish_site(
+        db,
+        access.site.id,
+        slug=body.slug,
+        seo=body.seo.model_dump(),
+        user_id=access.user.id,
+        settings=settings,
+    )
+    return PublishOut(
+        version=pub.version,
+        slug=pub.slug,
+        url=publish.site_url(pub.slug, settings),
+        path=publish.site_path(pub.slug),
+    )
+
+
+@router.post("/sites/{site_id}/unpublish", status_code=204)
+async def unpublish_site(access: Member, db: Db, settings: AppSettings) -> Response:
+    if access.protected:
+        raise ApiError("forbidden", "The demo site stays published — create your own to try this")
+    await publish.unpublish_site(db, access.site, settings)
+    return Response(status_code=204)
+
+
+@router.patch("/sites/{site_id}", response_model=SiteDetail)
+async def patch_site(body: PatchSite, access: Owner, db: Db, settings: AppSettings) -> SiteDetail:
+    site = access.site
+    tags: set[str] = set()
+    if body.slug is not None and body.slug.strip().lower() != site.slug:
+        if access.protected:
+            raise ApiError("forbidden", PROTECTED)
+        new_slug = body.slug.strip().lower()
+        await publish.check_slug(db, new_slug, exclude=site.id)
+        if site.published_at:
+            tags |= {site_tag(site.slug), site_tag(new_slug)}
+        site.slug = new_slug
+
+    if body.name is not None or body.seo is not None:
+        name = body.name.strip() if body.name is not None else None
+        seo = publish.validate_seo(body.seo.model_dump()) if body.seo is not None else None
+
+        def edit(site_map: Map, _: Array) -> None:
+            if name is not None:
+                crdt.set_text(site_map, "name", name)
+            if seo is not None:
+                seo_map = site_map.get("seo")
+                if not isinstance(seo_map, Map):
+                    site_map["seo"] = seo_map = Map({})
+                crdt.set_text(seo_map, "title", seo["title"])
+                crdt.set_text(seo_map, "description", seo["description"])
+                seo_map["og_image"] = seo["og_image"]
+
+        await documents.server_edit(db, site.id, edit, access.user.id)
+        if name is not None:
+            site.name = name
+    await db.commit()
+    if tags:
+        await revalidate(sorted(tags), settings)
+    return await sites.detail(db, await load_access(db, site.id, access.user), settings)
+
+
+@router.delete("/sites/{site_id}", status_code=204)
+async def delete_site(access: Owner, db: Db, settings: AppSettings) -> Response:
+    if access.protected:
+        raise ApiError("forbidden", "The demo site can't be deleted — create your own to try this")
+    site = access.site
+    slug = site.slug if site.published_at else None
+    await uploads.delete_prefix(site.id, settings)
+    await sites.delete_site(db, site)
+    if slug:
+        await revalidate([site_tag(slug)], settings)
+    return Response(status_code=204)
+
+
+@router.post("/uploads", response_model=UploadOut, status_code=201)
+async def upload_image(
+    db: Db,
+    user: CurrentUser,
+    settings: AppSettings,
+    site_id: Annotated[uuid.UUID, Form()],
+    file: Annotated[UploadFile, File()],
+) -> UploadOut:
+    access = await load_access(db, site_id, user)
+    data = await file.read(uploads.MAX_BYTES + 1)
+    if len(data) > uploads.MAX_BYTES:
+        size = file.size or len(data)
+        raise ApiError("file_too_large", uploads.too_large_message(size), status=413)
+    image = uploads.process(data)
+    url = await uploads.store(db, access.site.id, image, settings)
+    return UploadOut(url=url, width=image.width, height=image.height)

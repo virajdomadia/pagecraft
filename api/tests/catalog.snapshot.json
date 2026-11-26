@@ -1,0 +1,651 @@
+{
+  "palettes": [
+    "espresso",
+    "blush",
+    "paper",
+    "iron",
+    "graphite",
+    "bistro",
+    "sage",
+    "midnight"
+  ],
+  "fonts": [
+    "fraunces-inter",
+    "playfair-karla",
+    "dmserif-dmsans",
+    "oswald-inter",
+    "spacegrotesk-inter",
+    "cormorant-manrope"
+  ],
+  "radii": [
+    "sharp",
+    "soft",
+    "round"
+  ],
+  "icons": [
+    "cup",
+    "leaf",
+    "clock",
+    "wifi",
+    "star",
+    "heart",
+    "scissors",
+    "sparkle",
+    "dumbbell",
+    "bolt",
+    "shield",
+    "truck",
+    "pin",
+    "phone",
+    "calendar",
+    "chef",
+    "wine",
+    "palette",
+    "pen",
+    "camera",
+    "check",
+    "gift"
+  ],
+  "max_sections": 30,
+  "sections": {
+    "nav": {
+      "variants": [
+        "inline",
+        "centered"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "brand": {
+          "kind": "text",
+          "max": 40
+        },
+        "links": {
+          "kind": "list",
+          "max": 6,
+          "item": {
+            "id": {
+              "kind": "text",
+              "max": null
+            },
+            "label": {
+              "kind": "text",
+              "max": 32
+            },
+            "href": {
+              "kind": "text",
+              "max": 300
+            }
+          }
+        },
+        "cta": {
+          "kind": "object",
+          "fields": {
+            "label": {
+              "kind": "text",
+              "max": 32
+            },
+            "href": {
+              "kind": "text",
+              "max": 300
+            }
+          }
+        }
+      }
+    },
+    "hero": {
+      "variants": [
+        "split",
+        "full",
+        "centered"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "eyebrow": {
+          "kind": "text",
+          "max": 60
+        },
+        "headline": {
+          "kind": "text",
+          "max": 90
+        },
+        "body": {
+          "kind": "text",
+          "max": 280
+        },
+        "image": {
+          "kind": "object",
+          "fields": {
+            "url": {
+              "kind": "text",
+              "max": 300
+            },
+            "alt": {
+              "kind": "text",
+              "max": 140
+            }
+          }
+        },
+        "cta": {
+          "kind": "object",
+          "fields": {
+            "label": {
+              "kind": "text",
+              "max": 32
+            },
+            "href": {
+              "kind": "text",
+              "max": 300
+            }
+          }
+        },
+        "cta2": {
+          "kind": "object",
+          "fields": {
+            "label": {
+              "kind": "text",
+              "max": 32
+            },
+            "href": {
+              "kind": "text",
+              "max": 300
+            }
+          }
+        }
+      }
+    },
+    "features": {
+      "variants": [
+        "grid-3",
+        "icons",
+        "rows"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "kicker": {
+          "kind": "text",
+          "max": 40
+        },
+        "heading": {
+          "kind": "text",
+          "max": 80
+        },
+        "intro": {
+          "kind": "text",
+          "max": 240
+        },
+        "items": {
+          "kind": "list",
+          "max": 12,
+          "item": {
+            "id": {
+              "kind": "text",
+              "max": null
+            },
+            "icon": {
+              "kind": "enum",
+              "values": [
+                "cup",
+                "leaf",
+                "clock",
+                "wifi",
+                "star",
+                "heart",
+                "scissors",
+                "sparkle",
+                "dumbbell",
+                "bolt",
+                "shield",
+                "truck",
+                "pin",
+                "phone",
+                "calendar",
+                "chef",
+                "wine",
+                "palette",
+                "pen",
+                "camera",
+                "check",
+                "gift"
+              ]
+            },
+            "title": {
+              "kind": "text",
+              "max": 60
+            },
+            "body": {
+              "kind": "text",
+              "max": 220
+            },
+            "meta": {
+              "kind": "text",
+              "max": 32
+            }
+          }
+        }
+      }
+    },
+    "gallery": {
+      "variants": [
+        "grid",
+        "mosaic",
+        "strip"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "kicker": {
+          "kind": "text",
+          "max": 40
+        },
+        "heading": {
+          "kind": "text",
+          "max": 80
+        },
+        "images": {
+          "kind": "list",
+          "max": 12,
+          "item": {
+            "id": {
+              "kind": "text",
+              "max": null
+            },
+            "url": {
+              "kind": "text",
+              "max": 300
+            },
+            "alt": {
+              "kind": "text",
+              "max": 140
+            },
+            "caption": {
+              "kind": "text",
+              "max": 80
+            }
+          }
+        }
+      }
+    },
+    "testimonials": {
+      "variants": [
+        "cards",
+        "spotlight"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "kicker": {
+          "kind": "text",
+          "max": 40
+        },
+        "heading": {
+          "kind": "text",
+          "max": 80
+        },
+        "items": {
+          "kind": "list",
+          "max": 9,
+          "item": {
+            "id": {
+              "kind": "text",
+              "max": null
+            },
+            "quote": {
+              "kind": "text",
+              "max": 320
+            },
+            "name": {
+              "kind": "text",
+              "max": 60
+            },
+            "role": {
+              "kind": "text",
+              "max": 60
+            }
+          }
+        }
+      }
+    },
+    "pricing": {
+      "variants": [
+        "cards",
+        "table"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "kicker": {
+          "kind": "text",
+          "max": 40
+        },
+        "heading": {
+          "kind": "text",
+          "max": 80
+        },
+        "intro": {
+          "kind": "text",
+          "max": 240
+        },
+        "plans": {
+          "kind": "list",
+          "max": 4,
+          "item": {
+            "id": {
+              "kind": "text",
+              "max": null
+            },
+            "name": {
+              "kind": "text",
+              "max": 40
+            },
+            "price": {
+              "kind": "text",
+              "max": 24
+            },
+            "period": {
+              "kind": "text",
+              "max": 24
+            },
+            "features": {
+              "kind": "text",
+              "max": 400
+            },
+            "cta": {
+              "kind": "object",
+              "fields": {
+                "label": {
+                  "kind": "text",
+                  "max": 32
+                },
+                "href": {
+                  "kind": "text",
+                  "max": 300
+                }
+              }
+            },
+            "featured": {
+              "kind": "bool"
+            }
+          }
+        },
+        "note": {
+          "kind": "text",
+          "max": 160
+        }
+      }
+    },
+    "faq": {
+      "variants": [
+        "accordion",
+        "two-column"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "kicker": {
+          "kind": "text",
+          "max": 40
+        },
+        "heading": {
+          "kind": "text",
+          "max": 80
+        },
+        "items": {
+          "kind": "list",
+          "max": 12,
+          "item": {
+            "id": {
+              "kind": "text",
+              "max": null
+            },
+            "question": {
+              "kind": "text",
+              "max": 140
+            },
+            "answer": {
+              "kind": "text",
+              "max": 600
+            }
+          }
+        }
+      }
+    },
+    "contact": {
+      "variants": [
+        "details",
+        "split"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "kicker": {
+          "kind": "text",
+          "max": 40
+        },
+        "heading": {
+          "kind": "text",
+          "max": 80
+        },
+        "body": {
+          "kind": "text",
+          "max": 240
+        },
+        "address": {
+          "kind": "text",
+          "max": 200
+        },
+        "hours": {
+          "kind": "text",
+          "max": 200
+        },
+        "phone": {
+          "kind": "text",
+          "max": 40
+        },
+        "email": {
+          "kind": "text",
+          "max": 80
+        },
+        "cta": {
+          "kind": "object",
+          "fields": {
+            "label": {
+              "kind": "text",
+              "max": 32
+            },
+            "href": {
+              "kind": "text",
+              "max": 300
+            }
+          }
+        },
+        "image": {
+          "kind": "object",
+          "fields": {
+            "url": {
+              "kind": "text",
+              "max": 300
+            },
+            "alt": {
+              "kind": "text",
+              "max": 140
+            }
+          }
+        }
+      }
+    },
+    "cta": {
+      "variants": [
+        "band",
+        "card"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "heading": {
+          "kind": "text",
+          "max": 90
+        },
+        "body": {
+          "kind": "text",
+          "max": 200
+        },
+        "cta": {
+          "kind": "object",
+          "fields": {
+            "label": {
+              "kind": "text",
+              "max": 32
+            },
+            "href": {
+              "kind": "text",
+              "max": 300
+            }
+          }
+        }
+      }
+    },
+    "footer": {
+      "variants": [
+        "simple",
+        "columns"
+      ],
+      "props": {
+        "anchor": {
+          "kind": "text",
+          "max": null
+        },
+        "tone": {
+          "kind": "enum",
+          "values": [
+            "default",
+            "surface",
+            "accent"
+          ]
+        },
+        "brand": {
+          "kind": "text",
+          "max": 40
+        },
+        "tagline": {
+          "kind": "text",
+          "max": 140
+        },
+        "links": {
+          "kind": "list",
+          "max": 8,
+          "item": {
+            "id": {
+              "kind": "text",
+              "max": null
+            },
+            "label": {
+              "kind": "text",
+              "max": 32
+            },
+            "href": {
+              "kind": "text",
+              "max": 300
+            }
+          }
+        },
+        "note": {
+          "kind": "text",
+          "max": 120
+        }
+      }
+    }
+  }
+}

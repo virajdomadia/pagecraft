@@ -1,0 +1,114 @@
+{
+  "meta": {
+    "key": "gym",
+    "name": "Gym",
+    "business": "Ironline, HSR Layout",
+    "description": "A strength gym: why train here, memberships, the questions people ask and a free trial.",
+    "sort": 4,
+    "showcase_slug": "ironline"
+  },
+  "content": {
+    "site": {
+      "name": "Ironline",
+      "theme": { "palette": "iron", "fonts": "oswald-inter", "radius": "sharp" },
+      "seo": {
+        "title": "Ironline · Strength training in HSR Layout",
+        "description": "Coached strength classes and open gym in HSR Layout Sector 2. First week free.",
+        "og_image": "/templates/gym/hero.jpg"
+      }
+    },
+    "sections": [
+      {
+        "id": "s_nav01", "type": "nav", "variant": "inline",
+        "props": {
+          "anchor": "", "tone": "default", "brand": "IRONLINE",
+          "links": [
+            { "id": "i_n1", "label": "Training", "href": "#training" },
+            { "id": "i_n2", "label": "Memberships", "href": "#memberships" },
+            { "id": "i_n3", "label": "FAQ", "href": "#faq" }
+          ],
+          "cta": { "label": "Free week", "href": "#trial" }
+        }
+      },
+      {
+        "id": "s_hero01", "type": "hero", "variant": "full",
+        "props": {
+          "anchor": "", "tone": "default",
+          "eyebrow": "HSR Layout · open 5:30 am – 10 pm",
+          "headline": "Get strong. Stay consistent.",
+          "body": "Coached strength classes of eight people or fewer, an open floor with competition racks, and a programme that tells you exactly what to lift today.",
+          "image": { "url": "/templates/gym/hero.jpg", "alt": "Rows of squat racks and dumbbells in a large gym" },
+          "cta": { "label": "Claim a free week", "href": "#trial" },
+          "cta2": { "label": "See memberships", "href": "#memberships" }
+        }
+      },
+      {
+        "id": "s_train01", "type": "features", "variant": "icons",
+        "props": {
+          "anchor": "training", "tone": "default",
+          "kicker": "Training",
+          "heading": "Why people stay past January",
+          "intro": "",
+          "items": [
+            { "id": "i_t1", "icon": "dumbbell", "title": "Small coached classes", "body": "Eight per class, one coach watching your form on every set.", "meta": "" },
+            { "id": "i_t2", "icon": "calendar", "title": "A plan for every day", "body": "Twelve-week blocks in our app: sets, reps and weights, adjusted weekly.", "meta": "" },
+            { "id": "i_t3", "icon": "bolt", "title": "Real equipment", "body": "Eight competition racks, calibrated plates and a 40 m turf sled track.", "meta": "" },
+            { "id": "i_t4", "icon": "shield", "title": "Physio on site", "body": "A sports physiotherapist on Tuesdays and Saturdays, free for members.", "meta": "" }
+          ]
+        }
+      },
+      {
+        "id": "s_price01", "type": "pricing", "variant": "cards",
+        "props": {
+          "anchor": "memberships", "tone": "surface",
+          "kicker": "Memberships",
+          "heading": "Pick how you want to train",
+          "intro": "No joining fee. Pause twice a year for travel or illness.",
+          "plans": [
+            { "id": "i_p1", "name": "Open gym", "price": "₹2,499", "period": "per month", "features": "Floor access 5:30 am – 10 pm\nProgramme in the app\nLockers and showers", "cta": { "label": "Start free week", "href": "#trial" }, "featured": false },
+            { "id": "i_p2", "name": "Coached", "price": "₹4,999", "period": "per month", "features": "Unlimited coached classes\nEverything in Open gym\nMonthly progress check-in\nPhysio sessions", "cta": { "label": "Start free week", "href": "#trial" }, "featured": true },
+            { "id": "i_p3", "name": "1:1 coaching", "price": "₹12,000", "period": "per month", "features": "Three private sessions a week\nNutrition plan\nEverything in Coached", "cta": { "label": "Talk to a coach", "href": "tel:+918067123456" }, "featured": false }
+          ],
+          "note": "Annual memberships get two months free. Students show an ID for 20% off Open gym."
+        }
+      },
+      {
+        "id": "s_faq01", "type": "faq", "variant": "two-column",
+        "props": {
+          "anchor": "faq", "tone": "default",
+          "kicker": "FAQ",
+          "heading": "Questions before your first class",
+          "items": [
+            { "id": "i_q1", "question": "I have never lifted. Is that a problem?", "answer": "No — most members start that way. Your first three classes are fundamentals: we teach the squat, hinge, press and pull with an empty bar before adding weight." },
+            { "id": "i_q2", "question": "What should I bring?", "answer": "Flat shoes, a water bottle and something you can move in. We have towels, chalk and lockers." },
+            { "id": "i_q3", "question": "Is there parking?", "answer": "Yes, basement parking for 30 cars and covered two-wheeler parking, free for members." },
+            { "id": "i_q4", "question": "Can I freeze my membership?", "answer": "Twice a year, for up to a month each time, from the app. Medical freezes have no limit with a doctor's note." }
+          ]
+        }
+      },
+      {
+        "id": "s_cta01", "type": "cta", "variant": "band",
+        "props": {
+          "anchor": "trial", "tone": "accent",
+          "heading": "Your first week is free.",
+          "body": "Seven days of classes and open gym. No card, no contract — just turn up at the front desk.",
+          "cta": { "label": "Book your first class", "href": "tel:+918067123456" }
+        }
+      },
+      {
+        "id": "s_foot01", "type": "footer", "variant": "columns",
+        "props": {
+          "anchor": "", "tone": "default",
+          "brand": "IRONLINE",
+          "tagline": "27th Main, Sector 2, HSR Layout, Bengaluru 560102",
+          "links": [
+            { "id": "i_f1", "label": "Instagram", "href": "https://www.instagram.com/" },
+            { "id": "i_f2", "label": "Call the desk", "href": "tel:+918067123456" },
+            { "id": "i_f3", "label": "Email", "href": "mailto:desk@ironline.in" }
+          ],
+          "note": "© 2026 Ironline Strength"
+        }
+      }
+    ]
+  }
+}

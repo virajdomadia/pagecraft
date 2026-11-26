@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "key": "cafe",
+    "name": "Café",
+    "business": "Kaapi Corner, Indiranagar",
+    "description": "A neighbourhood café: menu highlights, the room, reviews and how to find you.",
+    "sort": 1,
+    "showcase_slug": "kaapi-corner"
+  },
+  "content": {
+    "site": {
+      "name": "Kaapi Corner",
+      "theme": { "palette": "espresso", "fonts": "fraunces-inter", "radius": "soft" },
+      "seo": {
+        "title": "Kaapi Corner · Filter coffee in Indiranagar",
+        "description": "Filter coffee, idli and fresh bakes on 12th Main, Indiranagar. Open 7 am to 10 pm, every day.",
+        "og_image": "/templates/cafe/hero.jpg"
+      }
+    },
+    "sections": [
+      {
+        "id": "s_nav01", "type": "nav", "variant": "inline",
+        "props": {
+          "anchor": "", "tone": "default", "brand": "Kaapi Corner",
+          "links": [
+            { "id": "i_n1", "label": "Menu", "href": "#menu" },
+            { "id": "i_n2", "label": "The room", "href": "#room" },
+            { "id": "i_n3", "label": "Reviews", "href": "#reviews" },
+            { "id": "i_n4", "label": "Visit", "href": "#visit" }
+          ],
+          "cta": { "label": "Call ahead", "href": "tel:+918041234567" }
+        }
+      },
+      {
+        "id": "s_hero01", "type": "hero", "variant": "split",
+        "props": {
+          "anchor": "", "tone": "default",
+          "eyebrow": "Indiranagar · since 2019",
+          "headline": "Filter coffee, done properly.",
+          "body": "Chicory-free decoction brewed every hour, Chikmagalur beans roasted on Tuesdays, and a dabarah set that arrives frothing. Stay for an idli, or take a flask to the office.",
+          "image": { "url": "/templates/cafe/hero.jpg", "alt": "South Indian filter coffee in a steel tumbler and dabarah" },
+          "cta": { "label": "See the menu", "href": "#menu" },
+          "cta2": { "label": "Find us", "href": "#visit" }
+        }
+      },
+      {
+        "id": "s_menu01", "type": "features", "variant": "rows",
+        "props": {
+          "anchor": "menu", "tone": "surface",
+          "kicker": "Menu highlights",
+          "heading": "What people come back for",
+          "intro": "A short menu we cook well. Everything is vegetarian; ask us about jaggery instead of sugar.",
+          "items": [
+            { "id": "i_m1", "icon": "cup", "title": "Filter kaapi", "body": "Our house decoction with full-cream milk, pulled high in a steel dabarah.", "meta": "₹60" },
+            { "id": "i_m2", "icon": "leaf", "title": "Ghee podi idli", "body": "Four mini idlis tossed in gunpowder and Nandini ghee, with coconut chutney.", "meta": "₹110" },
+            { "id": "i_m3", "icon": "sparkle", "title": "Cold coffee tonic", "body": "Single-origin espresso over tonic and orange peel. Best on a hot afternoon.", "meta": "₹180" },
+            { "id": "i_m4", "icon": "heart", "title": "Banana-walnut loaf", "body": "Baked every morning with Yelakki bananas. Ask for it warm with butter.", "meta": "₹120" }
+          ]
+        }
+      },
+      {
+        "id": "s_room01", "type": "gallery", "variant": "mosaic",
+        "props": {
+          "anchor": "room", "tone": "default",
+          "kicker": "The room",
+          "heading": "Brick, brass and morning light",
+          "images": [
+            { "id": "i_g1", "url": "/templates/cafe/interior.jpg", "alt": "Wooden tables in a quiet café with morning light", "caption": "The front room at 8 am" },
+            { "id": "i_g2", "url": "/templates/cafe/latte.jpg", "alt": "A cappuccino with latte art on a saucer", "caption": "" },
+            { "id": "i_g3", "url": "/templates/cafe/pastry.jpg", "alt": "Coffee, pastry and juice on a breakfast table", "caption": "Weekend breakfast" },
+            { "id": "i_g4", "url": "/templates/cafe/brew.jpg", "alt": "Pour-over coffee being brewed with a kettle and scale", "caption": "" },
+            { "id": "i_g5", "url": "/templates/cafe/beans.jpg", "alt": "Freshly roasted coffee beans", "caption": "Roasted on Tuesdays" }
+          ]
+        }
+      },
+      {
+        "id": "s_rev01", "type": "testimonials", "variant": "cards",
+        "props": {
+          "anchor": "reviews", "tone": "default",
+          "kicker": "Reviews",
+          "heading": "Regulars say",
+          "items": [
+            { "id": "i_r1", "quote": "The only filter coffee in Indiranagar that tastes like my grandmother's in Mysuru. I come three times a week.", "name": "Ananya R.", "role": "Regular since 2020" },
+            { "id": "i_r2", "quote": "Quiet before ten, good wifi and nobody rushes you. The ghee podi idli is the real reason I work from here.", "name": "Karthik S.", "role": "Product designer" },
+            { "id": "i_r3", "quote": "We ordered two flasks for a team offsite and they were still hot at noon. Lovely people.", "name": "Priya M.", "role": "Google review" }
+          ]
+        }
+      },
+      {
+        "id": "s_visit01", "type": "contact", "variant": "details",
+        "props": {
+          "anchor": "visit", "tone": "surface",
+          "kicker": "Visit",
+          "heading": "Find us",
+          "body": "Two minutes from Indiranagar metro. Street parking on 12th Main after 11 am.",
+          "address": "487, 12th Main Road\nHAL 2nd Stage, Indiranagar\nBengaluru 560038",
+          "hours": "Every day 7 am – 10 pm\nKitchen closes at 9:30 pm",
+          "phone": "+91 80 4123 4567",
+          "email": "hello@kaapicorner.in",
+          "cta": { "label": "Get directions", "href": "https://www.openstreetmap.org/search?query=12th%20Main%20Road%20Indiranagar%20Bengaluru" },
+          "image": { "url": "", "alt": "" }
+        }
+      },
+      {
+        "id": "s_foot01", "type": "footer", "variant": "simple",
+        "props": {
+          "anchor": "", "tone": "default",
+          "brand": "Kaapi Corner",
+          "tagline": "Filter coffee and small plates, Indiranagar.",
+          "links": [
+            { "id": "i_f1", "label": "Instagram", "href": "https://www.instagram.com/" },
+            { "id": "i_f2", "label": "Email us", "href": "mailto:hello@kaapicorner.in" }
+          ],
+          "note": "© 2026 Kaapi Corner"
+        }
+      }
+    ]
+  }
+}

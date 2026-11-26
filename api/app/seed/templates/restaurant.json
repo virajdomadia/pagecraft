@@ -1,0 +1,120 @@
+{
+  "meta": {
+    "key": "restaurant",
+    "name": "Restaurant",
+    "business": "Bistro Nine, Jayanagar",
+    "description": "A sit-down restaurant: the food, the menu, what diners say and how to book a table.",
+    "sort": 6,
+    "showcase_slug": "bistro-nine"
+  },
+  "content": {
+    "site": {
+      "name": "Bistro Nine",
+      "theme": { "palette": "bistro", "fonts": "playfair-karla", "radius": "soft" },
+      "seo": {
+        "title": "Bistro Nine · Modern South Indian in Jayanagar",
+        "description": "Dosas, thalis and coastal plates from a small open kitchen on 9th Block, Jayanagar. Tables from 12 to 3:30 and 7 to 11.",
+        "og_image": "/templates/restaurant/hero.jpg"
+      }
+    },
+    "sections": [
+      {
+        "id": "s_nav01", "type": "nav", "variant": "centered",
+        "props": {
+          "anchor": "", "tone": "default", "brand": "Bistro Nine",
+          "links": [
+            { "id": "i_n1", "label": "Food", "href": "#food" },
+            { "id": "i_n2", "label": "Menu", "href": "#menu" },
+            { "id": "i_n3", "label": "Book", "href": "#book" }
+          ],
+          "cta": { "label": "Reserve", "href": "tel:+918026634999" }
+        }
+      },
+      {
+        "id": "s_hero01", "type": "hero", "variant": "full",
+        "props": {
+          "anchor": "", "tone": "default",
+          "eyebrow": "9th Block, Jayanagar",
+          "headline": "South Indian, slowly.",
+          "body": "Batter fermented for two days, coconut grated to order and a thali that changes every Thursday. Lunch and dinner, closed Mondays.",
+          "image": { "url": "/templates/restaurant/hero.jpg", "alt": "A masala dosa served on a banana leaf with chutneys" },
+          "cta": { "label": "Book a table", "href": "#book" },
+          "cta2": { "label": "See the menu", "href": "#menu" }
+        }
+      },
+      {
+        "id": "s_food01", "type": "gallery", "variant": "mosaic",
+        "props": {
+          "anchor": "food", "tone": "default",
+          "kicker": "From the kitchen",
+          "heading": "What's on the table this week",
+          "images": [
+            { "id": "i_g1", "url": "/templates/restaurant/thali.jpg", "alt": "A South Indian thali with rice, sambar and vegetable dishes", "caption": "Thursday thali" },
+            { "id": "i_g2", "url": "/templates/restaurant/vada.jpg", "alt": "A masala dosa with medu vada and chutneys", "caption": "" },
+            { "id": "i_g3", "url": "/templates/restaurant/jamun.jpg", "alt": "Gulab jamun in a bowl", "caption": "" },
+            { "id": "i_g4", "url": "/templates/restaurant/room.jpg", "alt": "A laid table inside a restaurant", "caption": "The dining room" }
+          ]
+        }
+      },
+      {
+        "id": "s_menu01", "type": "features", "variant": "rows",
+        "props": {
+          "anchor": "menu", "tone": "surface",
+          "kicker": "Menu",
+          "heading": "Six we're known for",
+          "intro": "The full menu changes with the market. Tell us about allergies when you book.",
+          "items": [
+            { "id": "i_m1", "icon": "chef", "title": "Benne masala dosa", "body": "Davangere-style, crisp outside, soft inside, with white butter and potato palya.", "meta": "₹220" },
+            { "id": "i_m2", "icon": "leaf", "title": "Thursday thali", "body": "Eleven small bowls, red rice, two kinds of payasa. Unlimited refills.", "meta": "₹420" },
+            { "id": "i_m3", "icon": "sparkle", "title": "Neer dosa and kori gassi", "body": "Lacy rice crêpes with a Mangalorean chicken curry.", "meta": "₹380" },
+            { "id": "i_m4", "icon": "heart", "title": "Ragi mudde and saaru", "body": "Finger-millet dumplings with a peppery horse-gram broth.", "meta": "₹260" },
+            { "id": "i_m5", "icon": "cup", "title": "Filter coffee", "body": "Made with Kaapi Corner's house decoction.", "meta": "₹70" },
+            { "id": "i_m6", "icon": "gift", "title": "Warm gulab jamun", "body": "Two, with a scoop of tender-coconut ice cream.", "meta": "₹180" }
+          ]
+        }
+      },
+      {
+        "id": "s_rev01", "type": "testimonials", "variant": "cards",
+        "props": {
+          "anchor": "", "tone": "default",
+          "kicker": "Diners",
+          "heading": "Worth the wait for a table",
+          "items": [
+            { "id": "i_r1", "quote": "The benne dosa is as good as Davangere, and the kori gassi made my Mangalorean father go quiet. High praise.", "name": "Shreya K.", "role": "Zomato review" },
+            { "id": "i_r2", "quote": "A thali that actually changes every week. We've been eleven Thursdays in a row.", "name": "Vikram and Leela", "role": "Jayanagar" },
+            { "id": "i_r3", "quote": "Booked for my parents' anniversary; they put a little lamp on the table without being asked.", "name": "Arjun P.", "role": "Google review" }
+          ]
+        }
+      },
+      {
+        "id": "s_book01", "type": "contact", "variant": "split",
+        "props": {
+          "anchor": "book", "tone": "default",
+          "kicker": "Book",
+          "heading": "Book a table",
+          "body": "We hold tables for fifteen minutes. Groups of eight or more, please call a day ahead.",
+          "address": "No. 9, 30th Cross, 9th Block\nJayanagar, Bengaluru 560069",
+          "hours": "Tue–Sun 12 – 3:30 pm, 7 – 11 pm\nClosed Mondays",
+          "phone": "+91 80 2663 4999",
+          "email": "table@bistronine.in",
+          "cta": { "label": "Call to book", "href": "tel:+918026634999" },
+          "image": { "url": "/templates/restaurant/room.jpg", "alt": "A laid table inside a restaurant" }
+        }
+      },
+      {
+        "id": "s_foot01", "type": "footer", "variant": "columns",
+        "props": {
+          "anchor": "", "tone": "default",
+          "brand": "Bistro Nine",
+          "tagline": "Modern South Indian, 9th Block, Jayanagar.",
+          "links": [
+            { "id": "i_f1", "label": "Instagram", "href": "https://www.instagram.com/" },
+            { "id": "i_f2", "label": "Call", "href": "tel:+918026634999" },
+            { "id": "i_f3", "label": "Email", "href": "mailto:table@bistronine.in" }
+          ],
+          "note": "© 2026 Bistro Nine · FSSAI 11225999000123"
+        }
+      }
+    ]
+  }
+}
