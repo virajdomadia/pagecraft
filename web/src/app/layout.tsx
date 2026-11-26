@@ -1,8 +1,12 @@
-import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { JetBrains_Mono, Manrope } from "next/font/google";
 import { site } from "@/lib/site";
-const sans = Manrope({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 import "./globals.css";
+
+// Product chrome type (Blueprint): Manrope for everything, JetBrains Mono for ids, slugs, labels.
+// Published sites use their own pair (lib/site-fonts.ts) and never load these.
+const sans = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap", preload: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -19,9 +23,11 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: site.title, description: site.description },
 };
 
+export const viewport: Viewport = { themeColor: "#ffffff" };
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

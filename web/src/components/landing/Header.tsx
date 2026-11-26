@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
 const links = [
   { href: "/#features", label: "Features" },
+  { href: "/#examples", label: "Examples" },
   { href: "/#plans", label: "Plans" },
-  { href: "/#early-access", label: "Early access" },
+  { href: "/#try", label: "Try the demo" },
 ];
 
 export function Header() {
@@ -35,10 +37,10 @@ export function Header() {
     <header className="wrap">
       <a className="skip" href="#main">Skip to content</a>
       <nav className="nav" aria-label="Main">
-        <a className="logo" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#4338CA"/><path d="M18 14 h20 l8 8 v28 h-28 z" fill="#FFFFFF"/><path d="M38 14 v8 h8" fill="#C7D2FE"/><path d="M30 30 l14 6 l-6 2 l-2 6 z" fill="#FF6B6B" stroke="#4338CA" strokeWidth="1.5" strokeLinejoin="round"/></svg>Pagecraft</a>
+        <Link className="logo" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#4338CA"/><path d="M18 14 h20 l8 8 v28 h-28 z" fill="#FFFFFF"/><path d="M38 14 v8 h8" fill="#C7D2FE"/><path d="M30 30 l14 6 l-6 2 l-2 6 z" fill="#FF6B6B" stroke="#4338CA" strokeWidth="1.5" strokeLinejoin="round"/></svg>Pagecraft</Link>
         <ul className="nav-links">{links.map((l) => <li key={l.href}><a href={l.href}>{l.label}</a></li>)}</ul>
         <div className="nav-end">
-          <a className="btn btn-line" href="/#early-access">Sign in</a>
+          <a className="btn btn-line" href="/sign-in">Sign in</a>
           <button
             ref={buttonRef}
             type="button"

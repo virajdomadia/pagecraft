@@ -1,0 +1,156 @@
+/* Editor-only styles: selection, inline editing, the draw-in, the theme ripple. */
+
+.pc-frame {
+  position: relative;
+  cursor: default;
+}
+.pc-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  z-index: 5;
+}
+.pc-frame:hover::after {
+  outline-color: rgb(67 56 202 / 0.55);
+}
+.pc-frame.is-selected::after {
+  outline: 2px dashed #4338ca;
+  outline-offset: -2px;
+}
+.pc-frame__label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  display: none;
+  padding: 3px 8px;
+  background: #4338ca;
+  color: #fff;
+  font: 500 11px/1.4 var(--font-jetbrains), ui-monospace, monospace;
+  letter-spacing: 0;
+  text-transform: none;
+  pointer-events: none;
+}
+.pc-frame__label i {
+  font-style: normal;
+  opacity: 0.75;
+  margin-left: 6px;
+}
+.pc-frame:hover .pc-frame__label {
+  display: block;
+  background: rgb(67 56 202 / 0.8);
+}
+.pc-frame.is-selected .pc-frame__label {
+  display: block;
+  background: #4338ca;
+}
+
+.pc-editable {
+  outline: none;
+  white-space: pre-wrap;
+  cursor: text;
+  border-radius: 2px;
+  min-width: 1ch;
+}
+.pc-editable:hover {
+  box-shadow: 0 0 0 1px rgb(67 56 202 / 0.35);
+}
+.pc-editable:focus {
+  box-shadow: 0 0 0 2px #4338ca;
+  background: rgb(238 240 255 / 0.25);
+}
+.pc-editable:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.45;
+  font-style: italic;
+}
+.pc-editable[data-limit] {
+  box-shadow: 0 0 0 2px #ff6b6b;
+}
+.pc-btn .pc-editable {
+  display: inline-block;
+}
+
+/* --- the Blueprint draw-in ------------------------------------------------------------------ */
+.pc-drawin {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  overflow: visible;
+  animation: pc-drawin-out 400ms ease 1000ms forwards;
+}
+.pc-drawin__box {
+  fill: none;
+  stroke: #4338ca;
+  stroke-width: 1.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pc-trace 550ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+.pc-drawin__label {
+  font: 500 10px var(--font-jetbrains), ui-monospace, monospace;
+  fill: #4338ca;
+  opacity: 0;
+  animation: pc-label 200ms ease forwards;
+  animation-delay: inherit;
+}
+.pc-drawin__g {
+  animation-delay: inherit;
+}
+.pc-drawin-content {
+  animation: pc-fill 450ms ease 550ms both;
+}
+@keyframes pc-trace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes pc-label {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pc-fill {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pc-drawin-out {
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-drawin {
+    display: none;
+  }
+  .pc-drawin-content {
+    animation: pc-fill 150ms ease both;
+  }
+}
+
+/* --- theme ripple (View Transitions): the new canvas grows from the swatch ------------------ */
+::view-transition-old(pc-canvas) {
+  animation: none;
+}
+::view-transition-new(pc-canvas) {
+  animation: pc-ripple 750ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes pc-ripple {
+  from {
+    clip-path: circle(0 at var(--pc-rx, 50%) var(--pc-ry, 0%));
+  }
+  to {
+    clip-path: circle(150% at var(--pc-rx, 50%) var(--pc-ry, 0%));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(pc-canvas),
+  ::view-transition-old(pc-canvas) {
+    animation: none;
+  }
+}
