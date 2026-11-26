@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "key": "salon",
+    "name": "Salon",
+    "business": "Loop Studio, Koramangala",
+    "description": "A hair and colour studio: services, prices, the work and a booking call to action.",
+    "sort": 2,
+    "showcase_slug": "loop-studio"
+  },
+  "content": {
+    "site": {
+      "name": "Loop Studio",
+      "theme": { "palette": "blush", "fonts": "cormorant-manrope", "radius": "round" },
+      "seo": {
+        "title": "Loop Studio · Hair and colour in Koramangala",
+        "description": "Cuts, colour and bridal styling by appointment in Koramangala 5th Block. Book on WhatsApp.",
+        "og_image": "/templates/salon/hero.jpg"
+      }
+    },
+    "sections": [
+      {
+        "id": "s_nav01", "type": "nav", "variant": "centered",
+        "props": {
+          "anchor": "", "tone": "default", "brand": "Loop Studio",
+          "links": [
+            { "id": "i_n1", "label": "Services", "href": "#services" },
+            { "id": "i_n2", "label": "Prices", "href": "#prices" },
+            { "id": "i_n3", "label": "Work", "href": "#work" }
+          ],
+          "cta": { "label": "Book a chair", "href": "https://wa.me/919845012345" }
+        }
+      },
+      {
+        "id": "s_hero01", "type": "hero", "variant": "full",
+        "props": {
+          "anchor": "", "tone": "default",
+          "eyebrow": "Koramangala 5th Block · by appointment",
+          "headline": "Hair that still looks good on day five.",
+          "body": "Precision cuts, lived-in colour and bridal styling from a small team that takes one client at a time.",
+          "image": { "url": "/templates/salon/hero.jpg", "alt": "A stylist blow-drying a client's hair in a salon lined with mirrors" },
+          "cta": { "label": "Book on WhatsApp", "href": "https://wa.me/919845012345" },
+          "cta2": { "label": "See prices", "href": "#prices" }
+        }
+      },
+      {
+        "id": "s_serv01", "type": "features", "variant": "grid-3",
+        "props": {
+          "anchor": "services", "tone": "default",
+          "kicker": "Services",
+          "heading": "Three things we do all day",
+          "intro": "Every appointment starts with a ten-minute consultation, free, with the stylist who will do the work.",
+          "items": [
+            { "id": "i_s1", "icon": "scissors", "title": "Cut and finish", "body": "A cut designed around how your hair grows and how much time you have in the morning.", "meta": "45–60 min" },
+            { "id": "i_s2", "icon": "palette", "title": "Colour", "body": "Balayage, global colour and grey blending with ammonia-free Olaplex-bonded colour.", "meta": "2–4 hours" },
+            { "id": "i_s3", "icon": "sparkle", "title": "Bridal and events", "body": "Trials at the studio, then we come to you on the day — anywhere in Bengaluru.", "meta": "On location" }
+          ]
+        }
+      },
+      {
+        "id": "s_price01", "type": "pricing", "variant": "cards",
+        "props": {
+          "anchor": "prices", "tone": "surface",
+          "kicker": "Prices",
+          "heading": "Clear prices, no surprises at the counter",
+          "intro": "Prices include GST. Long or very thick hair may take longer; we will tell you before we start.",
+          "plans": [
+            { "id": "i_p1", "name": "Cut and finish", "price": "₹1,400", "period": "from", "features": "Consultation\nWash and conditioning\nCut and blow-dry", "cta": { "label": "Book a cut", "href": "https://wa.me/919845012345" }, "featured": false },
+            { "id": "i_p2", "name": "Balayage", "price": "₹6,500", "period": "from", "features": "Consultation and strand test\nHand-painted colour\nGloss, cut and finish\nTake-home care kit", "cta": { "label": "Book colour", "href": "https://wa.me/919845012345" }, "featured": true },
+            { "id": "i_p3", "name": "Bridal trial", "price": "₹3,000", "period": "adjusted on the day", "features": "Two looks at the studio\nPhotos to take home\nFully credited on booking", "cta": { "label": "Ask about dates", "href": "https://wa.me/919845012345" }, "featured": false }
+          ],
+          "note": "Cancel or move an appointment up to 24 hours before at no charge."
+        }
+      },
+      {
+        "id": "s_work01", "type": "gallery", "variant": "grid",
+        "props": {
+          "anchor": "work", "tone": "default",
+          "kicker": "Work",
+          "heading": "From the chair this month",
+          "images": [
+            { "id": "i_g1", "url": "/templates/salon/cut.jpg", "alt": "A stylist cutting a client's hair", "caption": "" },
+            { "id": "i_g2", "url": "/templates/salon/colour.jpg", "alt": "Hair colour being applied in foils", "caption": "" },
+            { "id": "i_g3", "url": "/templates/salon/style.jpg", "alt": "A client's finished blow-dry in the mirror", "caption": "" },
+            { "id": "i_g4", "url": "/templates/salon/studio.jpg", "alt": "Salon chairs and mirrors in a bright studio", "caption": "" }
+          ]
+        }
+      },
+      {
+        "id": "s_cta01", "type": "cta", "variant": "band",
+        "props": {
+          "anchor": "", "tone": "accent",
+          "heading": "Saturdays fill up by Wednesday.",
+          "body": "Message us your hair goals and a photo — we reply within the hour, 10 am to 8 pm.",
+          "cta": { "label": "Book on WhatsApp", "href": "https://wa.me/919845012345" }
+        }
+      },
+      {
+        "id": "s_foot01", "type": "footer", "variant": "columns",
+        "props": {
+          "anchor": "", "tone": "default",
+          "brand": "Loop Studio",
+          "tagline": "1st floor, 22 80 Feet Road, Koramangala 5th Block, Bengaluru 560095 · Tue–Sun 10 am – 8 pm",
+          "links": [
+            { "id": "i_f1", "label": "Instagram", "href": "https://www.instagram.com/" },
+            { "id": "i_f2", "label": "WhatsApp", "href": "https://wa.me/919845012345" },
+            { "id": "i_f3", "label": "Call", "href": "tel:+919845012345" }
+          ],
+          "note": "© 2026 Loop Studio"
+        }
+      }
+    ]
+  }
+}

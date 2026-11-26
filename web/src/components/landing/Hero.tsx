@@ -2,8 +2,8 @@ export function Hero() {
   return (
     <section className="wrap hero">
       <h1>Build the page together. Publish it in one click.</h1>
-      <p className="lede">A landing-page editor two people can use at the same time — you write the headline while your designer swaps the images — then it's live on its own address.</p>
-      <div className="actions"><a className="btn btn-indigo" href="#early-access">Start a page, free</a><a className="btn btn-line" href="#features">See what you can build</a></div>
+      <p className="lede">Pick a template, edit every section right on the page, and publish a fast, SEO-clean site to its own address. Co-editing with a teammate in the same page arrives next.</p>
+      <div className="actions"><a className="btn btn-indigo" href="/sign-up">Start a page, free</a><a className="btn btn-line" href="#try">Try the demo — no sign-up</a></div>
 
       <div className="editor" role="img" aria-label="Preview of the Pagecraft editor: two people editing a café landing page at the same time">
         <div className="topbar" aria-hidden="true">

@@ -1,0 +1,38 @@
+# Migrate and seed the production database — run by hand (Actions → db → Run workflow), never on
+# push. Runs on GitHub's runner (no Vercel compute). The seed is idempotent: templates are refreshed,
+# missing showcase sites created and published; `reset` also rebuilds every showcase site (the
+# shared demo site Kaapi Corner included) from its template.
+# Needs repo secret DATABASE_URL (the Neon URL of the pagecraft-api project; app/db.py converts it)
+# and, so the seed's publishes refresh the live pages at once, REVALIDATE_SECRET + WEB_URL.
+name: db
+on:
+  workflow_dispatch:
+    inputs:
+      reset:
+        description: Rebuild the showcase sites from their templates
+        type: boolean
+        default: false
+
+concurrency: { group: db-production, cancel-in-progress: false }
+permissions: { contents: read }
+
+jobs:
+  migrate-and-seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: api
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+      WEB_URL: https://pagecraft.virajdomadia.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6 # python version from api/.python-version
+        with:
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
+      - run: uv sync --locked
+      - run: uv run alembic upgrade head
+      - run: uv run python -m app.seed ${{ inputs.reset && '--reset' || '' }}

@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "key": "freelancer",
+    "name": "Freelancer portfolio",
+    "business": "Meera Rao — brand designer",
+    "description": "A one-person studio: selected work, what clients say and a way to start a project.",
+    "sort": 3,
+    "showcase_slug": "meera-rao"
+  },
+  "content": {
+    "site": {
+      "name": "Meera Rao",
+      "theme": { "palette": "paper", "fonts": "dmserif-dmsans", "radius": "sharp" },
+      "seo": {
+        "title": "Meera Rao · Brand designer in Bengaluru",
+        "description": "Identities, packaging and signage for independent Bengaluru businesses. Taking two projects for early 2027.",
+        "og_image": "/templates/freelancer/kaapi.jpg"
+      }
+    },
+    "sections": [
+      {
+        "id": "s_nav01", "type": "nav", "variant": "inline",
+        "props": {
+          "anchor": "", "tone": "default", "brand": "Meera Rao",
+          "links": [
+            { "id": "i_n1", "label": "Work", "href": "#work" },
+            { "id": "i_n2", "label": "Clients", "href": "#clients" }
+          ],
+          "cta": { "label": "Start a project", "href": "mailto:studio@meerarao.in" }
+        }
+      },
+      {
+        "id": "s_hero01", "type": "hero", "variant": "split",
+        "props": {
+          "anchor": "", "tone": "default",
+          "eyebrow": "Brand designer · Bengaluru",
+          "headline": "Identities for businesses people walk into.",
+          "body": "I design names, logos, menus and shop signs for independent cafés, studios and makers — the things customers touch before they ever see your website.",
+          "image": { "url": "/templates/freelancer/desk.jpg", "alt": "A notebook, coloured pencils and stationery on a wooden desk" },
+          "cta": { "label": "See the work", "href": "#work" },
+          "cta2": { "label": "Email me", "href": "mailto:studio@meerarao.in" }
+        }
+      },
+      {
+        "id": "s_work01", "type": "gallery", "variant": "grid",
+        "props": {
+          "anchor": "work", "tone": "surface",
+          "kicker": "Selected work",
+          "heading": "2024 – 2026",
+          "images": [
+            { "id": "i_g1", "url": "/templates/freelancer/kaapi.jpg", "alt": "Kaapi Corner wordmark in cream on leaf green", "caption": "Kaapi Corner — identity" },
+            { "id": "i_g2", "url": "/templates/freelancer/loop.jpg", "alt": "Loop Studio wordmark in plum on blush", "caption": "Loop Studio — identity" },
+            { "id": "i_g3", "url": "/templates/freelancer/ironline.jpg", "alt": "Ironline wordmark in lime on black", "caption": "Ironline — brand system" },
+            { "id": "i_g4", "url": "/templates/freelancer/nimbus.jpg", "alt": "Nimbus wordmark in blue on pale grey", "caption": "Nimbus — packaging" },
+            { "id": "i_g5", "url": "/templates/freelancer/bistro.jpg", "alt": "Bistro Nine wordmark in cream on oxblood", "caption": "Bistro Nine — menus and signage" },
+            { "id": "i_g6", "url": "/templates/freelancer/hasiru.jpg", "alt": "Hasiru Books wordmark in dark green on sage", "caption": "Hasiru Books — identity" }
+          ]
+        }
+      },
+      {
+        "id": "s_rev01", "type": "testimonials", "variant": "spotlight",
+        "props": {
+          "anchor": "clients", "tone": "default",
+          "kicker": "Clients",
+          "heading": "What working together is like",
+          "items": [
+            { "id": "i_r1", "quote": "Meera spent a morning behind our counter before she drew a single letter. The logo she came back with is the first thing regulars mention.", "name": "Deepa Nair", "role": "Owner, Kaapi Corner" },
+            { "id": "i_r2", "quote": "Fixed price, a clear timeline and files our printer understood first time. We have recommended her to three other studios.", "name": "Rohan Mehta", "role": "Co-founder, Loop Studio" },
+            { "id": "i_r3", "quote": "She talked us out of a mascot and into a wordmark. Right call — it works on a kettle, a box and a billboard.", "name": "Aditya Kulkarni", "role": "Founder, Nimbus" }
+          ]
+        }
+      },
+      {
+        "id": "s_cta01", "type": "cta", "variant": "card",
+        "props": {
+          "anchor": "", "tone": "default",
+          "heading": "Booking two projects for January 2027.",
+          "body": "Identity projects start at ₹1.2 lakh and take six to eight weeks. Tell me about your business and I'll reply within two days.",
+          "cta": { "label": "Start a project", "href": "mailto:studio@meerarao.in" }
+        }
+      },
+      {
+        "id": "s_foot01", "type": "footer", "variant": "simple",
+        "props": {
+          "anchor": "", "tone": "default",
+          "brand": "Meera Rao",
+          "tagline": "Brand design for independent businesses, from Jayanagar.",
+          "links": [
+            { "id": "i_f1", "label": "Behance", "href": "https://www.behance.net/" },
+            { "id": "i_f2", "label": "LinkedIn", "href": "https://www.linkedin.com/" },
+            { "id": "i_f3", "label": "Email", "href": "mailto:studio@meerarao.in" }
+          ],
+          "note": "© 2026 Meera Rao Studio"
+        }
+      }
+    ]
+  }
+}
