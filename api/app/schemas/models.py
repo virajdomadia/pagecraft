@@ -233,3 +233,45 @@ class AwarenessIn(Strict):
     client: int = Field(ge=0, le=2**53)  # the tab's Y.Doc clientID
     n: int = Field(ge=1, le=2**53)  # the tab's post counter: later posts win
     state: PresenceState | None  # null = this tab is leaving
+
+
+# --- invites, members, password reset (L4) ------------------------------------------------------
+
+
+class InviteIn(ApiModel):
+    email: str = Field(max_length=254, pattern=r"^\s*[^@\s]+@[^@\s]+\.[^@\s]+\s*$")
+
+
+class InviteOut(ApiModel):
+    id: uuid.UUID
+    email: str
+    expires_at: datetime
+
+
+class InviteCreated(ApiModel):
+    invite: InviteOut
+    emailed: bool
+    # Only when the email didn't go out (email is off, or a demo invite): for the owner to share.
+    link: str | None
+
+
+class InvitePreview(ApiModel):
+    site_name: str
+    invited_by: str | None
+    email: str
+    status: Literal["pending", "used", "expired"]
+    demo: bool
+
+
+class ForgotIn(ApiModel):
+    email: str = Field(min_length=3, max_length=254)
+
+
+class ForgotOut(ApiModel):
+    # False: email is off, so no link can be sent (the screen says so; it never shows one).
+    email_on: bool
+
+
+class ResetIn(ApiModel):
+    token: str = Field(min_length=10, max_length=100)
+    password: str = Field(min_length=8, max_length=200)

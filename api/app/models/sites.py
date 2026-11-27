@@ -113,6 +113,25 @@ class SiteAwareness(Base):
     )
 
 
+class Invite(UuidMixin, CreatedMixin, Base):
+    """An invitation to edit a site (L4). Only the token's SHA-256 is stored."""
+
+    __tablename__ = "invites"
+    __table_args__ = (Index("ix_invites_site_id", "site_id"),)
+
+    site_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("sites.id", ondelete="CASCADE"), nullable=False
+    )
+    email: Mapped[str] = mapped_column(Text, nullable=False)  # lower-cased
+    role: Mapped[str] = mapped_column(Text, nullable=False, server_default="editor")
+    token_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    invited_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class Publication(UuidMixin, CreatedMixin, Base):
     __tablename__ = "publications"
     __table_args__ = (

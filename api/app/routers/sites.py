@@ -18,6 +18,9 @@ from app.schemas.models import (
     AwarenessIn,
     CreateSite,
     DocOut,
+    InviteCreated,
+    InviteIn,
+    InviteOut,
     PatchSite,
     PublishIn,
     PublishOut,
@@ -34,6 +37,7 @@ from app.schemas.models import (
 from app.services import (
     crdt,
     documents,
+    invites,
     limits,
     presence,
     publish,
@@ -180,6 +184,36 @@ async def post_awareness(body: AwarenessIn, access: Member, db: Db) -> Response:
     Never stored past a minute; fanned out by the stream with the poster's name and colour."""
     state = body.state.model_dump(exclude_none=True) if body.state else None
     await presence.publish(db, access.site.id, access.user.id, body.client, body.n, state)
+    return Response(status_code=204)
+
+
+@router.get("/sites/{site_id}/invites", response_model=list[InviteOut])
+async def list_invites(access: Owner, db: Db) -> list[InviteOut]:
+    return [InviteOut.model_validate(i) for i in await invites.pending(db, access.site.id)]
+
+
+@router.post("/sites/{site_id}/invites", response_model=InviteCreated, status_code=201)
+async def create_invite(
+    body: InviteIn, request: Request, access: Owner, db: Db, settings: AppSettings
+) -> InviteCreated:
+    """L4. Emails the link when email is on; otherwise (and always in the demo) returns it so the
+    owner can share it. It only works for the invited address."""
+    await limits.hit(db, f"invite:{limits.client_ip(request)}", 30, limits.HOUR)
+    await limits.hit(db, f"invite-user:{access.user.id}", 30, limits.HOUR)
+    invite, link, emailed = await invites.create_invite(db, access, body.email, settings)
+    return InviteCreated(invite=InviteOut.model_validate(invite), emailed=emailed, link=link)
+
+
+@router.delete("/sites/{site_id}/invites/{invite_id}", status_code=204)
+async def revoke_invite(invite_id: uuid.UUID, access: Owner, db: Db) -> Response:
+    await invites.revoke(db, access.site.id, invite_id)
+    return Response(status_code=204)
+
+
+@router.delete("/sites/{site_id}/members/{user_id}", status_code=204)
+async def remove_member(user_id: uuid.UUID, access: Owner, db: Db) -> Response:
+    """L4. Their next request is 404; an open editor of theirs gets `gone` on the stream."""
+    await invites.remove_member(db, access, user_id)
     return Response(status_code=204)
 
 
