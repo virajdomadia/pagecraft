@@ -4,15 +4,21 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import * as Y from "yjs";
 import { exportDoc, LOAD, LOCAL, roots, type SiteContent } from "@/lib/doc/model";
 import { fromBase64, type SaveStatus, type SendResult, UpdateQueue } from "@/lib/doc/persistence";
+import { openStream } from "@/lib/doc/stream";
 
 /**
  * The editor's document (04 §3): one Y.Doc per open site, loaded from `GET /sites/{id}/doc`
  * (snapshot + tail), saved through the UpdateQueue, undone by a Y.UndoManager that tracks only
- * this tab's own transactions (origin LOCAL) — which is exactly what v2 needs when a stream
- * starts applying a teammate's updates with another origin.
+ * this tab's own transactions (origin LOCAL). Teammates' edits arrive over the live stream (L1)
+ * and are applied with origin LOAD: never queued back, never undone by this tab.
  */
 
-type Loaded = { doc: Y.Doc; undo: Y.UndoManager; queue: UpdateQueue };
+/** A tab hidden this long lets its stream go (each open stream polls the database). */
+const HIDDEN_CLOSE_MS = 60_000;
+
+const GONE = "This site doesn't exist or you no longer have access.";
+
+type Loaded ={ doc: Y.Doc; undo: Y.UndoManager; queue: UpdateQueue };
 
 export type SiteDoc = {
   status: "loading" | "ready" | "error";
@@ -86,15 +92,46 @@ export function useSiteDoc(siteId: string): SiteDoc {
       const blob = new Blob([JSON.stringify({ updates: [pending] })], { type: "application/json" });
       navigator.sendBeacon(`/api/sites/${siteId}/updates`, blob);
     };
-    const onVisibility = () => document.visibilityState === "hidden" && beacon();
+    // The live stream: started once the document has loaded, paused while the tab is hidden.
+    let applied = 0;
+    let ready = false;
+    let closeStream: (() => void) | null = null;
+    let hiddenTimer: ReturnType<typeof setTimeout> | null = null;
+    const startStream = () => {
+      if (disposed || closeStream) return;
+      closeStream = openStream({
+        siteId,
+        from: () => applied,
+        onEvent: (e) => {
+          if (e.event !== "update") return;
+          const { seq, data } = e.data as { seq: number; data: string };
+          Y.applyUpdate(doc, fromBase64(data), LOAD);
+          applied = Math.max(applied, seq);
+        },
+        onGone: () => setError(GONE),
+      });
+    };
+    const stopStream = () => {
+      closeStream?.();
+      closeStream = null;
+    };
+
+    const onVisibility = () => {
+      if (hiddenTimer) clearTimeout(hiddenTimer);
+      hiddenTimer = null;
+      if (document.visibilityState === "hidden") {
+        beacon();
+        hiddenTimer = setTimeout(stopStream, HIDDEN_CLOSE_MS);
+      } else if (ready) startStream();
+    };
     window.addEventListener("pagehide", beacon);
     document.addEventListener("visibilitychange", onVisibility);
 
     (async () => {
       try {
         const res = await fetch(`/api/sites/${siteId}/doc`, { credentials: "same-origin", cache: "no-store" });
-        if (!res.ok) throw new Error(res.status === 404 ? "This site doesn't exist or you no longer have access." : "Couldn't load the site.");
-        const body = (await res.json()) as { snapshot: string; updates: string[] };
+        if (!res.ok) throw new Error(res.status === 404 ? GONE : "Couldn't load the site.");
+        const body = (await res.json()) as { snapshot: string; updates: string[]; seq: number };
         if (disposed) return;
         roots(doc); // declare the root types before integrating
         doc.transact(() => {
@@ -111,6 +148,9 @@ export function useSiteDoc(siteId: string): SiteDoc {
         undo.on("stack-item-popped", onStack);
         bump();
         setLoaded({ doc, undo, queue });
+        applied = body.seq;
+        ready = true;
+        if (document.visibilityState !== "hidden") startStream();
       } catch (err) {
         if (!disposed) setError(err instanceof Error ? err.message : "Couldn't load the site.");
       }
@@ -118,6 +158,8 @@ export function useSiteDoc(siteId: string): SiteDoc {
 
     return () => {
       disposed = true;
+      stopStream();
+      if (hiddenTimer) clearTimeout(hiddenTimer);
       beacon();
       window.removeEventListener("pagehide", beacon);
       document.removeEventListener("visibilitychange", onVisibility);

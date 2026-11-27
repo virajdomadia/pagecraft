@@ -25,8 +25,12 @@ def get_settings_dep(request: Request) -> Settings:
 AppSettings = Annotated[Settings, Depends(get_settings_dep)]
 
 
+def session_token(request: Request) -> str:
+    return request.cookies.get(COOKIE_NAME, "")
+
+
 async def current_user(request: Request, db: Db) -> User | None:
-    token = request.cookies.get(COOKIE_NAME, "")
+    token = session_token(request)
     session = await find_session(db, token) if token else None
     return session.user if session else None
 

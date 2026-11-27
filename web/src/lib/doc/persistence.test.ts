@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as Y from "yjs";
-import { fromBase64, storageKey, toBase64, UpdateQueue, type SendResult } from "@/lib/doc/persistence";
+import { FLUSH_MS, fromBase64, storageKey, toBase64, UpdateQueue, type SendResult } from "@/lib/doc/persistence";
 
 class MemoryStore {
   data = new Map<string, string>();
@@ -13,7 +13,15 @@ class MemoryStore {
   removeItem(k: string) {
     this.data.delete(k);
   }
+  key(i: number) {
+    return [...this.data.keys()][i] ?? null;
+  }
+  get length() {
+    return this.data.size;
+  }
 }
+
+const saved = (store: MemoryStore, siteId: string) => [...store.data.keys()].filter((k) => k === storageKey(siteId) || k.startsWith(`${storageKey(siteId)}:`));
 
 function edits(n: number): { doc: Y.Doc; updates: Uint8Array[] } {
   const doc = new Y.Doc();
@@ -34,21 +42,21 @@ describe("UpdateQueue", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it("batches a burst of updates into one merged POST after 300 ms", async () => {
+  it("batches a burst of updates into one merged POST after FLUSH_MS", async () => {
     const sent: string[] = [];
     const store = new MemoryStore();
     const q = new UpdateQueue("site1", async (b) => (sent.push(b), "ok"), store);
     const { updates } = edits(5);
     updates.forEach((u) => q.push(u));
     expect(q.getStatus()).toBe("saving");
-    expect(store.getItem(storageKey("site1"))).not.toBeNull();
-    await vi.advanceTimersByTimeAsync(299);
+    expect(saved(store, "site1")).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(FLUSH_MS - 1);
     expect(sent).toHaveLength(0);
     await vi.advanceTimersByTimeAsync(1);
     expect(sent).toHaveLength(1);
     expect(replay(sent)).toBe("01234");
     expect(q.getStatus()).toBe("saved");
-    expect(store.getItem(storageKey("site1"))).toBeNull();
+    expect(saved(store, "site1")).toHaveLength(0);
   });
 
   it("keeps the batch when offline, shows Offline, and retries with backoff", async () => {
@@ -59,7 +67,7 @@ describe("UpdateQueue", () => {
     q.subscribe((s) => statuses.push(s));
     const { updates } = edits(2);
     updates.forEach((u) => q.push(u));
-    await vi.advanceTimersByTimeAsync(300);
+    await vi.advanceTimersByTimeAsync(FLUSH_MS);
     expect(q.getStatus()).toBe("offline");
     q.push(edits(1).updates[0]); // typing continues while offline
     await vi.advanceTimersByTimeAsync(1000);
@@ -80,7 +88,32 @@ describe("UpdateQueue", () => {
     expect(restored).not.toBeNull();
     await vi.advanceTimersByTimeAsync(0);
     expect(replay(sent)).toBe(doc.getText("t").toString());
-    expect(store.getItem(storageKey("s"))).toBeNull();
+    expect(saved(store, "s")).toHaveLength(0);
+  });
+
+  it("two tabs on one site keep separate saved queues, and a reload restores both", async () => {
+    const store = new MemoryStore();
+    const offline = async (): Promise<SendResult> => "retry";
+    const a = new UpdateQueue("s", offline, store);
+    const b = new UpdateQueue("s", offline, store);
+    const docA = new Y.Doc();
+    const docB = new Y.Doc();
+    docA.on("update", (u: Uint8Array) => a.push(u));
+    docB.on("update", (u: Uint8Array) => b.push(u));
+    docA.getText("t").insert(0, "from A ");
+    docB.getText("t").insert(0, "from B ");
+    expect(saved(store, "s")).toHaveLength(2);
+    a.dispose();
+    b.dispose();
+
+    const sent: string[] = [];
+    const c = new UpdateQueue("s", async (x) => (sent.push(x), "ok"), store);
+    expect(c.restore()).not.toBeNull();
+    await vi.advanceTimersByTimeAsync(0);
+    const text = replay(sent);
+    expect(text).toContain("from A");
+    expect(text).toContain("from B");
+    expect(saved(store, "s")).toHaveLength(0);
   });
 
   it("drain() resolves once the server has everything (publish waits on it)", async () => {
@@ -95,7 +128,7 @@ describe("UpdateQueue", () => {
     const send = vi.fn(async (): Promise<SendResult> => "fatal");
     const q = new UpdateQueue("s", send, new MemoryStore());
     q.push(edits(1).updates[0]);
-    await vi.advanceTimersByTimeAsync(300);
+    await vi.advanceTimersByTimeAsync(FLUSH_MS);
     await vi.advanceTimersByTimeAsync(60_000);
     expect(send).toHaveBeenCalledTimes(1);
     expect(q.getStatus()).toBe("error");
@@ -107,12 +140,12 @@ describe("UpdateQueue", () => {
     const q = new UpdateQueue("s", send, store);
     const { updates } = edits(2);
     q.push(updates[0]);
-    await vi.advanceTimersByTimeAsync(300);
+    await vi.advanceTimersByTimeAsync(FLUSH_MS);
     q.push(updates[1]);
     await vi.advanceTimersByTimeAsync(60_000);
     expect(send).toHaveBeenCalledTimes(1);
     expect(q.getStatus()).toBe("error");
-    expect(store.getItem(storageKey("s"))).toBeNull();
+    expect(saved(store, "s")).toHaveLength(0);
     expect(q.hasPending()).toBe(false);
   });
 

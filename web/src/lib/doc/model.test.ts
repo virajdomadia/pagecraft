@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as Y from "yjs";
-import { buildDoc, exportDoc, getAt, LOCAL, replaceText, roots, setField, type SiteContent, withFreshIds } from "@/lib/doc/model";
+import { buildDoc, exportDoc, getAt, LOAD, LOCAL, replaceText, roots, setField, shiftIndex, type SiteContent, withFreshIds } from "@/lib/doc/model";
 
 const content: SiteContent = {
   site: {
@@ -104,5 +104,25 @@ describe("the document model", () => {
     expect(copy.id).toMatch(/^s_[a-z0-9]{6}$/);
     expect((copy.props.items as { id: string }[])[0].id).not.toBe("i_1");
     expect(copy.props.headline).toBe("Filter coffee, done properly.");
+  });
+
+  it("shiftIndex keeps a caret on its character when a teammate edits elsewhere in the text", () => {
+    const a = new Y.Doc();
+    const text = a.getText("t");
+    text.insert(0, "Filter coffee");
+    const caret = 6; // after "Filter"
+    let seen = caret;
+    text.observe((e) => {
+      seen = shiftIndex(e.delta, seen);
+    });
+    const remote = (fn: () => void) => a.transact(fn, LOAD);
+    remote(() => text.insert(0, "Good "));
+    expect(text.toString().slice(0, seen)).toBe("Good Filter");
+    remote(() => text.insert(text.length, "!"));
+    expect(seen).toBe(11);
+    remote(() => text.delete(0, 5));
+    expect(text.toString().slice(0, seen)).toBe("Filter");
+    remote(() => text.delete(3, 6)); // a deletion across the caret lands it at the cut
+    expect(seen).toBe(3);
   });
 });
