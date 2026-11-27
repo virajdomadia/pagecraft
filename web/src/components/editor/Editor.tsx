@@ -11,7 +11,7 @@ import { PublishDialog } from "@/components/editor/PublishDialog";
 import { ThemePanel } from "@/components/editor/ThemePanel";
 import { TopBar } from "@/components/editor/TopBar";
 import { SiteRenderer } from "@/components/renderer/SiteRenderer";
-import { api, errorMessage, type Me, type SiteDetail } from "@/lib/api";
+import { api, errorMessage, type Me, type SiteDetail, type TeammateOut } from "@/lib/api";
 import { roots } from "@/lib/doc/model";
 import { deleteSection, duplicateSection, insertSection, moveSection, sectionIndex, setSeo, setTheme } from "@/lib/doc/ops";
 import { useSiteDoc } from "@/lib/doc/useSiteDoc";
@@ -39,7 +39,7 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 /** S5: the editor — layers · canvas · inspector over one Y.Doc. */
-export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: boolean }) {
+export function Editor({ site, me, fresh, together = false }: { site: SiteDetail; me: Me; fresh: boolean; together?: boolean }) {
   const sd = useSiteDoc(site.id);
   const { content, doc, change } = sd;
   const wide = useWide();
@@ -51,6 +51,23 @@ export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: b
   const [published, setPublished] = useState(site.status === "published");
   const [slug, setSlug] = useState(site.slug);
   const [toast, setToast] = useState<Toast | null>(null);
+  // L3: in a demo sandbox, the other demo user can be opened in a second tab.
+  const teammate = me.demo ? site.members.find((m) => m.id !== me.id) : undefined;
+  const [invite, setInvite] = useState(together && !!teammate);
+
+  async function openTeammate() {
+    const win = window.open("", "_blank"); // opened inside the click, so no popup blocker
+    try {
+      const { token } = await api<TeammateOut>("/auth/demo/teammate", { method: "POST" });
+      if (!win) throw new Error("blocked");
+      win.opener = null;
+      win.location.href = `/sites/${site.id}/edit#teammate=${token}`;
+      setInvite(false);
+    } catch (err) {
+      win?.close();
+      setToast({ message: err instanceof Error && err.message === "blocked" ? "Your browser blocked the new tab. Allow pop-ups for this site and try again." : errorMessage(err), tone: "error" });
+    }
+  }
   // Edited since the last publish: the server's timestamps (5 s of clock-skew slack), then any save in this session.
   const [dirty, setDirty] = useState(
     !!site.published_at && new Date(site.updated_at).getTime() > new Date(site.published_at).getTime() + 5000,
@@ -71,6 +88,9 @@ export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: b
       window.history.replaceState(null, "", `/sites/${site.id}/edit`);
     }
   }, [fresh, sd.status, site.id]);
+  useEffect(() => {
+    if (together) window.history.replaceState(null, "", `/sites/${site.id}/edit`);
+  }, [together, site.id]);
 
   // A selection that no longer exists (undo of an add, deleted elsewhere) clears itself.
   useEffect(() => {
@@ -221,6 +241,7 @@ export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: b
         dirty={dirty}
         editingAs={`${me.name} · ${site.role === "owner" ? "Owner" : "Editor"}`}
         presence={<PresenceList peers={peers} meId={me.id} labelFor={labelFor} />}
+        teammate={teammate ? { name: teammate.name, open: openTeammate } : undefined}
         protectedSite={site.protected}
         save={sd.save}
         canUndo={sd.canUndo}
@@ -301,6 +322,25 @@ export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: b
             setToast({ message, tone: "error" });
           }}
         />
+      )}
+
+      {invite && teammate && (
+        <aside className="pc-rise fixed bottom-5 right-5 z-40 w-[300px] rounded-[4px] border border-line bg-paper p-4 shadow-xl" aria-labelledby="together-h">
+          <h2 id="together-h" className="text-sm font-bold">
+            Edit together, live
+          </h2>
+          <p className="mt-1 text-sm text-ink-2">
+            Open a second tab as {teammate.name.split(" ")[0]}, put the two side by side, and type into the same headline.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <button type="button" onClick={openTeammate} className="min-h-9 flex-1 rounded-[3px] bg-guide px-3 text-sm font-bold text-white hover:bg-guide-hover">
+              Open as {teammate.name.split(" ")[0]}
+            </button>
+            <button type="button" onClick={() => setInvite(false)} className="min-h-9 rounded-[3px] border border-line px-3 text-sm font-semibold text-ink-2 hover:border-guide">
+              Later
+            </button>
+          </div>
+        </aside>
       )}
 
       {toast && (

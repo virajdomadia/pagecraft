@@ -1,4 +1,5 @@
 import type { components } from "@/lib/api-types";
+import { tabHeaders } from "@/lib/tab-session";
 
 /**
  * Typed fetch to the API (05 §2). In the browser every call goes to `/api/*` on this origin,
@@ -20,6 +21,7 @@ export type PublishedSite = Schemas["PublishedSite"];
 export type DocOut = Schemas["DocOut"];
 export type UploadOut = Schemas["UploadOut"];
 export type SeoIn = Schemas["SeoIn"];
+export type TeammateOut = Schemas["TeammateOut"];
 
 export class ApiError extends Error {
   constructor(
@@ -50,7 +52,7 @@ export async function api<T>(path: string, init: RequestInit & { json?: unknown 
     res = await fetch(`/api${path}`, {
       ...rest,
       credentials: "same-origin",
-      headers: json !== undefined ? { "Content-Type": "application/json", ...headers } : headers,
+      headers: { ...tabHeaders(), ...(json !== undefined ? { "Content-Type": "application/json" } : {}), ...(headers as Record<string, string>) },
       body: json !== undefined ? JSON.stringify(json) : rest.body,
     });
   } catch {

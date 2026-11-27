@@ -1,4 +1,5 @@
 import { ApiError, toApiError, type UploadOut } from "@/lib/api";
+import { tabHeaders } from "@/lib/tab-session";
 
 export const MAX_UPLOAD = 5 * 1024 * 1024;
 const TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -30,7 +31,7 @@ export async function uploadImage(siteId: string, file: File): Promise<UploadOut
   body.set("file", file.size > SHRINK_OVER ? new File([await shrink(file)], "photo.jpg", { type: "image/jpeg" }) : file);
   let res: Response;
   try {
-    res = await fetch("/api/uploads", { method: "POST", body, credentials: "same-origin" });
+    res = await fetch("/api/uploads", { method: "POST", body, credentials: "same-origin", headers: tabHeaders() });
   } catch {
     throw new ApiError(0, "offline", "Upload failed — check your connection");
   }
