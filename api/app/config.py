@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     # --- Shared with web, which forwards the visitor's address with it (limits.client_ip). ---
     proxy_secret: SecretStr | None = None
 
+    # --- Email (L4: invites, password resets) over SMTP. Unset → email is off: invites show
+    # their link to the inviting owner instead, and password resets can't be sent. ---
+    smtp_host: str | None = None
+    smtp_port: int = 587  # STARTTLS
+    smtp_user: str | None = None
+    smtp_password: SecretStr | None = None
+    mail_from: str | None = None  # e.g. "Pagecraft <hello@…>"; defaults to smtp_user
+
     # --- Cross-service ---
     # Where the web app lives: the revalidate hook and the secure-cookie decision.
     web_url: str = "http://localhost:3000"

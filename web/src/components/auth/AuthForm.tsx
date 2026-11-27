@@ -94,12 +94,10 @@ export function AuthForm({ mode, next }: { mode: "sign-in" | "sign-up"; next: st
         </button>
       </form>
       {!signUp && (
-        <p className="mt-3 text-sm text-muted">
-          Forgot your password? Password resets arrive with email in the next release — for now,{" "}
-          <a className="font-semibold text-guide underline-offset-2 hover:underline" href="https://virajdomadia.com/#contact">
-            get in touch
-          </a>
-          .
+        <p className="mt-3 text-sm">
+          <Link className="font-semibold text-guide underline-offset-2 hover:underline" href="/forgot">
+            Forgot your password?
+          </Link>
         </p>
       )}
       <div className="my-6 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.08em] text-muted">

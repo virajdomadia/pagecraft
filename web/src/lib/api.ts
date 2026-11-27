@@ -22,6 +22,10 @@ export type DocOut = Schemas["DocOut"];
 export type UploadOut = Schemas["UploadOut"];
 export type SeoIn = Schemas["SeoIn"];
 export type TeammateOut = Schemas["TeammateOut"];
+export type InviteOut = Schemas["InviteOut"];
+export type InviteCreated = Schemas["InviteCreated"];
+export type InvitePreview = Schemas["InvitePreview"];
+export type ForgotOut = Schemas["ForgotOut"];
 
 export class ApiError extends Error {
   constructor(

@@ -2,14 +2,23 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, Response
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import AppSettings, CurrentUser, Db, current_user
 from app.errors import ApiError
 from app.models import User
-from app.schemas.models import DemoSignIn, Me, SignIn, SignUp, TeammateOut
-from app.services import auth, limits, sites
+from app.schemas.models import (
+    DemoSignIn,
+    ForgotIn,
+    ForgotOut,
+    Me,
+    ResetIn,
+    SignIn,
+    SignUp,
+    TeammateOut,
+)
+from app.services import auth, email, invites, limits, sites
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -79,6 +88,37 @@ async def demo_teammate(
     _, token = await auth.open_session(db, partner)
     response.headers["Cache-Control"] = "no-store"
     return TeammateOut(token=token, me=me(partner))
+
+
+@router.post("/forgot", response_model=ForgotOut)
+async def forgot(
+    body: ForgotIn, request: Request, db: Db, settings: AppSettings, later: BackgroundTasks
+) -> ForgotOut:
+    """L4. Emails a one-hour reset link if a real account has this address. The answer and its
+    timing are the same either way (the email goes after the response), and the link is never
+    in a response."""
+    await limits.hit(db, f"forgot:{limits.client_ip(request)}", 10, limits.HOUR)
+    try:
+        await limits.hit(db, f"forgot:{auth.normalise_email(body.email)}", 3, limits.HOUR)
+    except ApiError:
+        # Silent: neither an oracle nor a way to make the owner's own request fail.
+        return ForgotOut(email_on=email.enabled(settings))
+    found = await invites.start_reset(db, body.email, settings)
+    if found:
+        later.add_task(invites.send_reset, settings, *found)
+    return ForgotOut(email_on=email.enabled(settings))
+
+
+@router.post("/reset", response_model=Me)
+async def reset(
+    body: ResetIn, request: Request, response: Response, db: Db, settings: AppSettings
+) -> Me:
+    """L4. Sets the new password, ends every other session, and signs this browser in."""
+    await limits.hit(db, f"reset:{limits.client_ip(request)}", 20, limits.HOUR)
+    user = await invites.finish_reset(db, body.token, body.password)
+    session, token = await auth.open_session(db, user)
+    auth.set_session_cookie(response, token, session.expires_at, settings)
+    return me(user)
 
 
 @router.post("/sign-out", status_code=204)

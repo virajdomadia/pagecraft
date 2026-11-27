@@ -16,7 +16,7 @@ from app.middleware import (
     RequestIdMiddleware,
     SameOriginWritesMiddleware,
 )
-from app.routers import auth, public, sites
+from app.routers import auth, invites, public, sites
 
 # Swagger UI from jsdelivr at an exact version, not FastAPI's floating `@5`.
 SWAGGER_UI = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.34.1"
@@ -53,6 +53,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(public.router)
     app.include_router(auth.router)
     app.include_router(sites.router)
+    app.include_router(invites.router)
 
     @app.get("/docs", include_in_schema=False)
     async def docs() -> HTMLResponse:

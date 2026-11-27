@@ -184,6 +184,34 @@
         "title": "DocOut",
         "type": "object"
       },
+      "ForgotIn": {
+        "properties": {
+          "email": {
+            "maxLength": 254,
+            "minLength": 3,
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "ForgotIn",
+        "type": "object"
+      },
+      "ForgotOut": {
+        "properties": {
+          "email_on": {
+            "title": "Email On",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "email_on"
+        ],
+        "title": "ForgotOut",
+        "type": "object"
+      },
       "Health": {
         "properties": {
           "ok": {
@@ -205,6 +233,120 @@
           "version"
         ],
         "title": "Health",
+        "type": "object"
+      },
+      "InviteCreated": {
+        "properties": {
+          "emailed": {
+            "title": "Emailed",
+            "type": "boolean"
+          },
+          "invite": {
+            "$ref": "#/components/schemas/InviteOut"
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link"
+          }
+        },
+        "required": [
+          "invite",
+          "emailed",
+          "link"
+        ],
+        "title": "InviteCreated",
+        "type": "object"
+      },
+      "InviteIn": {
+        "properties": {
+          "email": {
+            "maxLength": 254,
+            "pattern": "^\\s*[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\s*$",
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "InviteIn",
+        "type": "object"
+      },
+      "InviteOut": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "expires_at"
+        ],
+        "title": "InviteOut",
+        "type": "object"
+      },
+      "InvitePreview": {
+        "properties": {
+          "demo": {
+            "title": "Demo",
+            "type": "boolean"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "invited_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invited By"
+          },
+          "site_name": {
+            "title": "Site Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "used",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_name",
+          "invited_by",
+          "email",
+          "status",
+          "demo"
+        ],
+        "title": "InvitePreview",
         "type": "object"
       },
       "Me": {
@@ -539,6 +681,28 @@
           }
         },
         "title": "RelPos",
+        "type": "object"
+      },
+      "ResetIn": {
+        "properties": {
+          "password": {
+            "maxLength": 200,
+            "minLength": 8,
+            "title": "Password",
+            "type": "string"
+          },
+          "token": {
+            "maxLength": 100,
+            "minLength": 10,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "password"
+        ],
+        "title": "ResetIn",
         "type": "object"
       },
       "SeoIn": {
@@ -1124,6 +1288,48 @@
         ]
       }
     },
+    "/auth/forgot": {
+      "post": {
+        "description": "L4. Emails a one-hour reset link if a real account has this address; the answer is the\nsame either way, and the link is never in a response.",
+        "operationId": "forgot_auth_forgot_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForgotOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Forgot",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/me": {
       "get": {
         "operationId": "get_me_auth_me_get",
@@ -1150,6 +1356,48 @@
           }
         },
         "summary": "Get Me",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/reset": {
+      "post": {
+        "description": "L4. Sets the new password, ends every other session, and signs this browser in.",
+        "operationId": "reset_auth_reset_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Reset",
         "tags": [
           "auth"
         ]
@@ -1289,6 +1537,90 @@
         "summary": "Health",
         "tags": [
           "public"
+        ]
+      }
+    },
+    "/invites/{token}": {
+      "get": {
+        "operationId": "preview_invites__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitePreview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Preview",
+        "tags": [
+          "invites"
+        ]
+      }
+    },
+    "/invites/{token}/accept": {
+      "post": {
+        "operationId": "accept_invites__token__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteCard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Accept",
+        "tags": [
+          "invites"
         ]
       }
     },
@@ -1694,6 +2026,198 @@
           }
         },
         "summary": "Get Doc",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/sites/{site_id}/invites": {
+      "get": {
+        "operationId": "list_invites_sites__site_id__invites_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InviteOut"
+                  },
+                  "title": "Response List Invites Sites  Site Id  Invites Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "List Invites",
+        "tags": [
+          "sites"
+        ]
+      },
+      "post": {
+        "description": "L4. Emails the link when email is on; otherwise (and always in the demo) returns it so the\nowner can share it. It only works for the invited address.",
+        "operationId": "create_invite_sites__site_id__invites_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Create Invite",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/sites/{site_id}/invites/{invite_id}": {
+      "delete": {
+        "operationId": "revoke_invite_sites__site_id__invites__invite_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invite_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invite Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Revoke Invite",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/sites/{site_id}/members/{user_id}": {
+      "delete": {
+        "description": "L4. Their next request is 404; an open editor of theirs gets `gone` on the stream.",
+        "operationId": "remove_member_sites__site_id__members__user_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Remove Member",
         "tags": [
           "sites"
         ]

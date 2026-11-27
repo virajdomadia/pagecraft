@@ -54,3 +54,16 @@ class RateHit(Base):
     at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class PasswordReset(CreatedMixin, Base):
+    """A one-time, one-hour password-reset link (L4). Only the token's SHA-256 is stored."""
+
+    __tablename__ = "password_resets"
+
+    token_hash: Mapped[str] = mapped_column(Text, primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

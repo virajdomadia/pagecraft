@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, type ReactNode, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { Avatar } from "@/components/studio/UserMenu";
 import { StatusPill } from "@/components/studio/SiteCardView";
-import { api, ApiError, errorMessage, type Me, type SiteDetail } from "@/lib/api";
+import { api, ApiError, errorMessage, type InviteCreated, type InviteOut, type Me, type SiteDetail } from "@/lib/api";
 import type { Json } from "@/lib/doc/model";
 import { prettyHost } from "@/lib/hosts";
 import { useSlugCheck } from "@/lib/useSlugCheck";
@@ -88,23 +88,7 @@ export function SiteSettings({ initial, me }: { initial: SiteDetail; me: Me }) {
         <Address site={site} owner={owner && !locked} onSaved={setSite} />
         <Publishing site={site} locked={locked} onChange={setSite} />
         <Seo site={site} owner={owner} onSaved={setSite} />
-        <Card id="people" title="People" intro="Who can open this site in the editor.">
-          <ul className="grid gap-2">
-            {site.members.map((m) => (
-              <li key={m.id} className="flex items-center gap-3 rounded-[3px] border border-line px-3 py-2">
-                <Avatar name={m.name} colour={m.avatar_colour} size={28} />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">
-                    {m.name} {m.id === me.id && <span className="font-normal text-muted">(you)</span>}
-                  </span>
-                  <span className="block truncate font-mono text-xs text-muted">{m.email}</span>
-                </span>
-                <span className="rounded-full bg-desk px-2 py-0.5 font-mono text-xs capitalize">{m.role}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-xs text-muted">Inviting people by email and editing together live are not built yet.</p>
-        </Card>
+        <People site={site} me={me} owner={owner} onChange={setSite} />
         <Card id="plan" title="Plan">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-ink-2">
@@ -339,5 +323,165 @@ function Danger({ site, owner, onDeleted }: { site: SiteDetail; owner: boolean; 
         </div>
       </form>
     </section>
+  );
+}
+
+/**
+ * L4: members, pending invites and the invite form. With email off (or in the demo, where only
+ * @example.com addresses can be invited) the owner gets the link to share instead; it only
+ * works for the invited address.
+ */
+function People({ site, me, owner, onChange }: { site: SiteDetail; me: Me; owner: boolean; onChange: (s: SiteDetail) => void }) {
+  const [pending, setPending] = useState<InviteOut[]>([]);
+  const [address, setAddress] = useState("");
+  const [state, setState] = useState<{ busy?: boolean; error?: string; sent?: InviteCreated }>({});
+  const [copied, setCopied] = useState(false);
+  const [confirm, setConfirm] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null); // keeps a shown invite link
+
+  useEffect(() => {
+    if (owner) api<InviteOut[]>(`/sites/${site.id}/invites`).then(setPending, () => {});
+  }, [owner, site.id]);
+
+  async function invite(e: FormEvent) {
+    e.preventDefault();
+    setState({ busy: true });
+    setCopied(false);
+    try {
+      const sent = await api<InviteCreated>(`/sites/${site.id}/invites`, { method: "POST", json: { email: address } });
+      setPending((p) => [...p.filter((i) => i.email !== sent.invite.email), sent.invite]);
+      setAddress("");
+      setState({ sent });
+    } catch (err) {
+      setState({ error: errorMessage(err) });
+    }
+  }
+
+  async function revoke(id: string) {
+    try {
+      await api(`/sites/${site.id}/invites/${id}`, { method: "DELETE" });
+      setPending((p) => p.filter((i) => i.id !== id));
+      setListError(null);
+    } catch (err) {
+      setListError(errorMessage(err));
+    }
+  }
+
+  async function remove(id: string) {
+    try {
+      await api(`/sites/${site.id}/members/${id}`, { method: "DELETE" });
+      onChange({ ...site, members: site.members.filter((m) => m.id !== id) });
+      setConfirm(null);
+      setListError(null);
+    } catch (err) {
+      setListError(errorMessage(err));
+    }
+  }
+
+  const row = "flex items-center gap-3 rounded-[3px] border border-line px-3 py-2";
+  const small = "min-h-8 shrink-0 rounded-[3px] border border-line px-2.5 text-xs font-semibold text-ink-2 hover:border-guide";
+  return (
+    <Card id="people" title="People" intro="Who can open this site in the editor and edit it with you, live.">
+      <ul className="grid gap-2" aria-label="Members">
+        {site.members.map((m) => (
+          <li key={m.id} className={row}>
+            <Avatar name={m.name} colour={m.avatar_colour} size={28} />
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold">
+                {m.name} {m.id === me.id && <span className="font-normal text-muted">(you)</span>}
+              </span>
+              <span className="block truncate font-mono text-xs text-muted">{m.email}</span>
+            </span>
+            <span className="rounded-full bg-desk px-2 py-0.5 font-mono text-xs capitalize">{m.role}</span>
+            {owner &&
+              m.role !== "owner" &&
+              (confirm === m.id ? (
+                <span className="flex gap-1.5">
+                  <button type="button" className={small} onClick={() => setConfirm(null)} autoFocus>
+                    Keep
+                  </button>
+                  <button type="button" className="min-h-8 rounded-[3px] bg-coral px-2.5 text-xs font-bold text-ink" onClick={() => remove(m.id)}>
+                    Remove {m.name.split(" ")[0]}
+                  </button>
+                </span>
+              ) : (
+                <button type="button" className={small} onClick={() => setConfirm(m.id)} aria-label={`Remove ${m.name}`}>
+                  Remove
+                </button>
+              ))}
+          </li>
+        ))}
+      </ul>
+      {listError && (
+        <div className="mt-2">
+          <Notice>{listError}</Notice>
+        </div>
+      )}
+
+      {owner && (
+        <>
+          {pending.length > 0 && (
+            <>
+              <h3 className={`${lbl} mt-5`}>Invited, not joined yet</h3>
+              <ul className="mt-2 grid gap-2" aria-label="Pending invites">
+                {pending.map((i) => (
+                  <li key={i.id} className={row}>
+                    <span className="min-w-0 flex-1 truncate font-mono text-sm">{i.email}</span>
+                    <span className="hidden text-xs text-muted sm:inline">
+                      until {new Date(i.expires_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                    </span>
+                    <button type="button" className={small} onClick={() => revoke(i.id)} aria-label={`Cancel the invite to ${i.email}`}>
+                      Cancel invite
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <form onSubmit={invite} className="mt-5 grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+            <label className="block">
+              <span className={lbl}>Invite an editor by email</span>
+              <input
+                className={inp}
+                type="email"
+                required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder={site.protected ? "someone@example.com" : "name@company.in"}
+                autoComplete="off"
+              />
+            </label>
+            <button type="submit" className={primary} disabled={state.busy || !address.trim()}>
+              {state.busy ? "Inviting…" : "Send invite"}
+            </button>
+          </form>
+          {site.protected && <p className="mt-2 text-xs text-muted">In the demo you can invite @example.com addresses only. The link appears here instead of going by email.</p>}
+          {state.error && (
+            <div className="mt-2">
+              <Notice>{state.error}</Notice>
+            </div>
+          )}
+          {state.sent?.emailed && (
+            <div className="mt-2">
+              <Notice ok>Invite emailed to {state.sent.invite.email}. It works for 7 days.</Notice>
+            </div>
+          )}
+          {state.sent?.link && (
+            <div className="mt-3 rounded-[3px] border border-line bg-guide-soft p-3" role="status">
+              <p className="text-sm text-ink-2">
+                <b className="text-ink">{site.protected ? "Email is off in the demo." : "Email is off right now."}</b> Here&apos;s the link for {state.sent.invite.email}{" "}
+                to share yourself. It only works for that address, for 7 days.
+              </p>
+              <div className="mt-2 flex gap-2">
+                <input className={`${inp} !mt-0 font-mono text-xs`} readOnly value={state.sent.link} aria-label="Invite link" onFocus={(e) => e.currentTarget.select()} />
+                <button type="button" className={small} onClick={() => navigator.clipboard?.writeText(state.sent?.link ?? "").then(() => setCopied(true), () => {})}>
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </Card>
   );
 }
