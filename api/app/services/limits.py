@@ -2,6 +2,7 @@
 requests can both see `limit - 1`), which is fine for throttling abuse."""
 
 import datetime as dt
+import hmac
 
 from fastapi import Request
 from sqlalchemy import delete, func, select
@@ -16,7 +17,14 @@ QUARTER = dt.timedelta(minutes=15)
 
 
 def client_ip(request: Request) -> str:
-    """Vercel sets `x-forwarded-for` to the caller's address (it does not trust a client's)."""
+    """The visitor's address. Browsers reach us through web's `/api/*` rewrite, so our own
+    `x-forwarded-for` is Vercel's proxy; web's middleware forwards the visitor's `x-real-ip`,
+    trusted only with the shared PROXY_SECRET (the Frontrow recipe)."""
+    secret = request.app.state.settings.proxy_secret
+    visitor = request.headers.get("x-pagecraft-client-ip")
+    proof = request.headers.get("x-pagecraft-proxy", "")
+    if secret and visitor and hmac.compare_digest(proof, secret.get_secret_value()):
+        return visitor.strip()
     forwarded = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
     return forwarded or (request.client.host if request.client else "unknown")
 
