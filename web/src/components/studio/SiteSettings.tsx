@@ -10,10 +10,10 @@ import type { Json } from "@/lib/doc/model";
 import { prettyHost } from "@/lib/hosts";
 import { useSlugCheck } from "@/lib/useSlugCheck";
 
-const lbl = "font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted";
+const lbl = "font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted";
 const inp =
   "mt-1.5 block w-full rounded-[3px] border border-line bg-paper px-3 py-2 text-[15px] outline-none focus:border-guide focus:ring-2 focus:ring-guide-soft disabled:bg-desk disabled:text-muted";
-const primary = "min-h-10 rounded-[3px] bg-guide px-4 text-sm font-bold text-white hover:bg-guide-hover disabled:opacity-50";
+const primary = "min-h-10 rounded-[3px] bg-guide px-4 text-sm font-bold text-white hover:bg-guide-hover disabled:bg-line disabled:text-ink-2";
 
 function Card({ id, title, children, intro }: { id: string; title: string; intro?: ReactNode; children: ReactNode }) {
   return (
@@ -77,9 +77,9 @@ export function SiteSettings({ initial, me }: { initial: SiteDetail; me: Me }) {
         )}
         {locked && owner && (
           <p className="rounded-[3px] border border-line bg-guide-soft px-4 py-3 text-sm text-ink-2">
-            This is the shared demo site: its address stays fixed and it can&apos;t be unpublished or deleted.{" "}
-            <Link href="/sites/new" className="font-semibold text-guide">
-              Create your own site
+            Demo sites keep the address they were given and can&apos;t be unpublished or deleted; the whole sandbox is removed after 24 hours.{" "}
+            <Link href="/sign-up" className="font-semibold text-guide">
+              Create an account
             </Link>{" "}
             to try those.
           </p>
@@ -97,20 +97,20 @@ export function SiteSettings({ initial, me }: { initial: SiteDetail; me: Me }) {
                   <span className="block text-sm font-semibold">
                     {m.name} {m.id === me.id && <span className="font-normal text-muted">(you)</span>}
                   </span>
-                  <span className="block truncate font-mono text-[11px] text-muted">{m.email}</span>
+                  <span className="block truncate font-mono text-xs text-muted">{m.email}</span>
                 </span>
-                <span className="rounded-full bg-desk px-2 py-0.5 font-mono text-[11px] capitalize">{m.role}</span>
+                <span className="rounded-full bg-desk px-2 py-0.5 font-mono text-xs capitalize">{m.role}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-muted">Inviting collaborators by email — and editing together live — arrives in the next release.</p>
+          <p className="mt-3 text-xs text-muted">Inviting people by email and editing together live are not built yet.</p>
         </Card>
         <Card id="plan" title="Plan">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-ink-2">
-              <b className="text-ink">Free</b> — up to 3 sites, a Pagecraft address and a small “Made with Pagecraft” badge on the published page.
+              <b className="text-ink">Free</b>: up to 3 sites, a Pagecraft address and a small “Made with Pagecraft” badge on the published page.
             </p>
-            <span className="rounded-full border border-line px-2.5 py-1 font-mono text-[11px] text-muted">Pro coming soon</span>
+            <span className="rounded-full border border-line px-2.5 py-1 font-mono text-xs text-muted">Pro coming soon</span>
           </div>
         </Card>
         <Danger site={site} owner={owner && !locked} onDeleted={() => router.push("/sites")} />
@@ -127,7 +127,7 @@ function General({ site, owner, onSaved }: { site: SiteDetail; owner: boolean; o
     setState({ busy: true });
     try {
       onSaved(await api<SiteDetail>(`/sites/${site.id}`, { method: "PATCH", json: { name: name.trim() } }));
-      setState({ ok: "Saved — the editor and dashboard show the new name." });
+      setState({ ok: "Saved. The editor and dashboard show the new name." });
     } catch (err) {
       setState({ error: errorMessage(err) });
     }
@@ -160,7 +160,7 @@ function Address({ site, owner, onSaved }: { site: SiteDetail; owner: boolean; o
     setState({ busy: true });
     try {
       onSaved(await api<SiteDetail>(`/sites/${site.id}`, { method: "PATCH", json: { slug } }));
-      setState({ ok: site.status === "published" ? "Moved — the old address now shows “not published”." : "Saved." });
+      setState({ ok: site.status === "published" ? "Moved. The old address now shows “not published”." : "Saved." });
     } catch (err) {
       if (err instanceof ApiError && typeof err.details.suggestion === "string") setSlug(err.details.suggestion);
       setState({ error: errorMessage(err) });
@@ -178,7 +178,7 @@ function Address({ site, owner, onSaved }: { site: SiteDetail; owner: boolean; o
                 {check.message}
                 {check.suggestion && (
                   <>
-                    {" — "}
+                    {" "}
                     <button type="button" className="font-semibold text-guide underline" onClick={() => setSlug(check.suggestion!)}>
                       use {check.suggestion}
                     </button>
@@ -228,7 +228,7 @@ function Publishing({ site, locked, onChange }: { site: SiteDetail; locked: bool
               </a>
             </>
           ) : site.published_version ? (
-            "Unpublished — visitors see “not published”."
+            "Unpublished. Visitors see “not published”."
           ) : (
             "Not published yet."
           )}
@@ -271,7 +271,7 @@ function Seo({ site, owner, onSaved }: { site: SiteDetail; owner: boolean; onSav
     try {
       const seo = { title: title.trim(), description: description.trim(), og_image: site.seo.og_image ?? "" };
       onSaved(await api<SiteDetail>(`/sites/${site.id}`, { method: "PATCH", json: { seo } as Record<string, Json> }));
-      setState({ ok: "Saved — used the next time you publish." });
+      setState({ ok: "Saved. Used the next time you publish." });
     } catch (err) {
       setState({ error: errorMessage(err) });
     }
@@ -282,14 +282,14 @@ function Seo({ site, owner, onSaved }: { site: SiteDetail; owner: boolean; onSav
         <label className="block">
           <span className="flex justify-between">
             <span className={lbl}>Title</span>
-            <span className="font-mono text-[10px] text-muted">{title.length}/70</span>
+            <span className="font-mono text-xs text-muted">{title.length}/70</span>
           </span>
           <input className={inp} value={title} maxLength={70} disabled={!owner} onChange={(e) => setTitle(e.target.value)} />
         </label>
         <label className="block">
           <span className="flex justify-between">
             <span className={lbl}>Description</span>
-            <span className="font-mono text-[10px] text-muted">{description.length}/160</span>
+            <span className="font-mono text-xs text-muted">{description.length}/160</span>
           </span>
           <textarea className={`${inp} min-h-[70px]`} value={description} maxLength={160} rows={2} disabled={!owner} onChange={(e) => setDescription(e.target.value)} />
         </label>

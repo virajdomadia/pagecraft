@@ -1,5 +1,7 @@
 """Sites: create from a template (R2), the dashboard cards (R1), settings (R6)."""
 
+import datetime as dt
+import secrets
 import uuid
 from typing import Any
 
@@ -12,7 +14,7 @@ from app.deps import Access
 from app.errors import ApiError
 from app.models import Publication, Site, SiteMember, Template, User
 from app.schemas.models import Member, SeoIn, SiteCard, SiteContentModel, SiteDetail
-from app.services import crdt, documents
+from app.services import crdt, documents, uploads
 from app.services.publish import check_slug, site_url, slug_taken
 from app.services.slugs import slugify, suggest
 
@@ -53,21 +55,6 @@ def rename_in_doc(name: str, old_name: str | None = None) -> Any:
     return edit
 
 
-async def _recycle_demo_site(db: AsyncSession, user: User) -> None:
-    """The landing page's demo creator is shared by every visitor, so its free-plan limit would
-    lock the next visitor out. Instead of a dead end, the oldest site a visitor made with it
-    (never the seeded showcase) is recycled. Real accounts get the 402."""
-    oldest = (
-        await db.execute(
-            select(Site).where(Site.created_by == user.id).order_by(Site.created_at).limit(1)
-        )
-    ).scalar_one_or_none()
-    if oldest is None:
-        raise ApiError("plan_limit", "The demo account is full right now", status=402)
-    await db.delete(oldest)
-    await db.flush()
-
-
 async def create_site(
     db: AsyncSession, user: User, *, name: str, template_key: str, slug: str | None
 ) -> Site:
@@ -79,17 +66,19 @@ async def create_site(
 
     name = name.strip()
     wanted = (slug or slugify(name)).strip().lower()
+    if user.demo:  # a visitor's sandbox never claims a real-looking address (H1)
+        wanted = f"demo-{secrets.token_hex(4)}"
     await check_slug(db, wanted)
 
+    # Serialise one user's creates, so parallel requests can't each pass the limit (L1).
+    await db.execute(select(User.id).where(User.id == user.id).with_for_update())
     if await owned_count(db, user) >= site_limit(user):
-        if not user.demo:
-            raise ApiError(
-                "plan_limit",
-                f"The free plan includes {FREE_SITE_LIMIT} sites — delete one to make another",
-                status=402,
-                details={"limit": FREE_SITE_LIMIT},
-            )
-        await _recycle_demo_site(db, user)
+        raise ApiError(
+            "plan_limit",
+            f"The free plan includes {FREE_SITE_LIMIT} sites — delete one to make another",
+            status=402,
+            details={"limit": FREE_SITE_LIMIT},
+        )
 
     template_name = crdt.export(crdt.load(tpl.snapshot))["site"].get("name")
     edit = crdt.server_edit(tpl.snapshot, [], rename_in_doc(name, template_name))
@@ -121,7 +110,7 @@ def card(
         published_version=site.published_version,
         updated_at=site.updated_at,
         role=role,  # type: ignore[arg-type]
-        protected=user.demo and site.created_by is None,
+        protected=user.demo,
         preview=_preview(content),
     )
 
@@ -157,10 +146,11 @@ async def detail(db: AsyncSession, access: Access, settings: Settings) -> SiteDe
     seo = content.get("site", {}).get("seo", {})
     return SiteDetail(
         **base.model_dump(),
+        # Clipped: a draft may be over a limit (publish refuses it); the response model may not.
         seo=SeoIn(
-            title=seo.get("title", ""),
-            description=seo.get("description", ""),
-            og_image=seo.get("og_image", ""),
+            title=seo.get("title", "")[:70],
+            description=seo.get("description", "")[:160],
+            og_image=seo.get("og_image", "")[:300],
         ),
         members=[
             Member.model_validate(
@@ -183,7 +173,47 @@ async def slug_suggestion(db: AsyncSession, slug: str, exclude: uuid.UUID | None
     return await suggest(slug, lambda s: slug_taken(db, s, exclude))
 
 
-async def delete_site(db: AsyncSession, site: Site) -> None:
+async def delete_site(db: AsyncSession, site: Site, settings: Settings) -> None:
+    """Database first, then best-effort Blob cleanup: a failed cleanup leaves orphan images,
+    never a live site with broken ones (L5)."""
     await db.execute(delete(Publication).where(Publication.site_id == site.id))
     await db.delete(site)
+    await db.commit()
+    await uploads.delete_prefix(site.id, settings)
+
+
+# --- the landing page's demo (H1) ---------------------------------------------------------------
+
+DEMO_TTL = dt.timedelta(hours=24)
+DEMO_DOMAIN = "@demo.pagecraft.app"
+DEMO_PEOPLE = {"creator": ("Deepa Nair", "#2EC4B6"), "collaborator": ("Rohan Mehta", "#FF6B6B")}
+
+
+async def open_demo(db: AsyncSession, persona: str, settings: Settings) -> User:
+    """Each click is a private sandbox: a fresh Deepa (owner) + Rohan (editor) and their own
+    copy of Kaapi Corner. Visitors never share a site, never see the public showcase, and
+    everything they make is gone after `DEMO_TTL`."""
+    await sweep_demo(db, settings)
+    tag = secrets.token_hex(4)
+    people = {
+        key: User(email=f"{key}-{tag}{DEMO_DOMAIN}", name=name, avatar_colour=colour, demo=True)
+        for key, (name, colour) in DEMO_PEOPLE.items()
+    }
+    db.add_all(people.values())
+    await db.flush()
+    site = await create_site(
+        db, people["creator"], name="Kaapi Corner", template_key="cafe", slug=None
+    )
+    db.add(SiteMember(site_id=site.id, user_id=people["collaborator"].id, role="editor"))
+    await db.commit()
+    return people[persona]
+
+
+async def sweep_demo(db: AsyncSession, settings: Settings) -> None:
+    expired = select(User.id).where(
+        User.demo, User.email.endswith(DEMO_DOMAIN), User.created_at < func.now() - DEMO_TTL
+    )
+    for site in (await db.execute(select(Site).where(Site.created_by.in_(expired)))).scalars():
+        await delete_site(db, site, settings)
+    await db.execute(delete(User).where(User.id.in_(expired)))
     await db.commit()

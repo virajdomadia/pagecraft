@@ -53,20 +53,17 @@ export function Layers({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between px-3 pb-2 pt-3">
-        <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted">Layers · {sections.length}</h2>
+        <h2 className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted">Layers · {sections.length}</h2>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
           <ol className="flex-1 overflow-y-auto px-2 pb-2" aria-label="Sections on this page">
-            {sections.map((s, i) => (
+            {sections.map((s) => (
               <Row
                 key={s.id}
                 section={s}
-                index={i}
-                count={sections.length}
                 selected={selected === s.id}
                 onSelect={onSelect}
-                onMove={onMove}
                 onDuplicate={onDuplicate}
                 onDelete={onDelete}
                 atMax={atMax}
@@ -84,7 +81,7 @@ export function Layers({
         >
           <span aria-hidden="true">+</span> Add section
         </button>
-        {atMax && <p className="mt-1 text-center text-[11px] text-muted">30 sections is the most a page can hold.</p>}
+        {atMax && <p className="mt-1 text-center text-xs text-muted">30 sections is the most a page can hold.</p>}
       </div>
     </div>
   );
@@ -92,21 +89,15 @@ export function Layers({
 
 function Row({
   section,
-  index,
-  count,
   selected,
   onSelect,
-  onMove,
   onDuplicate,
   onDelete,
   atMax,
 }: {
   section: SectionJson;
-  index: number;
-  count: number;
   selected: boolean;
   onSelect: (id: string) => void;
-  onMove: (from: number, to: number) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   atMax: boolean;
@@ -119,7 +110,7 @@ function Row({
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`group relative mb-1 flex items-center gap-1 rounded-[3px] border pl-1 pr-1 ${
+      className={`group mb-1 flex items-center gap-1 rounded-[3px] border pl-1 pr-1 ${
         selected ? "border-guide bg-guide-soft" : "border-transparent hover:border-line hover:bg-desk"
       } ${isDragging ? "z-10 shadow-lg" : ""}`}
     >
@@ -130,21 +121,10 @@ function Row({
       </button>
       <button type="button" onClick={() => onSelect(section.id)} className="min-w-0 flex-1 py-2 text-left" aria-current={selected || undefined}>
         <span className="block truncate text-[13px] font-semibold">{name}</span>
-        <span className="block truncate font-mono text-[10.5px] text-muted">
-          {variant} · {section.id}
-        </span>
+        <span className="block truncate text-xs text-muted">{variant}</span>
       </button>
-      <span
-        className={`absolute right-1 top-1/2 -translate-y-1/2 items-center rounded-[3px] pl-2 ${
-          selected ? "flex bg-guide-soft" : "hidden bg-desk group-hover:flex group-focus-within:flex"
-        }`}
-      >
-        <button type="button" className={iconBtn} aria-label={`Move ${name} up`} disabled={index === 0} onClick={() => onMove(index, index - 1)}>
-          ↑
-        </button>
-        <button type="button" className={iconBtn} aria-label={`Move ${name} down`} disabled={index === count - 1} onClick={() => onMove(index, index + 1)}>
-          ↓
-        </button>
+      {/* Own column, never over the title: a click on the label always selects. */}
+      <span className={`flex shrink-0 items-center ${selected ? "" : "invisible group-hover:visible group-focus-within:visible"}`}>
         <button type="button" className={iconBtn} aria-label={`Duplicate ${name}`} disabled={atMax} onClick={() => onDuplicate(section.id)}>
           <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <rect x="5" y="5" width="8.5" height="8.5" rx="1" />

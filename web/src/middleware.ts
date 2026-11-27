@@ -7,6 +7,9 @@ import { slugForHost } from "@/lib/hosts";
  * 2. The studio (`/sites/*`) needs a session: with no `pc_session` cookie, go to sign-in and come
  *    back. A present-but-expired cookie is caught by the page itself (the API answers 401), so
  *    this check needs no network.
+ * 3. `/api/*` is rewritten to the API, which then sees this proxy's address, not the visitor's.
+ *    Pass the visitor's `x-real-ip` (Vercel sets it at its edge; a client can't) proven with
+ *    PROXY_SECRET, so the API's per-IP rate limits see real visitors (the Frontrow recipe).
  */
 export function middleware(request: NextRequest) {
   const slug = slugForHost(request.headers.get("host"), process.env.NEXT_PUBLIC_SITE_HOST || undefined);
@@ -18,6 +21,15 @@ export function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = `/s/${slug}${pathname === "/" ? "" : pathname}`;
     return NextResponse.rewrite(url);
+  }
+
+  const secret = process.env.PROXY_SECRET;
+  const ip = request.headers.get("x-real-ip");
+  if (pathname.startsWith("/api/") && secret && ip) {
+    const headers = new Headers(request.headers);
+    headers.set("x-pagecraft-client-ip", ip);
+    headers.set("x-pagecraft-proxy", secret);
+    return NextResponse.next({ request: { headers } });
   }
 
   if (pathname.startsWith("/sites") && !request.cookies.get("pc_session")) {

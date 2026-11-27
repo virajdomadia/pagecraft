@@ -1,6 +1,6 @@
-"""Image uploads (04 §8): ≤ 5 MB, JPEG / PNG / WebP sniffed by Pillow (never trusted from the
-filename or the Content-Type), resized to ≤ 2000 px and re-encoded — which also strips EXIF,
-GPS included.
+"""Image uploads (04 §8): ≤ 4 MB (Vercel refuses bodies over 4.5 MB before the API runs),
+JPEG / PNG / WebP sniffed by Pillow (never trusted from the filename or the Content-Type),
+≤ 25 megapixels, resized to ≤ 2000 px and re-encoded — which also strips EXIF, GPS included.
 
 Storage: Vercel Blob (`sites/{site_id}/{uuid}.{ext}`) when `BLOB_READ_WRITE_TOKEN` is set;
 otherwise the bytes go to the `uploads` table and are served at `/media/{id}` (through web's
@@ -8,6 +8,7 @@ otherwise the bytes go to the `uploads` table and are served at `/media/{id}` (t
 """
 
 import io
+import logging
 import uuid
 from dataclasses import dataclass
 
@@ -19,13 +20,18 @@ from app.config import Settings
 from app.errors import ApiError
 from app.models import Upload
 
-MAX_BYTES = 5 * 1024 * 1024
+log = logging.getLogger(__name__)
+
+MAX_BYTES = 4 * 1024 * 1024
 MAX_SIDE = 2000
 FORMATS = {"JPEG", "PNG", "WEBP"}
 BLOB_API = "https://blob.vercel-storage.com"
 TIMEOUT = 15.0
 
-Image.MAX_IMAGE_PIXELS = 50_000_000  # refuse decompression bombs early
+MAX_PIXELS = 25_000_000  # checked before decoding; ~100 MB as RGBA
+Image.MAX_IMAGE_PIXELS = (
+    MAX_PIXELS  # Pillow only *raises* at twice this; the check below won't wait
+)
 
 
 @dataclass
@@ -38,7 +44,7 @@ class Processed:
 
 
 def too_large_message(size: int) -> str:
-    return f"That image is {size / 1024 / 1024:.1f} MB — the limit is 5 MB"
+    return f"That image is {size / 1024 / 1024:.1f} MB — the limit is 4 MB"
 
 
 def process(data: bytes) -> Processed:
@@ -46,9 +52,16 @@ def process(data: bytes) -> Processed:
         raise ApiError("file_too_large", too_large_message(len(data)), status=413)
     try:
         with Image.open(io.BytesIO(data)) as probe:
-            fmt = probe.format
+            fmt, (width, height) = probe.format, probe.size
             probe.verify()
+        if width * height > MAX_PIXELS:
+            raise ApiError(
+                "file_too_large",
+                f"That image is {width}×{height} — the limit is 25 megapixels",
+                status=413,
+            )
         img = Image.open(io.BytesIO(data))
+        img.draft("RGB", (MAX_SIDE, MAX_SIDE))  # JPEG: decode at a reduced scale
         img.load()
     except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as exc:
         raise ApiError("unsupported_type", "Upload a JPEG, PNG or WebP image", status=415) from exc
@@ -113,11 +126,16 @@ async def delete_prefix(
     }
     try:
         async with httpx.AsyncClient(transport=transport, timeout=TIMEOUT) as client:
-            res = await client.get(
-                f"{BLOB_API}/", params={"prefix": f"sites/{site_id}/"}, headers=headers
-            )
-            urls = [b["url"] for b in res.json().get("blobs", [])] if res.is_success else []
-            if urls:
-                await client.post(f"{BLOB_API}/delete", json={"urls": urls}, headers=headers)
-    except httpx.HTTPError:
-        pass  # orphaned images are harmless; the site row is gone either way
+            params = {"prefix": f"sites/{site_id}/"}
+            while True:
+                res = await client.get(f"{BLOB_API}/", params=params, headers=headers)
+                res.raise_for_status()
+                body = res.json()
+                urls = [b["url"] for b in body.get("blobs", [])]
+                if urls:
+                    await client.post(f"{BLOB_API}/delete", json={"urls": urls}, headers=headers)
+                if not body.get("hasMore") or not body.get("cursor"):
+                    break
+                params["cursor"] = body["cursor"]
+    except Exception:  # orphaned images are harmless; the site row is already gone
+        log.warning("Blob cleanup failed for site %s", site_id, exc_info=True)

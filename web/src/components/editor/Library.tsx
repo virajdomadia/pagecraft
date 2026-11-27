@@ -13,7 +13,7 @@ export function Library({ onPick, onClose, below }: { onPick: (type: SectionType
   return (
     <div className="flex h-full flex-col" role="dialog" aria-label="Add a section" onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <div className="flex items-center justify-between px-3 pb-2 pt-3">
-        <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted">Add section</h2>
+        <h2 className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted">Add section</h2>
         <button type="button" onClick={onClose} className="rounded-[3px] px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-desk">
           Close
         </button>
@@ -33,8 +33,8 @@ export function Library({ onPick, onClose, below }: { onPick: (type: SectionType
                 <Thumb boxes={def.variants[0].thumb} className="transition group-hover:[&_rect:first-child]:stroke-guide" />
                 <span className="min-w-0">
                   <span className="block text-[13px] font-bold">{def.label}</span>
-                  <span className="block text-[11.5px] leading-snug text-ink-2">{def.description}</span>
-                  <span className="mt-0.5 block font-mono text-[10px] text-muted">
+                  <span className="block text-xs leading-snug text-ink-2">{def.description}</span>
+                  <span className="mt-0.5 block font-mono text-xs text-muted">
                     {def.variants.length} layouts
                   </span>
                 </span>

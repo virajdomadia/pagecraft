@@ -3,6 +3,7 @@ uploads, membership and the seed. Covers 04 §12's `test_publish_export`,
 `test_slug_unique_and_reserved` and `test_membership`."""
 
 import base64
+import datetime as dt
 import io
 from typing import Any
 
@@ -10,10 +11,10 @@ import pytest
 from httpx import AsyncClient
 from PIL import Image
 from pycrdt import Doc, Text
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Publication, Site, SiteUpdate, Template, User
+from app.models import Publication, Site, SiteMember, SiteUpdate, Template, User
 from app.seed.__main__ import seed
 from app.services import crdt
 from app.services.documents import COMPACT_EVERY
@@ -110,6 +111,15 @@ async def test_sign_up_sign_in_me_sign_out(db_client: AsyncClient) -> None:
     assert ok.status_code == 200 and ok.json()["id"] == me["id"]
 
 
+async def test_cross_site_writes_are_refused(client: AsyncClient) -> None:
+    """L4: SameSite=Lax lets a sibling *.virajdomadia.com page send the cookie; the browser's
+    Sec-Fetch-Site says where the request came from."""
+    for where in ("cross-site", "same-site"):
+        res = await client.post("/auth/sign-out", headers={"Sec-Fetch-Site": where})
+        assert res.status_code == 403 and res.json()["error"]["code"] == "forbidden"
+    assert (await client.get("/health", headers={"Sec-Fetch-Site": "cross-site"})).is_success
+
+
 async def test_protected_routes_need_a_session(db_client: AsyncClient) -> None:
     for path in ("/sites", "/templates"):
         res = await db_client.get(path)
@@ -118,17 +128,95 @@ async def test_protected_routes_need_a_session(db_client: AsyncClient) -> None:
 
 
 async def test_demo_logins(db_client: AsyncClient, templates: AsyncSession) -> None:
+    """H1: every click is a private sandbox (a fresh Deepa + Rohan and their own copy of Kaapi
+    Corner), never the public showcase."""
     creator = (await db_client.post("/auth/demo", json={"as": "creator"})).json()
     assert creator["name"] == "Deepa Nair" and creator["demo"]
     sites = (await db_client.get("/sites")).json()["sites"]
-    assert [s["slug"] for s in sites] == ["kaapi-corner"]
-    assert sites[0]["role"] == "owner" and sites[0]["status"] == "published"
+    assert len(sites) == 1 and sites[0]["name"] == "Kaapi Corner"
+    assert sites[0]["slug"].startswith("demo-") and sites[0]["role"] == "owner"
     assert sites[0]["protected"]
+    mine = sites[0]
 
+    db_client.cookies.clear()
     collab = (await db_client.post("/auth/demo", json={"as": "collaborator"})).json()
     assert collab["name"] == "Rohan Mehta"
     sites = (await db_client.get("/sites")).json()["sites"]
-    assert [(s["slug"], s["role"]) for s in sites] == [("kaapi-corner", "editor")]
+    assert [s["role"] for s in sites] == ["editor"] and sites[0]["id"] != mine["id"]
+    assert (await db_client.get(f"/sites/{mine['id']}")).status_code == 404
+    detail = (await db_client.get(f"/sites/{sites[0]['id']}")).json()
+    assert {m["name"] for m in detail["members"]} == {"Deepa Nair", "Rohan Mehta"}
+
+
+async def test_demo_cannot_touch_the_showcase_or_pick_an_address(
+    db_client: AsyncClient, db: AsyncSession, templates: AsyncSession
+) -> None:
+    await db_client.post("/auth/demo", json={"as": "creator"})
+    showcase = (await db.execute(select(Site).where(Site.slug == "kaapi-corner"))).scalar_one()
+    assert (await db_client.get(f"/sites/{showcase.id}")).status_code == 404
+
+    made = await new_site(db_client, "Bank KYC Update", slug="bank-kyc-update")
+    assert made["slug"].startswith("demo-") and made["protected"]
+    url = f"/sites/{made['id']}"
+    for res in (
+        await db_client.post(f"{url}/publish", json={"slug": "bank-kyc-update", "seo": SEO}),
+        await db_client.patch(url, json={"slug": "bank-kyc-update"}),
+    ):
+        assert res.status_code == 403
+
+    ok = await db_client.post(f"{url}/publish", json={"slug": made["slug"], "seo": SEO})
+    assert ok.status_code == 200
+    public = (await db_client.get(f"/public/sites/{made['slug']}")).json()
+    assert public["demo"] is True
+    assert (await db_client.get("/public/sites/kaapi-corner")).json()["demo"] is False
+
+
+async def test_demo_sandboxes_expire(
+    db_client: AsyncClient, db: AsyncSession, templates: AsyncSession
+) -> None:
+    await db_client.post("/auth/demo", json={"as": "creator"})
+    site = (await db_client.get("/sites")).json()["sites"][0]
+    pub = await db_client.post(
+        f"/sites/{site['id']}/publish", json={"slug": site["slug"], "seo": SEO}
+    )
+    assert pub.is_success
+    await db.execute(
+        update(User).where(User.demo).values(created_at=func.now() - dt.timedelta(hours=25))
+    )
+    await db.execute(
+        update(Site)
+        .where(Site.slug == site["slug"])
+        .values(created_at=func.now() - dt.timedelta(hours=25))
+    )
+    await db.commit()
+    # Gone from the public web at once…
+    assert (await db_client.get(f"/public/sites/{site['slug']}")).status_code == 404
+    # …and from the database at the next demo login; the showcase stays.
+    db_client.cookies.clear()
+    await db_client.post("/auth/demo", json={"as": "creator"})
+    slugs = set((await db.execute(select(Site.slug))).scalars())
+    assert site["slug"] not in slugs and "kaapi-corner" in slugs
+    demo_users = (await db.execute(select(func.count()).where(User.demo))).scalar_one()
+    assert demo_users == 2
+
+
+async def test_open_endpoints_are_rate_limited(
+    db_client: AsyncClient, templates: AsyncSession
+) -> None:
+    """M1 / H1: per-IP limits on sign-up and the demo, per-email on sign-in."""
+    for i in range(10):
+        await sign_up(db_client, f"user{i}@example.com")
+    res = await db_client.post(
+        "/auth/sign-up", json={"email": "u11@example.com", "password": "x" * 8, "name": "A"}
+    )
+    assert res.status_code == 429 and res.json()["error"]["code"] == "rate_limited"
+
+    for _ in range(10):
+        await db_client.post("/auth/sign-in", json={"email": "user0@example.com", "password": "no"})
+    res = await db_client.post(
+        "/auth/sign-in", json={"email": "user0@example.com", "password": "correct horse"}
+    )
+    assert res.status_code == 429
 
 
 # --- seed + templates ---------------------------------------------------------------------------
@@ -141,8 +229,29 @@ async def test_seed_is_idempotent(db: AsyncSession) -> None:
     assert second == {"templates": 6, "sites_created": 0, "published": 0}
     assert (await db.execute(select(func.count()).select_from(Template))).scalar_one() == 6
     assert (await db.execute(select(func.count()).select_from(Site))).scalar_one() == 6
-    assert (await db.execute(select(func.count()).select_from(User))).scalar_one() == 3
+    assert (await db.execute(select(func.count()).select_from(User))).scalar_one() == 1
     assert (await db.execute(select(func.count()).select_from(Publication))).scalar_one() == 6
+
+
+async def test_seed_hands_the_showcase_back_to_the_platform(db: AsyncSession) -> None:
+    """Upgrade path for H1: v1 seeded Kaapi Corner as the shared demo creator's site."""
+    await seed(db, make_settings())
+    kaapi = (await db.execute(select(Site).where(Site.slug == "kaapi-corner"))).scalar_one()
+    old = User(email="creator@demo.pagecraft.app", name="Deepa Nair", demo=True)
+    db.add(old)
+    await db.flush()
+    db.add(SiteMember(site_id=kaapi.id, user_id=old.id, role="editor"))
+    await db.commit()
+
+    await seed(db, make_settings())
+    members = (
+        await db.execute(
+            select(User.email, User.demo, SiteMember.role)
+            .join(SiteMember, SiteMember.user_id == User.id)
+            .where(SiteMember.site_id == kaapi.id)
+        )
+    ).all()
+    assert members == [("platform@pagecraft.app", False, "owner")]
 
 
 async def test_templates_list_six_with_content(
@@ -230,23 +339,42 @@ async def test_slug_unique_and_reserved(db_client: AsyncClient, templates: Async
     assert pub.status_code == 422 and pub.json()["error"]["code"] == "reserved_slug"
 
 
+async def test_slug_race_is_a_409_not_a_500(
+    db_client: AsyncClient, templates: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """L1: the check passes for both requests, the unique index catches the loser."""
+    await sign_up(db_client)
+
+    async def passes(*_: Any, **__: Any) -> None:
+        return None
+
+    monkeypatch.setattr("app.services.sites.check_slug", passes)
+    res = await db_client.post("/sites", json={"name": "Kaapi Corner", "template": "cafe"})
+    assert res.status_code == 409 and res.json()["error"]["code"] == "slug_taken"
+
+
+async def test_only_the_owner_moves_an_address_through_publish(
+    db_client: AsyncClient, db: AsyncSession, templates: AsyncSession
+) -> None:
+    """L2: an editor can publish, but not to a new address."""
+    await sign_up(db_client, "owner@example.com")
+    site = await new_site(db_client)
+    db_client.cookies.clear()
+    editor = await sign_up(db_client, "editor@example.com")
+    db.add(SiteMember(site_id=site["id"], user_id=editor["id"], role="editor"))
+    await db.commit()
+    url = f"/sites/{site['id']}/publish"
+    moved = await db_client.post(url, json={"slug": "somewhere-else", "seo": SEO})
+    assert moved.status_code == 403
+    assert (await db_client.post(url, json={"slug": "chai-point", "seo": SEO})).is_success
+
+
 async def test_free_plan_limit(db_client: AsyncClient, templates: AsyncSession) -> None:
     await sign_up(db_client)
     for name in ("One Cafe", "Two Cafe", "Three Cafe"):
         await new_site(db_client, name)
     res = await db_client.post("/sites", json={"name": "Four Cafe", "template": "gym"})
     assert res.status_code == 402 and res.json()["error"]["code"] == "plan_limit"
-
-
-async def test_demo_creator_recycles_instead_of_hitting_the_limit(
-    db_client: AsyncClient, templates: AsyncSession
-) -> None:
-    await db_client.post("/auth/demo", json={"as": "creator"})
-    made = [await new_site(db_client, f"Visitor Site {i}") for i in range(4)]
-    slugs = {s["slug"] for s in (await db_client.get("/sites")).json()["sites"]}
-    assert "kaapi-corner" in slugs  # the showcase is never recycled
-    assert made[0]["slug"] not in slugs and made[3]["slug"] in slugs
-    assert len(slugs) == 3
 
 
 # --- the document log ---------------------------------------------------------------------------
@@ -290,6 +418,62 @@ async def test_bad_updates_are_rejected(db_client: AsyncClient, templates: Async
     assert res.status_code == 422
     res = await db_client.post(f"/sites/{site['id']}/updates", json={"updates": []})
     assert res.status_code == 422
+
+
+async def test_a_malformed_document_is_refused_at_save(
+    db_client: AsyncClient, templates: AsyncSession
+) -> None:
+    """H2: a valid Yjs update with the wrong shape must not reach the log, or every reader
+    (`GET /sites`, `GET /sites/{id}`) 500s for every member."""
+    await sign_up(db_client)
+    site = await new_site(db_client)
+    url = f"/sites/{site['id']}"
+
+    def text_section(_site, sections) -> None:  # type: ignore[no-untyped-def]
+        sections.append(Text("not a section"))
+
+    def seo_not_a_map(site_map, _sections) -> None:  # type: ignore[no-untyped-def]
+        site_map["seo"] = Text("nope")
+
+    for edit in (text_section, seo_not_a_map):
+        doc = await load_doc(db_client, site["id"])
+        before = doc.get_state()
+        site_map, sections = crdt.roots(doc)
+        with doc.transaction():
+            edit(site_map, sections)
+        update = base64.b64encode(doc.get_update(before)).decode()
+        res = await db_client.post(f"{url}/updates", json={"updates": [update]})
+        assert res.status_code == 422, res.text
+    assert (await db_client.get("/sites")).status_code == 200
+    assert (await db_client.get(url)).status_code == 200
+
+    # Too long for the response model is not a shape error (two people can type at once):
+    # the reader clips it, publish refuses it.
+    doc = await load_doc(db_client, site["id"])
+
+    def long_title(site_map, _sections) -> None:  # type: ignore[no-untyped-def]
+        crdt.set_text(site_map["seo"], "title", "x" * 200)
+
+    await push(db_client, site["id"], doc, long_title)
+    res = await db_client.get(url)
+    assert res.status_code == 200 and len(res.json()["seo"]["title"]) == 70
+
+
+async def test_an_update_with_missing_dependencies_is_a_conflict(
+    db_client: AsyncClient, templates: AsyncSession
+) -> None:
+    """M4: e.g. a tab still open across a `seed --reset`; 409 so it reloads."""
+    await sign_up(db_client)
+    site = await new_site(db_client)
+    doc = await load_doc(db_client, site["id"])
+    s0 = doc.get_state()
+    set_headline("one")(*crdt.roots(doc))
+    s1 = doc.get_state()
+    set_headline("two")(*crdt.roots(doc))
+    later = base64.b64encode(doc.get_update(s1)).decode()
+    assert s0 != s1
+    res = await db_client.post(f"/sites/{site['id']}/updates", json={"updates": [later]})
+    assert res.status_code == 409 and res.json()["error"]["code"] == "conflict"
 
 
 # --- publish ------------------------------------------------------------------------------------
@@ -428,24 +612,6 @@ async def test_delete_removes_site_updates_and_publications(
         assert count.scalar_one() == 0
 
 
-async def test_demo_showcase_is_protected(db_client: AsyncClient, templates: AsyncSession) -> None:
-    await db_client.post("/auth/demo", json={"as": "creator"})
-    kaapi = (await db_client.get("/sites")).json()["sites"][0]
-    url = f"/sites/{kaapi['id']}"
-    assert (await db_client.delete(url)).status_code == 403
-    assert (await db_client.post(f"{url}/unpublish")).status_code == 403
-    assert (await db_client.patch(url, json={"slug": "my-cafe"})).status_code == 403
-    assert (
-        await db_client.post(f"{url}/publish", json={"slug": "mine", "seo": SEO})
-    ).status_code == 403
-    # …but editing and publishing the demo itself works: that is the demo.
-    doc = await load_doc(db_client, kaapi["id"])
-    await push(db_client, kaapi["id"], doc, set_headline("Edited by a visitor"))
-    seo = {"title": "Kaapi Corner", "description": "", "og_image": ""}
-    ok = await db_client.post(f"{url}/publish", json={"slug": "kaapi-corner", "seo": seo})
-    assert ok.status_code == 200 and ok.json()["version"] == 2
-
-
 # --- membership ---------------------------------------------------------------------------------
 
 
@@ -476,6 +642,7 @@ async def test_membership(db_client: AsyncClient, templates: AsyncSession) -> No
     kaapi = (await db_client.get("/sites")).json()["sites"][0]
     assert kaapi["role"] == "editor"
     kurl = f"/sites/{kaapi['id']}"
+    assert (await db_client.post(f"{kurl}/unpublish")).status_code == 403
     assert (await db_client.get(f"{kurl}/doc")).status_code == 200
     assert (await db_client.patch(kurl, json={"name": "Hijacked"})).status_code == 403
     assert (await db_client.delete(kurl)).status_code == 403
@@ -512,13 +679,22 @@ async def test_upload_resizes_and_serves(db_client: AsyncClient, templates: Asyn
 async def test_upload_limits(db_client: AsyncClient, templates: AsyncSession) -> None:
     await sign_up(db_client)
     site = await new_site(db_client)
-    big = os_random(6 * 1024 * 1024)
+    big = os_random(4 * 1024 * 1024 + 1)  # L7: Vercel refuses bodies over 4.5 MB itself
     res = await db_client.post(
         "/uploads", data={"site_id": site["id"]}, files={"file": ("big.jpg", big, "image/jpeg")}
     )
     assert res.status_code == 413
     assert res.json()["error"]["code"] == "file_too_large"
-    assert "5 MB" in res.json()["error"]["message"]
+    assert "4 MB" in res.json()["error"]["message"]
+
+    bomb = io.BytesIO()  # M2: 30 MP of one colour is a few KB on the wire, ~120 MB decoded
+    Image.new("RGB", (6000, 5000), "#2F5D45").save(bomb, "PNG")
+    res = await db_client.post(
+        "/uploads",
+        data={"site_id": site["id"]},
+        files={"file": ("bomb.png", bomb.getvalue(), "image/png")},
+    )
+    assert res.status_code == 413 and "megapixels" in res.json()["error"]["message"]
 
     gif = io.BytesIO()
     Image.new("RGB", (10, 10)).save(gif, "GIF")

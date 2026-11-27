@@ -329,6 +329,10 @@
           "content": {
             "$ref": "#/components/schemas/SiteContentModel"
           },
+          "demo": {
+            "title": "Demo",
+            "type": "boolean"
+          },
           "plan": {
             "enum": [
               "free",
@@ -365,6 +369,7 @@
           "seo",
           "plan",
           "template",
+          "demo",
           "published_at"
         ],
         "title": "PublishedSite",

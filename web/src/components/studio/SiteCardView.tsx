@@ -9,7 +9,7 @@ import { prettyHost } from "@/lib/hosts";
 export function StatusPill({ status }: { status: "draft" | "published" }) {
   const live = status === "published";
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-paper px-2 py-0.5 font-mono text-[11px] text-ink-2">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-paper px-2 py-0.5 font-mono text-xs text-ink-2">
       <i className={`h-1.5 w-1.5 rounded-full ${live ? "bg-mint" : "bg-[#B8B8CC]"}`} aria-hidden="true" />
       {live ? "Published" : "Draft"}
     </span>
@@ -37,7 +37,7 @@ export function SiteCardView({ site }: { site: SiteCard }) {
           </h2>
           <StatusPill status={site.status} />
         </div>
-        <p className="truncate font-mono text-[11px] text-muted">
+        <p className="truncate font-mono text-xs text-muted">
           {site.published_url ? (
             <a href={`/s/${site.slug}`} className="text-guide no-underline hover:underline" target="_blank" rel="noopener">
               {prettyHost(site.slug)}
@@ -49,7 +49,7 @@ export function SiteCardView({ site }: { site: SiteCard }) {
         <div className="flex items-center justify-between gap-2 text-xs text-ink-2">
           <span>
             Edited {timeAgo(site.updated_at)}
-            {site.role === "editor" && <span className="ml-2 rounded-full bg-guide-soft px-2 py-0.5 font-mono text-[10px] text-guide">Editor</span>}
+            {site.role === "editor" && <span className="ml-2 rounded-full bg-guide-soft px-2 py-0.5 font-mono text-xs text-guide">Editor</span>}
           </span>
           <span className="flex gap-1">
             <Link href={`/sites/${site.id}/settings`} className="rounded-[3px] px-2 py-1.5 font-semibold no-underline hover:bg-guide-soft">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { DemoButtons } from "@/components/auth/DemoButtons";
 import { api, ApiError, errorMessage } from "@/lib/api";
+import { safeNext } from "@/lib/hosts";
 
 const field =
   "mt-1.5 block w-full rounded-[3px] border border-line bg-paper px-3 py-2.5 text-[15px] text-ink outline-none transition focus:border-guide focus:ring-2 focus:ring-guide-soft";
@@ -17,7 +18,7 @@ export function AuthForm({ mode, next }: { mode: "sign-in" | "sign-up"; next: st
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const signUp = mode === "sign-up";
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/sites";
+  const safe = safeNext(next);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,7 +29,7 @@ export function AuthForm({ mode, next }: { mode: "sign-in" | "sign-up"; next: st
     setFieldErrors({});
     try {
       await api(`/auth/${mode}`, { method: "POST", json: body });
-      router.push(safeNext);
+      router.push(safe);
       router.refresh();
     } catch (err) {
       setBusy(false);
@@ -106,12 +107,12 @@ export function AuthForm({ mode, next }: { mode: "sign-in" | "sign-up"; next: st
         or look around with a demo login
         <span className="h-px flex-1 bg-line" />
       </div>
-      <DemoButtons next={safeNext} />
+      <DemoButtons next={safe} />
       <p className="mt-6 text-sm text-ink-2">
         {signUp ? "Already have an account? " : "New to Pagecraft? "}
         <Link
           className="font-semibold text-guide underline-offset-2 hover:underline"
-          href={`/${signUp ? "sign-in" : "sign-up"}${safeNext !== "/sites" ? `?next=${encodeURIComponent(safeNext)}` : ""}`}
+          href={`/${signUp ? "sign-in" : "sign-up"}${safe !== "/sites" ? `?next=${encodeURIComponent(safe)}` : ""}`}
         >
           {signUp ? "Sign in" : "Create an account"}
         </Link>

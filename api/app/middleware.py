@@ -3,6 +3,9 @@
 - RequestIdMiddleware: honour a well-formed incoming `X-Request-Id`, else uuid4; echo it back.
 - BlankQueryParamsMiddleware: `?date=&type=` → params absent, so no-JS GET filter forms that
   submit empty selects validate as "not provided" rather than as bad input.
+- SameOriginWritesMiddleware: refuse a state-changing request the browser marks as coming
+  from another site (L4). Same-site counts too: every *.virajdomadia.com app is "same site".
+  Browsers without Sec-Fetch-Site (and non-browser clients) pass; the cookie is still Lax.
 - NoSniffMiddleware: `X-Content-Type-Options: nosniff` on every response, so nothing the api
   sends is ever content-sniffed into something executable. (500s render outside the middleware
   stack; `errors.envelope` sets it on those itself.)
@@ -13,6 +16,8 @@ import uuid
 from urllib.parse import parse_qsl, urlencode
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
+
+from app.errors import envelope
 
 REQUEST_ID_HEADER = b"x-request-id"
 REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
@@ -75,3 +80,20 @@ class NoSniffMiddleware:
             await send(message)
 
         await self.app(scope, receive, send_nosniff)
+
+
+SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+FOREIGN = {b"cross-site", b"same-site"}
+
+
+class SameOriginWritesMiddleware:
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http" and scope["method"] not in SAFE_METHODS:
+            site = next((v for k, v in scope["headers"] if k == b"sec-fetch-site"), None)
+            if site in FOREIGN:
+                await envelope("forbidden", "Cross-site request refused")(scope, receive, send)
+                return
+        await self.app(scope, receive, send)

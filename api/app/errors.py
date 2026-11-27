@@ -11,6 +11,7 @@ from typing import Any
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 log = logging.getLogger(__name__)
@@ -111,6 +112,13 @@ async def _http_exception(_: Request, exc: Exception) -> JSONResponse:
     return envelope(code, str(exc.detail), status=status, headers=exc.headers)
 
 
+async def _integrity_error(request: Request, exc: Exception) -> JSONResponse:
+    # Check-then-act on a slug (create, publish, move) can lose a race to the unique index.
+    if "uq_sites_slug" in str(exc):
+        return envelope("slug_taken", "That address was just taken — pick another", status=409)
+    return await _unhandled(request, exc)
+
+
 async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
     request_id: str | None = getattr(request.state, "request_id", None)
     log.exception("Unhandled error on %s %s", request.method, request.url.path, exc_info=exc)
@@ -122,6 +130,7 @@ def install_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(ApiError, _api_error)
     app.add_exception_handler(RequestValidationError, _validation_error)
     app.add_exception_handler(StarletteHTTPException, _http_exception)
+    app.add_exception_handler(IntegrityError, _integrity_error)
     app.add_exception_handler(Exception, _unhandled)
     _document_error_contract(app)
 

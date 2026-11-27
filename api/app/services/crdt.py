@@ -15,7 +15,7 @@ or a URL). Exporting is the inverse: `Y.Text` → `str`.
 from collections.abc import Callable, Iterable, Sequence
 from typing import Any
 
-from pycrdt import Array, Doc, Map, Text, merge_updates
+from pycrdt import Array, Doc, Map, Text, get_update, merge_updates
 
 ATOMIC_KEYS = frozenset(
     {
@@ -96,12 +96,20 @@ def merge(updates: Sequence[bytes]) -> bytes:
 
 def is_valid_update(update: bytes) -> bool:
     """A cheap sanity check before an update is appended to the log: Yrs must decode it.
-    (Missing dependencies are fine — they wait in the pending set — garbage is not.)"""
+    (Missing dependencies are caught later, against the site's document: `missing_dependencies`.)"""
     try:
         Doc().apply_update(update)
     except Exception:
         return False
     return True
+
+
+def missing_dependencies(doc: Doc, update: bytes) -> bool:
+    """True when `doc` (with `update` applied) did not integrate all of it: Yrs parks such
+    structs as pending and `compact` would silently drop them."""
+    # The part of `update` that `doc`'s state does not cover; its first varuint counts the
+    # clients that still have structs in it (0 = everything was integrated).
+    return get_update(update, doc.get_state())[0] != 0
 
 
 def server_edit(

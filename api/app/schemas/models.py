@@ -179,4 +179,6 @@ class PublishedSite(ApiModel):
     seo: SeoIn
     plan: Literal["free", "pro"]
     template: str
+    # Made in a landing-page demo sandbox: the page is noindexed and carries a banner (H1).
+    demo: bool
     published_at: datetime

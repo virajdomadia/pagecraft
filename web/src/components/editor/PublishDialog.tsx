@@ -7,7 +7,7 @@ import { prettyHost } from "@/lib/hosts";
 import { useSlugCheck } from "@/lib/useSlugCheck";
 import { validateSection } from "@/sections/registry";
 
-const lbl = "font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] text-muted";
+const lbl = "font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted";
 const inp =
   "mt-1 block w-full rounded-[3px] border border-line bg-paper px-3 py-2 text-[14px] outline-none focus:border-guide focus:ring-2 focus:ring-guide-soft";
 
@@ -78,7 +78,7 @@ export function PublishDialog({
     setError(null);
     try {
       const seoNext = { title: title.trim(), description: description.trim(), og_image: og };
-      if (!(await onPublish(seoNext))) throw new ApiError(0, "offline", "Your latest changes haven't saved yet — check your connection and try again.");
+      if (!(await onPublish(seoNext))) throw new ApiError(0, "offline", "Your latest changes haven't saved yet. Check your connection and try again.");
       const res = await api<PublishOut>(`/sites/${siteId}/publish`, { method: "POST", json: { slug, seo: seoNext } });
       setDone(res);
       onDone(res);
@@ -89,7 +89,7 @@ export function PublishDialog({
         return;
       }
       if (err instanceof ApiError && err.code === "slug_taken" && typeof err.details.suggestion === "string") {
-        setError(`${slug} is taken — try ${err.details.suggestion}.`);
+        setError(`${slug} is taken. Try ${err.details.suggestion}.`);
         setSlug(err.details.suggestion);
         return;
       }
@@ -117,7 +117,7 @@ export function PublishDialog({
     >
       {done ? (
         <div className="pc-rise p-6">
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-mint-ink">● Live · version {done.version}</p>
+          <p className="font-mono text-xs uppercase tracking-[0.08em] text-mint-ink">● Live · version {done.version}</p>
           <h2 id="publish-title" className="mt-1 text-[22px] font-extrabold tracking-tight">
             Your site is published
           </h2>
@@ -130,7 +130,7 @@ export function PublishDialog({
               {copied ? "Copied" : "Copy link"}
             </button>
           </div>
-          <p className="mt-2 font-mono text-[11px] text-muted">
+          <p className="mt-2 font-mono text-xs text-muted">
             Also at {prettyHost(done.slug)} once Pagecraft&apos;s wildcard domain is switched on.
           </p>
           <div className="mt-6 flex justify-end gap-2">
@@ -171,7 +171,7 @@ export function PublishDialog({
                 onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
               />
             </span>
-            <span className="mt-1 block min-h-4 text-[11.5px]" aria-live="polite">
+            <span className="mt-1 block min-h-4 text-xs" aria-live="polite">
               {protectedSite ? (
                 <span className="text-muted">The demo site&apos;s address stays fixed.</span>
               ) : check.state === "bad" ? (
@@ -179,7 +179,7 @@ export function PublishDialog({
                   {check.message}
                   {check.suggestion && (
                     <>
-                      {" — "}
+                      {" "}
                       <button type="button" className="font-semibold text-guide underline" onClick={() => setSlug(check.suggestion!)}>
                         use {check.suggestion}
                       </button>
@@ -199,14 +199,14 @@ export function PublishDialog({
           <label className="block">
             <span className="flex justify-between">
               <span className={lbl}>Search title</span>
-              <span className="font-mono text-[10px] text-muted">{title.length}/70</span>
+              <span className="font-mono text-xs text-muted">{title.length}/70</span>
             </span>
             <input className={inp} value={title} maxLength={70} onChange={(e) => setTitle(e.target.value)} />
           </label>
           <label className="block">
             <span className="flex justify-between">
               <span className={lbl}>Search description</span>
-              <span className="font-mono text-[10px] text-muted">{description.length}/160</span>
+              <span className="font-mono text-xs text-muted">{description.length}/160</span>
             </span>
             <textarea className={`${inp} min-h-[64px]`} value={description} maxLength={160} rows={2} onChange={(e) => setDescription(e.target.value)} />
           </label>
@@ -218,7 +218,7 @@ export function PublishDialog({
                 type="button"
                 aria-pressed={og === ""}
                 onClick={() => setOg("")}
-                className={`grid h-14 w-20 shrink-0 place-items-center rounded-[3px] border-2 font-mono text-[10px] text-muted ${og === "" ? "border-guide" : "border-line"}`}
+                className={`grid h-14 w-20 shrink-0 place-items-center rounded-[3px] border-2 font-mono text-xs text-muted ${og === "" ? "border-guide" : "border-line"}`}
               >
                 none
               </button>
@@ -259,7 +259,7 @@ export function PublishDialog({
             <button
               type="submit"
               disabled={busy || check.state === "bad" || check.state === "checking"}
-              className="min-w-28 rounded-[3px] bg-guide px-4 py-2 text-sm font-bold text-white hover:bg-guide-hover disabled:opacity-60"
+              className="min-w-28 rounded-[3px] bg-guide px-4 py-2 text-sm font-bold text-white hover:bg-guide-hover disabled:bg-line disabled:text-ink-2"
             >
               {busy ? "Publishing…" : published ? "Publish changes" : "Publish"}
             </button>

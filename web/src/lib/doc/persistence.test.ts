@@ -101,6 +101,35 @@ describe("UpdateQueue", () => {
     expect(q.getStatus()).toBe("error");
   });
 
+  it("a rejected batch (413/422/409) is dropped, not retried forever or restored on reload", async () => {
+    const store = new MemoryStore();
+    const send = vi.fn(async (): Promise<SendResult> => "rejected");
+    const q = new UpdateQueue("s", send, store);
+    const { updates } = edits(2);
+    q.push(updates[0]);
+    await vi.advanceTimersByTimeAsync(300);
+    q.push(updates[1]);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(q.getStatus()).toBe("error");
+    expect(store.getItem(storageKey("s"))).toBeNull();
+    expect(q.hasPending()).toBe(false);
+  });
+
+  it("never merges more than one request's worth (the API caps a batch at 256 KB)", async () => {
+    const sizes: number[] = [];
+    const q = new UpdateQueue("s", async (b) => (sizes.push(fromBase64(b).length), "ok"), new MemoryStore());
+    const doc = new Y.Doc();
+    doc.on("update", (u: Uint8Array) => q.push(u));
+    for (let i = 0; i < 6; i++) doc.getText("t").insert(0, "x".repeat(60_000));
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(sizes.length).toBeGreaterThan(1);
+    expect(Math.max(...sizes)).toBeLessThanOrEqual(256 * 1024);
+    expect(q.getStatus()).toBe("saved");
+    q.dispose();
+    doc.destroy();
+  });
+
   it("base64 round-trips large updates", () => {
     const bytes = new Uint8Array(200_000).map((_, i) => i % 256);
     expect(fromBase64(toBase64(bytes))).toEqual(bytes);

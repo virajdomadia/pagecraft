@@ -48,7 +48,7 @@ export function ImageField({
 
   return (
     <div className="grid gap-2">
-      <span className="font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] text-muted">{label}</span>
+      <span className="font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted">{label}</span>
       <div
         className={`relative grid overflow-hidden rounded-[3px] border ${over ? "border-guide bg-guide-soft" : "border-line bg-desk"} ${compact ? "grid-cols-[72px_1fr]" : "grid-cols-[96px_1fr]"} items-center gap-3 p-2`}
         onDragOver={(e) => {
@@ -67,7 +67,7 @@ export function ImageField({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={url} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="grid h-full place-items-center font-mono text-[10px] text-muted">no image</div>
+            <div className="grid h-full place-items-center font-mono text-xs text-muted">no image</div>
           )}
         </div>
         <div className="flex flex-wrap gap-1.5">
@@ -92,7 +92,7 @@ export function ImageField({
               Remove
             </button>
           )}
-          <span className="w-full text-[10.5px] text-muted">JPEG, PNG or WebP · up to 5 MB · or drop a file here</span>
+          <span className="w-full text-xs text-ink-2">JPEG, PNG or WebP · up to 5 MB · or drop a file here</span>
         </div>
         <input
           ref={input}
@@ -131,7 +131,7 @@ export function ImageField({
       )}
       {url && (
         <label className="block">
-          <span className="font-mono text-[10.5px] text-muted">Alt text — describe the photo for screen readers</span>
+          <span className="font-mono text-xs text-muted">Alt text: describe the photo for screen readers</span>
           <input
             className="mt-1 block w-full rounded-[3px] border border-line bg-paper px-2.5 py-1.5 text-[13px] outline-none focus:border-guide"
             value={alt}
@@ -139,7 +139,7 @@ export function ImageField({
             onChange={(e) => onChange({ url, alt: e.target.value })}
             aria-invalid={!alt.trim()}
           />
-          {!alt.trim() && <span className="mt-1 block text-[11px] text-coral-ink">Needed before you publish.</span>}
+          {!alt.trim() && <span className="mt-1 block text-xs text-coral-ink">Needed before you publish.</span>}
         </label>
       )}
     </div>

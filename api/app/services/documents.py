@@ -17,10 +17,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.errors import ApiError
 from app.models import Site, SiteUpdate
+from app.sections import shape_problem
 from app.services import crdt
 
 COMPACT_EVERY = 50
 MAX_BATCH_BYTES = 256 * 1024
+MAX_DOC_BYTES = 2 * 1024 * 1024  # a landing page is ~20 KB; this only stops abuse
 
 
 def b64(data: bytes) -> str:
@@ -35,8 +37,15 @@ def unb64(text: str) -> bytes:
 
 
 async def lock_site(db: AsyncSession, site_id: uuid.UUID) -> Site:
+    # populate_existing: the request already loaded this row (load_access) before another writer
+    # committed; without it the lock is taken but the stale seq / snapshot are kept (C1).
     site = (
-        await db.execute(select(Site).where(Site.id == site_id).with_for_update())
+        await db.execute(
+            select(Site)
+            .where(Site.id == site_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
     ).scalar_one_or_none()
     if site is None:
         raise ApiError("not_found", "Site not found")
@@ -79,6 +88,15 @@ async def append(
     update = crdt.merge(raw)
 
     site = await lock_site(db, site_id)
+    rows = await tail(db, site)
+    doc = crdt.load(site.snapshot, [r.update for r in rows] + [update])
+    if crdt.missing_dependencies(doc, update):
+        raise ApiError("conflict", "This site changed since you opened it — reload to keep editing")
+    if len(doc.get_update()) > MAX_DOC_BYTES:
+        raise ApiError("too_large", "This site is too large to save", status=413)
+    problem = shape_problem(crdt.export(doc))
+    if problem is not None:
+        raise ApiError("validation", problem)
     seq = await _append_locked(db, site, update, author_id)
     await db.commit()
     return seq

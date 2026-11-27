@@ -1,4 +1,4 @@
-from app.models.auth import PLANS, Session, User
+from app.models.auth import PLANS, RateHit, Session, User
 from app.models.base import Base
 from app.models.sites import (
     ROLES,
@@ -17,6 +17,7 @@ __all__ = [
     "TEMPLATE_KEYS",
     "Base",
     "Publication",
+    "RateHit",
     "Session",
     "Site",
     "SiteMember",

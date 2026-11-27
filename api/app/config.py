@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # --- Publish → web revalidate hook (F1/F4). Unset → publish skips the hook (ISR 60 s). ---
     revalidate_secret: SecretStr | None = None
 
+    # --- Shared with web, which forwards the visitor's address with it (limits.client_ip). ---
+    proxy_secret: SecretStr | None = None
+
     # --- Cross-service ---
     # Where the web app lives: the revalidate hook and the secure-cookie decision.
     web_url: str = "http://localhost:3000"

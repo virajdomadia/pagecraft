@@ -3,13 +3,13 @@
     uv run python -m app.seed            # create what is missing, publish what never was
     uv run python -m app.seed --reset    # also rebuild every showcase site from its template
 
-- users: the platform account and the two landing-page demo logins (creator, collaborator).
-  None of them has a password — the demo buttons sign in through `POST /auth/demo`.
+- users: the platform account (no password; it owns every showcase site). The landing page's
+  demo logins are per-visitor sandboxes made by `POST /auth/demo`, not seeded.
 - templates: six, each a real Yjs snapshot built by pycrdt from `seed/templates/*.json`
   (snapshots are refreshed on every run, so editing a JSON file and re-seeding is enough).
 - showcase sites: one per template, published through `services/publish.py` (export +
-  validate, exactly like the editor's Publish). *Kaapi Corner* belongs to the demo creator with
-  the collaborator as editor; the other five belong to the platform account.
+  validate, exactly like the editor's Publish), all owned by the platform account and nobody
+  else — so no demo visitor can edit what the landing page links to.
 
 Database: `DATABASE_URL` (api/.env.local or the environment).
 """
@@ -28,24 +28,20 @@ from app.services.publish import publish_site
 from app.services.templates import load_templates
 
 PLATFORM = ("platform@pagecraft.app", "Pagecraft")
-CREATOR = ("creator@demo.pagecraft.app", "Deepa Nair")
-COLLABORATOR = ("collaborator@demo.pagecraft.app", "Rohan Mehta")
-DEMO_TEMPLATE = "cafe"
 
 
 async def upsert_user(db: AsyncSession, email: str, name: str, colour: str | None = None) -> User:
     user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
     if user is None:
-        user = User(email=email, name=name, avatar_colour=colour or avatar_colour(email), demo=True)
+        user = User(email=email, name=name, avatar_colour=colour or avatar_colour(email))
         db.add(user)
-        await db.flush()
+    user.demo = False  # v1 seeded it as a demo user
+    await db.flush()
     return user
 
 
 async def seed(db: AsyncSession, settings: Settings, *, reset: bool = False) -> dict[str, int]:
     platform = await upsert_user(db, *PLATFORM, colour="#1B1B2F")
-    creator = await upsert_user(db, *CREATOR, colour="#2EC4B6")
-    collaborator = await upsert_user(db, *COLLABORATOR, colour="#FF6B6B")
 
     counts = {"templates": 0, "sites_created": 0, "published": 0}
     for spec in load_templates():
@@ -64,25 +60,26 @@ async def seed(db: AsyncSession, settings: Settings, *, reset: bool = False) -> 
         site = (
             await db.execute(select(Site).where(Site.slug == spec.showcase_slug))
         ).scalar_one_or_none()
-        owner = creator if spec.key == DEMO_TEMPLATE else platform
         if site is None:
             site = Site(
                 name=spec.content["site"]["name"],
                 template=spec.key,
                 slug=spec.showcase_slug,
                 snapshot=spec.snapshot(),
-                created_by=None,  # seeded: protected from the shared demo logins
+                created_by=None,  # seeded
             )
             db.add(site)
             await db.flush()
-            db.add(SiteMember(site_id=site.id, user_id=owner.id, role="owner"))
-            if spec.key == DEMO_TEMPLATE:
-                db.add(SiteMember(site_id=site.id, user_id=collaborator.id, role="editor"))
+            db.add(SiteMember(site_id=site.id, user_id=platform.id, role="owner"))
             await db.commit()
             counts["sites_created"] += 1
-        elif reset:
-            site.snapshot, site.snapshot_seq, site.seq = spec.snapshot(), 0, 0
-            await db.execute(delete(SiteUpdate).where(SiteUpdate.site_id == site.id))
+        else:
+            # v1 shared Kaapi Corner with the demo logins: the platform is the only member now.
+            await db.execute(delete(SiteMember).where(SiteMember.site_id == site.id))
+            db.add(SiteMember(site_id=site.id, user_id=platform.id, role="owner"))
+            if reset:
+                site.snapshot, site.snapshot_seq, site.seq = spec.snapshot(), 0, 0
+                await db.execute(delete(SiteUpdate).where(SiteUpdate.site_id == site.id))
             await db.commit()
 
         if reset or site.published_at is None:
@@ -91,7 +88,7 @@ async def seed(db: AsyncSession, settings: Settings, *, reset: bool = False) -> 
                 site.id,
                 slug=spec.showcase_slug,
                 seo=spec.content["site"]["seo"],
-                user_id=owner.id,
+                user_id=platform.id,
                 settings=settings,
             )
             counts["published"] += 1

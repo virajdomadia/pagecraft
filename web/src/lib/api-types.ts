@@ -424,6 +424,8 @@ export interface components {
         /** PublishedSite */
         PublishedSite: {
             content: components["schemas"]["SiteContentModel"];
+            /** Demo */
+            demo: boolean;
             /**
              * Plan
              * @enum {string}

@@ -9,7 +9,7 @@
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;background-position:center top}
 .landing a{color:inherit}
 .landing .wrap{width:min(1180px,100% - 48px);margin-inline:auto}
-.landing h1,.landing h2,.landing h3{margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.05}
+.landing h1,.landing h2,.landing h3{margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.05;text-wrap:balance}
 .landing p{margin:0}
 .landing :focus-visible{outline:3px solid var(--indigo);outline-offset:2px;box-shadow:0 0 0 2px #fff}
 /* indigo ring (≈7.6:1 on white) with a white halo, so it reads on the indigo buttons too */
@@ -36,7 +36,11 @@
 .landing .hero{text-align:center;padding:64px 0 40px}
 .landing .hero h1{font-size:clamp(44px,6.5vw,84px);max-width:14ch;margin-inline:auto}
 .landing .hero .lede{font-size:20px;color:var(--ink-2);max-width:48ch;margin:20px auto 0}
-.landing .hero .actions{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.landing .hero .demo-buttons{justify-content:center;margin-top:28px}
+.landing .hero-note{color:var(--ink-2);font-size:15px;margin-top:14px}
+.landing .hero-note a{font-weight:700;text-underline-offset:3px}
+.landing .roadmap{margin-top:20px;color:var(--ink-2);font-size:15px}
+.landing .roadmap .soon{margin:0 8px 0 0}
 
 /* editor */
 .landing .editor{margin:48px auto 0;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 40px 80px -40px rgba(27,27,47,.35);overflow:hidden}
@@ -45,7 +49,7 @@
 .landing .topbar .url{flex:1;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink-2);background:#f6f6fa;border-radius:6px;padding:6px 10px;max-width:420px;margin-inline:auto}
 .landing .topbar .who{display:flex;align-items:center}
 .landing .av{width:26px;height:26px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;margin-left:-6px}
-.landing .av.c{background:var(--coral);color:var(--ink)}.landing .av.m{background:var(--mint);color:var(--ink)}
+.landing .av.m{background:var(--mint);color:var(--ink)}
 .landing .pub{background:var(--indigo);color:#fff;font-weight:700;font-size:13px;padding:7px 12px;border-radius:7px;position:relative}
 .landing .toast{position:absolute;top:calc(100% + 10px);right:0;background:var(--ink);color:#fff;font-size:12.5px;padding:8px 12px;border-radius:8px;white-space:nowrap;opacity:0;transform:translateY(-4px);animation:toast .4s ease 5.2s forwards;box-shadow:0 10px 24px -10px rgba(0,0,0,.4)}
 .landing .toast::before{content:"";position:absolute;top:-5px;right:16px;border:5px solid transparent;border-top:0;border-bottom-color:var(--ink)}
@@ -68,19 +72,10 @@
 .landing .page .ph{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:0;max-width:12ch;position:relative;display:inline-block}
 .landing .page .ph .caret{display:inline-block;width:2px;height:1em;background:var(--coral);vertical-align:-.15em;margin-left:2px;animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
-.landing .sel{position:absolute;inset:-6px -8px;border:1.5px solid var(--coral);border-radius:4px;pointer-events:none}
-.landing .sel::after{content:"Meera";position:absolute;top:-20px;left:-1.5px;background:var(--coral);color:var(--ink);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px 4px 4px 0}
+.landing .sel{position:absolute;inset:-6px -8px;border:1.5px dashed var(--indigo);border-radius:4px;pointer-events:none}
 .landing .page p.sub{font-size:13px;color:var(--ink-2);margin:12px 0 18px;max-width:38ch}
 .landing .page .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
 .landing .page .row3 div{height:64px;border-radius:8px;background:linear-gradient(135deg,#eef0ff,#dfe3ff)}
-.landing .page .row3 div:nth-child(2){position:relative}
-.landing .sel2{position:absolute;inset:-4px;border:1.5px solid var(--mint);border-radius:8px}
-.landing .sel2::after{content:"Viraj";position:absolute;top:-20px;left:-1.5px;background:var(--mint);color:var(--ink);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px 4px 4px 0}
-.landing .cursor{position:absolute;width:18px;height:18px;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
-.landing .cursor.c1{left:36%;top:20%;animation:c1 6s ease-in-out infinite}
-.landing .cursor.c2{left:70%;top:75%;animation:c2 7s ease-in-out infinite}
-@keyframes c1{0%,100%{transform:translate(0,0)}30%{transform:translate(60px,110px)}60%{transform:translate(-40px,60px)}}
-@keyframes c2{0%,100%{transform:translate(0,0)}40%{transform:translate(-120px,-140px)}70%{transform:translate(-30px,-40px)}}
 @media (prefers-reduced-motion:reduce){.landing .editor *,.landing .editor *::before,.landing .editor *::after{animation:none!important}.landing .editor .toast{opacity:1;transform:none}}
 
 /* features */
@@ -93,11 +88,7 @@
 .landing .b p{color:var(--ink-2);font-size:15px;max-width:44ch}
 .landing .b .viz{margin-top:18px}
 .landing .cur-list{display:flex;gap:8px;flex-wrap:wrap}
-.landing .cur-list span{display:inline-flex;align-items:center;gap:6px;background:#f6f6fa;border-radius:999px;padding:5px 10px 5px 6px;font-size:13px;font-weight:600}
-.landing .cur-list i{width:14px;height:14px;border-radius:50%;display:block}
-.landing .hist{display:grid;gap:6px;font-size:13px}
-.landing .hist div{display:flex;justify-content:space-between;padding:6px 10px;border-radius:6px;background:#f6f6fa}
-.landing .hist div:first-child{background:var(--indigo-soft);color:var(--indigo);font-weight:700}
+.landing .cur-list span{display:inline-flex;align-items:center;gap:6px;background:#f6f6fa;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
 .landing .urlbox{font-family:ui-monospace,Menlo,monospace;font-size:14px;background:var(--ink);color:#fff;padding:12px 14px;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
 .landing .urlbox b{color:#a5b4fc}
 .landing .tmpl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}

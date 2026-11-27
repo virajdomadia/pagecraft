@@ -118,3 +118,20 @@ def test_server_edit_merges_with_a_concurrent_client_edit() -> None:
 def test_invalid_update_is_rejected() -> None:
     assert crdt.is_valid_update(crdt.build_update(CONTENT))
     assert not crdt.is_valid_update(b"\xff\x00garbage")
+
+
+def test_an_update_with_missing_dependencies_is_detected() -> None:
+    """M4: Yrs keeps such an update pending and `get_update()` drops it at compaction, so the
+    log must refuse it instead (the client reloads)."""
+    snapshot = crdt.build_update(CONTENT)
+    client = crdt.load(snapshot)
+    s0 = client.get_state()
+    _headline(client).insert(0, "one ")
+    u1 = client.get_update(s0)
+    s1 = client.get_state()
+    _headline(client).insert(0, "two ")
+    u2 = client.get_update(s1)
+
+    assert crdt.missing_dependencies(crdt.load(snapshot, [u2]), u2)
+    assert not crdt.missing_dependencies(crdt.load(snapshot, [u1, u2]), u2)
+    assert not crdt.missing_dependencies(crdt.load(snapshot, [u1, u2]), u1)  # a re-send

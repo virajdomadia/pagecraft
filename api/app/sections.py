@@ -402,6 +402,31 @@ def validate_content(content: Any) -> dict[str, Any]:
     return {"site": doc.site.model_dump(), "sections": sections}
 
 
+def shape_problem(content: dict[str, Any]) -> str | None:
+    """The structure every reader relies on, checked on every save (H2). Content limits stay
+    at publish: two people typing at once may briefly go over a length, never off-shape."""
+    site, sections = content.get("site"), content.get("sections")
+    if not isinstance(site, dict) or not isinstance(sections, list):
+        return "The document must have a site and a list of sections"
+    if not isinstance(site.get("name", ""), str):
+        return "site.name must be text"
+    for key in ("theme", "seo"):
+        if not isinstance(site.get(key, {}), dict):
+            return f"site.{key} must be a map"
+    if not all(isinstance(v, str) for v in site.get("seo", {}).values()):
+        return "site.seo values must be text"
+    if len(sections) > 2 * MAX_SECTIONS:
+        return f"A site has at most {MAX_SECTIONS} sections"
+    for section in sections:
+        if not (
+            isinstance(section, dict)
+            and all(isinstance(section.get(k), str) for k in ("id", "type", "variant"))
+            and isinstance(section.get("props"), dict)
+        ):
+            return "Every section needs an id, a type, a variant and props"
+    return None
+
+
 # --- drift guard ---------------------------------------------------------------------------------
 
 

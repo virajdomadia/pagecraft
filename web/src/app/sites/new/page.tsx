@@ -14,7 +14,7 @@ export default async function NewSite() {
   return (
     <>
       <AppBar me={me} crumbs={[{ href: "/sites", label: "Sites" }, { label: "New site" }]} />
-      <TemplatePicker templates={templates} atLimit={sites.owned >= sites.limit && !me.demo} limit={sites.limit} demo={me.demo} />
+      <TemplatePicker templates={templates} atLimit={sites.owned >= sites.limit} limit={sites.limit} demo={me.demo} />
     </>
   );
 }

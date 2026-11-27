@@ -10,7 +10,12 @@ from fastapi.responses import HTMLResponse
 from app.config import Settings, get_settings
 from app.db import dispose_engine
 from app.errors import install_error_handlers
-from app.middleware import BlankQueryParamsMiddleware, NoSniffMiddleware, RequestIdMiddleware
+from app.middleware import (
+    BlankQueryParamsMiddleware,
+    NoSniffMiddleware,
+    RequestIdMiddleware,
+    SameOriginWritesMiddleware,
+)
 from app.routers import auth, public, sites
 
 # Swagger UI from jsdelivr at an exact version, not FastAPI's floating `@5`.
@@ -42,6 +47,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(RequestIdMiddleware)
     app.add_middleware(NoSniffMiddleware)
     app.add_middleware(BlankQueryParamsMiddleware)
+    app.add_middleware(SameOriginWritesMiddleware)
     install_error_handlers(app)
 
     app.include_router(public.router)

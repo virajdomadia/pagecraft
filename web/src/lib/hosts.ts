@@ -26,3 +26,16 @@ export function publishedPath(slug: string): string {
 export function prettyHost(slug: string, siteHost: string = DEFAULT_SITE_HOST): string {
   return `${slug}.${siteHost}`;
 }
+
+/** Where to go after sign-in: a path on this origin, never one the URL parser sends elsewhere
+ * (`//evil`, `/\evil`, `/<TAB>/evil` all resolve off-site). */
+export function safeNext(next: string): string {
+  const base = "https://pagecraft.invalid";
+  try {
+    const url = new URL(next, base);
+    if (next.startsWith("/") && url.origin === base) return url.pathname + url.search + url.hash;
+  } catch {
+    /* unparseable → default */
+  }
+  return "/sites";
+}

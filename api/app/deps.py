@@ -52,9 +52,9 @@ class Access:
 
     @property
     def protected(self) -> bool:
-        """A seeded showcase site seen through a shared demo login: its address and existence
-        are fixed (the landing page links to it), its content is the demo."""
-        return self.user.demo and self.site.created_by is None
+        """Seen from a demo sandbox: the address is generated (`demo-…`) and stays fixed, and the
+        site can't be unpublished or deleted — the sandbox expires instead (H1)."""
+        return self.user.demo
 
 
 NOT_FOUND = "Site not found"

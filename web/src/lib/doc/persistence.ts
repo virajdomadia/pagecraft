@@ -10,13 +10,17 @@ import * as Y from "yjs";
 
 export type SaveStatus = "saved" | "saving" | "offline" | "error";
 
-export type SendResult = "ok" | "retry" | "fatal";
+// fatal: lost access, keep the batch for after sign-in. rejected: the API refused the content
+// (413/422/409), so it can never succeed; drop it rather than block every later save.
+export type SendResult = "ok" | "retry" | "fatal" | "rejected";
 export type Sender = (updateBase64: string) => Promise<SendResult>;
 
 export type KeyValueStore = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
 export const FLUSH_MS = 300;
 const MAX_BACKOFF_MS = 30_000;
+// Under the API's 256 KB per request, with room for base64 + JSON.
+const MAX_BATCH_BYTES = 180 * 1024;
 
 export function toBase64(bytes: Uint8Array): string {
   let s = "";
@@ -40,6 +44,7 @@ export class UpdateQueue {
   private inflight: Uint8Array | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private backoff = 1000;
+  private stopped = false;
   private status: SaveStatus = "saved";
   private listeners = new Set<(s: SaveStatus) => void>();
   private idleWaiters: (() => void)[] = [];
@@ -67,6 +72,7 @@ export class UpdateQueue {
   }
 
   push(update: Uint8Array): void {
+    if (this.stopped) return;
     this.pending.push(update);
     this.persistLocal();
     this.setStatus(this.status === "offline" ? "offline" : "saving");
@@ -120,8 +126,11 @@ export class UpdateQueue {
 
   private async flush(): Promise<void> {
     if (this.inflight || this.pending.length === 0) return;
-    const batch = this.pending.length === 1 ? this.pending[0] : Y.mergeUpdates(this.pending);
-    this.pending = [];
+    let n = 1;
+    for (let size = this.pending[0].length; n < this.pending.length && size + this.pending[n].length <= MAX_BATCH_BYTES; n++)
+      size += this.pending[n].length;
+    const parts = this.pending.splice(0, n);
+    const batch = parts.length === 1 ? parts[0] : Y.mergeUpdates(parts);
     this.inflight = batch;
     let result: SendResult;
     try {
@@ -140,6 +149,15 @@ export class UpdateQueue {
         this.setStatus("saved");
         this.idleWaiters.splice(0).forEach((fn) => fn());
       }
+      return;
+    }
+    if (result === "rejected") {
+      // Later edits may build on the refused one, so stop here; a reload resyncs from the server.
+      this.pending = [];
+      this.stopped = true;
+      this.safeRemove();
+      this.setStatus("error");
+      this.idleWaiters.splice(0).forEach((fn) => fn());
       return;
     }
     // Keep it, in order, and try again.
