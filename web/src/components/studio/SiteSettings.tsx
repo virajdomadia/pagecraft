@@ -337,6 +337,7 @@ function People({ site, me, owner, onChange }: { site: SiteDetail; me: Me; owner
   const [state, setState] = useState<{ busy?: boolean; error?: string; sent?: InviteCreated }>({});
   const [copied, setCopied] = useState(false);
   const [confirm, setConfirm] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null); // keeps a shown invite link
 
   useEffect(() => {
     if (owner) api<InviteOut[]>(`/sites/${site.id}/invites`).then(setPending, () => {});
@@ -360,8 +361,9 @@ function People({ site, me, owner, onChange }: { site: SiteDetail; me: Me; owner
     try {
       await api(`/sites/${site.id}/invites/${id}`, { method: "DELETE" });
       setPending((p) => p.filter((i) => i.id !== id));
+      setListError(null);
     } catch (err) {
-      setState({ error: errorMessage(err) });
+      setListError(errorMessage(err));
     }
   }
 
@@ -370,8 +372,9 @@ function People({ site, me, owner, onChange }: { site: SiteDetail; me: Me; owner
       await api(`/sites/${site.id}/members/${id}`, { method: "DELETE" });
       onChange({ ...site, members: site.members.filter((m) => m.id !== id) });
       setConfirm(null);
+      setListError(null);
     } catch (err) {
-      setState({ error: errorMessage(err) });
+      setListError(errorMessage(err));
     }
   }
 
@@ -394,7 +397,7 @@ function People({ site, me, owner, onChange }: { site: SiteDetail; me: Me; owner
               m.role !== "owner" &&
               (confirm === m.id ? (
                 <span className="flex gap-1.5">
-                  <button type="button" className={small} onClick={() => setConfirm(null)}>
+                  <button type="button" className={small} onClick={() => setConfirm(null)} autoFocus>
                     Keep
                   </button>
                   <button type="button" className="min-h-8 rounded-[3px] bg-coral px-2.5 text-xs font-bold text-ink" onClick={() => remove(m.id)}>
@@ -409,6 +412,11 @@ function People({ site, me, owner, onChange }: { site: SiteDetail; me: Me; owner
           </li>
         ))}
       </ul>
+      {listError && (
+        <div className="mt-2">
+          <Notice>{listError}</Notice>
+        </div>
+      )}
 
       {owner && (
         <>

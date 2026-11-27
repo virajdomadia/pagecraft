@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, Response
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import AppSettings, CurrentUser, Db, current_user
@@ -91,12 +91,21 @@ async def demo_teammate(
 
 
 @router.post("/forgot", response_model=ForgotOut)
-async def forgot(body: ForgotIn, request: Request, db: Db, settings: AppSettings) -> ForgotOut:
-    """L4. Emails a one-hour reset link if a real account has this address; the answer is the
-    same either way, and the link is never in a response."""
+async def forgot(
+    body: ForgotIn, request: Request, db: Db, settings: AppSettings, later: BackgroundTasks
+) -> ForgotOut:
+    """L4. Emails a one-hour reset link if a real account has this address. The answer and its
+    timing are the same either way (the email goes after the response), and the link is never
+    in a response."""
     await limits.hit(db, f"forgot:{limits.client_ip(request)}", 10, limits.HOUR)
-    await limits.hit(db, f"forgot:{auth.normalise_email(body.email)}", 3, limits.HOUR)
-    await invites.start_reset(db, body.email, settings)
+    try:
+        await limits.hit(db, f"forgot:{auth.normalise_email(body.email)}", 3, limits.HOUR)
+    except ApiError:
+        # Silent: neither an oracle nor a way to make the owner's own request fail.
+        return ForgotOut(email_on=email.enabled(settings))
+    found = await invites.start_reset(db, body.email, settings)
+    if found:
+        later.add_task(invites.send_reset, settings, *found)
     return ForgotOut(email_on=email.enabled(settings))
 
 

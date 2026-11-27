@@ -14,13 +14,14 @@ import secrets
 import uuid
 
 from sqlalchemy import delete, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
 from app.deps import Access
 from app.errors import ApiError
 from app.models import Invite, PasswordReset, Session, Site, SiteAwareness, SiteMember, User
-from app.services import auth, email
+from app.services import auth, email, limits
 from app.services.sites import DEMO_DOMAIN
 
 INVITE_TTL = dt.timedelta(days=7)
@@ -72,6 +73,8 @@ async def create_invite(
             Invite.site_id == access.site.id, Invite.email == address, Invite.accepted_at.is_(None)
         )
     )
+    if not demo:  # nobody gets more than a few invite emails an hour, whoever sends them
+        await limits.hit(db, f"invite-to:{address}", 3, limits.HOUR)
     token, token_hash = _token()
     invite = Invite(
         site_id=access.site.id,
@@ -84,11 +87,12 @@ async def create_invite(
     await db.commit()
 
     link = f"{settings.web_url.rstrip('/')}/invites/{token}"
+    who, what = " ".join(access.user.name.split()), " ".join(access.site.name.split())
     emailed = not demo and await email.send(
         settings,
         address,
-        f"{access.user.name} invited you to edit {access.site.name} on Pagecraft",
-        f"{access.user.name} invited you to edit the site “{access.site.name}” on Pagecraft.\n\n"
+        f"{who} invited you to edit {what} on Pagecraft",
+        f"{who} invited you to edit the site “{what}” on Pagecraft.\n\n"
         f"Open this link to join (it works for 7 days, for {address}):\n{link}\n\n"
         "If you weren't expecting this, you can ignore it.\n",
     )
@@ -139,10 +143,18 @@ async def accept(db: AsyncSession, token: str, user: User) -> Site:
         raise ApiError("forbidden", f"This invite is for {invite.email}. Sign in with that email")
     if user.demo != await _site_is_demo(db, site):
         raise ApiError("forbidden", "Demo invites can't be accepted. Sign up to invite real people")
-    exists = await db.get(SiteMember, (site.id, user.id))
-    if exists is None:
-        db.add(SiteMember(site_id=site.id, user_id=user.id, role=invite.role))
-    invite.accepted_at = _now()
+    # Atomic: of two tabs accepting at once, one marks the invite and both end up members.
+    taken = await db.execute(
+        update(Invite)
+        .where(Invite.id == invite.id, Invite.accepted_at.is_(None))
+        .values(accepted_at=_now())
+    )
+    if getattr(taken, "rowcount", 1):
+        await db.execute(
+            insert(SiteMember)
+            .values(site_id=site.id, user_id=user.id, role=invite.role)
+            .on_conflict_do_nothing()
+        )
     await db.commit()
     return site
 
@@ -168,43 +180,60 @@ async def remove_member(db: AsyncSession, access: Access, user_id: uuid.UUID) ->
 # --- password reset -----------------------------------------------------------------------------
 
 
-async def start_reset(db: AsyncSession, raw_email: str, settings: Settings) -> None:
-    """Email a reset link if a real account with a password has this address. Says nothing
-    either way (no account enumeration), and never returns the link."""
+async def start_reset(
+    db: AsyncSession, raw_email: str, settings: Settings
+) -> tuple[str, str] | None:
+    """(address, reset link) for a real account with a password at this address, or None.
+    The caller emails it after the response, so a hit and a miss take the same time; the link
+    is never returned to the browser."""
     if not email.enabled(settings):
-        return
+        return None
     user = (
         await db.execute(select(User).where(User.email == auth.normalise_email(raw_email)))
     ).scalar_one_or_none()
     if user is None or user.demo or not user.password_hash:
-        return
+        return None
     token, token_hash = _token()
     db.add(PasswordReset(token_hash=token_hash, user_id=user.id, expires_at=_now() + RESET_TTL))
     await db.commit()
-    link = f"{settings.web_url.rstrip('/')}/reset#token={token}"
+    return user.email, f"{settings.web_url.rstrip('/')}/reset#token={token}"
+
+
+async def send_reset(settings: Settings, to: str, link: str) -> None:
     await email.send(
         settings,
-        user.email,
+        to,
         "Reset your Pagecraft password",
-        f"Someone asked to reset the password for {user.email} on Pagecraft.\n\n"
+        f"Someone asked to reset the password for {to} on Pagecraft.\n\n"
         f"Choose a new one here (the link works once, for 1 hour):\n{link}\n\n"
         "If it wasn't you, ignore this email: your password stays the same.\n",
     )
 
 
 async def finish_reset(db: AsyncSession, token: str, password: str) -> User:
-    reset = await db.get(PasswordReset, auth.hash_token(token))
-    if reset is None or reset.used_at is not None or reset.expires_at <= _now():
+    # Consumed atomically: two requests with one link can't both set a password.
+    user_id = (
+        await db.execute(
+            update(PasswordReset)
+            .where(
+                PasswordReset.token_hash == auth.hash_token(token),
+                PasswordReset.used_at.is_(None),
+                PasswordReset.expires_at > _now(),
+            )
+            .values(used_at=_now())
+            .returning(PasswordReset.user_id)
+        )
+    ).scalar_one_or_none()
+    if user_id is None:
         raise ApiError(
             "not_found", "This reset link has been used or has expired. Ask for a new one"
         )
-    user = await db.get(User, reset.user_id)
+    user = await db.get(User, user_id)
     if user is None or user.demo:
         raise ApiError(
             "not_found", "This reset link has been used or has expired. Ask for a new one"
         )
     user.password_hash = auth.hash_password(password)
-    reset.used_at = _now()
     # Every other session ends: whoever knew the old password is signed out, and older links die.
     await db.execute(delete(Session).where(Session.user_id == user.id))
     await db.execute(

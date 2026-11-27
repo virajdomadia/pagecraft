@@ -178,3 +178,18 @@ async def test_demo_accounts_get_no_reset(
     me = (await db_client.post("/auth/demo", json={"as": "creator"})).json()
     await db_client.post("/auth/forgot", json={"email": me["email"]})
     assert outbox == []
+
+
+async def test_one_address_gets_few_invite_emails_and_names_stay_on_one_line(
+    db_client: AsyncClient, seeded: AsyncSession, outbox: list
+) -> None:
+    await sign_up(db_client, "asha@example.in", "Asha\nBCC: x@evil.in")
+    sid = (await db_client.post("/sites", json={"name": "Chai Point", "template": "cafe"})).json()[
+        "id"
+    ]
+    for _ in range(3):
+        res = await db_client.post(f"/sites/{sid}/invites", json={"email": "ravi@example.in"})
+        assert res.status_code == 201
+    assert "\n" not in outbox[0]["subject"]  # a name never breaks the header line
+    res = await db_client.post(f"/sites/{sid}/invites", json={"email": "ravi@example.in"})
+    assert res.status_code == 429

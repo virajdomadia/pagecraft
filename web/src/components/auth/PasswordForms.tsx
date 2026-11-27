@@ -100,8 +100,8 @@ export function ResetForm() {
   useEffect(() => {
     // The token travels in the fragment, so it never reaches a server log; take it and clear it.
     const m = /^#token=([\w-]+)$/.exec(window.location.hash);
-    setToken(m?.[1] ?? null);
     if (m) window.history.replaceState(null, "", window.location.pathname);
+    setToken((t) => m?.[1] ?? t ?? null); // a second run (Strict Mode) keeps the token it took
   }, []);
 
   async function submit(e: FormEvent<HTMLFormElement>) {

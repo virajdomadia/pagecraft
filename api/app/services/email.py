@@ -4,6 +4,7 @@ never raises, it reports whether the message went out so callers can fall back."
 import asyncio
 import logging
 import smtplib
+import ssl
 from email.message import EmailMessage
 
 from app.config import Settings
@@ -19,10 +20,10 @@ def _send(settings: Settings, to: str, subject: str, body: str) -> None:
     msg = EmailMessage()
     msg["From"] = settings.mail_from or settings.smtp_user or ""
     msg["To"] = to
-    msg["Subject"] = subject
+    msg["Subject"] = " ".join(subject.split())  # one line, whatever names it carries
     msg.set_content(body)
     with smtplib.SMTP(settings.smtp_host or "", settings.smtp_port, timeout=10) as smtp:
-        smtp.starttls()
+        smtp.starttls(context=ssl.create_default_context())  # verify the server's certificate
         if settings.smtp_user and settings.smtp_password:
             smtp.login(settings.smtp_user, settings.smtp_password.get_secret_value())
         smtp.send_message(msg)
@@ -33,7 +34,7 @@ async def send(settings: Settings, to: str, subject: str, body: str) -> bool:
         return False
     try:
         await asyncio.to_thread(_send, settings, to, subject, body)
-    except (OSError, smtplib.SMTPException) as exc:
+    except (OSError, ValueError, smtplib.SMTPException) as exc:
         log.warning("Email to %s failed: %s", to.split("@")[-1], exc)
         return False
     return True
