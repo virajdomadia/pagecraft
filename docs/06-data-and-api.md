@@ -50,6 +50,9 @@ commit;
 **v4 additions:** `sites.custom_domain citext unique null`, `sites.domain_status text`, `sites.github_repo text null`, `sites.github_push bool default false`; `github_connections (user_id fk pk, login text, token_enc bytea, created_at)`.
 
 ## B. Redis keys (v2)
+
+*Not used as built: the stream polls Postgres (04 §5 "As built").*
+
 | Key | Type | Cap / TTL | Written by |
 |---|---|---|---|
 | `site:{id}` | stream · entries `kind=update\|aw`, `seq`, `author`/`client`, `data` | `MAXLEN ~ 1000` | append (after Postgres commit), awareness POST |

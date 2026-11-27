@@ -218,6 +218,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sites/{site_id}/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stream Site
+         * @description SSE (04 §5): `hello`, then `update` (id = seq) for every change after `from` /
+         *     `Last-Event-ID`, `gone` when access ends, a comment ping every 20 s; closes after ~280 s.
+         */
+        get: operations["stream_site_sites__site_id__stream_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sites/{site_id}/unpublish": {
         parameters: {
             query?: never;
@@ -1101,6 +1122,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PublishOut"];
+                };
+            };
+            /** @description Error envelope (06 §C) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    stream_site_sites__site_id__stream_get: {
+        parameters: {
+            query?: {
+                from?: number | null;
+            };
+            header?: {
+                "last-event-id"?: number | null;
+            };
+            path: {
+                site_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
                 };
             };
             /** @description Error envelope (06 §C) */

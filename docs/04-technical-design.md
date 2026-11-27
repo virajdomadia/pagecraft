@@ -61,6 +61,8 @@ One `Y.Doc` per site. Shape (what `doc.toJSON()` looks like; `Y.Text` fields are
 
 ## 5. Realtime (v2): SSE on Vercel, `XREAD BLOCK`
 
+**As built (L1, 2026-11-28):** the same SSE contract, but fed by the Postgres update log instead of Redis — Upstash was never created and Postgres already holds every update with a gap-free `seq`. `services/stream.py` reads `sites.seq` (joined with the member row, so a removed editor gets `event: gone`) every 100 ms in one REPEATABLE READ transaction and sends the new `site_updates` rows; a reader behind `snapshot_seq` (compacted away) gets the snapshot as an `update` first. No `resync` event and no polling fallback are needed: the client (`lib/doc/stream.ts`, fetch-based so it controls `from=`) reconnects with the last seq it applied, which is the catch-up. Autosave flushes every 100 ms (was 300 ms) so an edit reaches the other tab in ~250 ms. Cost: ~10 indexed reads/s per open editor; tabs hidden for 60 s close their stream. Upgrade to Redis/`LISTEN` when a site has many simultaneous editors.
+
 ```
 POST /sites/{id}/updates            (unchanged) + XADD site:{id} MAXLEN ~1000 * kind=update seq=… data=<bytes> author=<user>
 POST /sites/{id}/awareness          body { state } → XADD site:{id} kind=aw client=<clientID> data=<awareness update>   (never stored in Postgres)

@@ -2,7 +2,7 @@
 
 import { type ElementType, useLayoutEffect, useRef } from "react";
 import * as Y from "yjs";
-import { LOCAL, replaceText } from "@/lib/doc/model";
+import { LOAD, LOCAL, replaceText, shiftIndex } from "@/lib/doc/model";
 
 /**
  * Inline text editing (R3, 04 §3): a `contentEditable` element bound to one Y.Text. Plain text
@@ -26,12 +26,12 @@ function caretOffsets(el: HTMLElement): [number, number] | null {
   return [start, start + range.toString().length];
 }
 
-function placeCaret(el: HTMLElement, offset: number): void {
+function placeCaret(el: HTMLElement, offset: number, end = offset): void {
   const node = el.firstChild ?? el;
   const len = node.nodeType === Node.TEXT_NODE ? (node.textContent ?? "").length : 0;
   const range = document.createRange();
   range.setStart(node, Math.min(offset, len));
-  range.collapse(true);
+  range.setEnd(node, Math.min(end, len));
   const sel = window.getSelection();
   sel?.removeAllRanges();
   sel?.addRange(range);
@@ -79,8 +79,12 @@ export function Editable({
     const observer = (event: Y.YTextEvent) => {
       const next = text.toString();
       if (el.textContent === next) return;
+      const focused = document.activeElement === el;
+      // A teammate's edit keeps your caret on its character; undo / redo jump to the change.
+      const mine = focused && event.transaction.origin === LOAD ? caretOffsets(el) : null;
       el.textContent = next;
-      if (document.activeElement === el) placeCaret(el, caretAfter(event.delta));
+      if (mine) placeCaret(el, shiftIndex(event.delta, mine[0]), shiftIndex(event.delta, mine[1]));
+      else if (focused) placeCaret(el, caretAfter(event.delta));
     };
     text.observe(observer);
     return () => text.unobserve(observer);

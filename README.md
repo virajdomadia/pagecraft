@@ -19,7 +19,7 @@ flowchart LR
   subgraph Browser["Browser · editor"]
     K[keystroke in a contentEditable] --> T[Y.Text insert/delete<br/>origin = LOCAL]
     T --> UM[Y.UndoManager<br/>tracks LOCAL only]
-    T --> Q[UpdateQueue<br/>300 ms · Y.mergeUpdates<br/>localStorage while unsent]
+    T --> Q[UpdateQueue<br/>100 ms · Y.mergeUpdates<br/>localStorage while unsent]
   end
   Q -->|POST /sites/id/updates · one merged blob| A[FastAPI]
   A -->|SELECT … FOR UPDATE on sites<br/>seq + 1, gap-free| L[(site_updates)]
@@ -31,10 +31,10 @@ flowchart LR
 ```
 
 1. **One `Y.Doc` per site.** A `site` map (name, theme, SEO) and a `sections` array of maps `{ id, type, variant, props }`. Every string a person types is a `Y.Text` (character-level merge); enums, URLs and ids are plain values (last writer wins). The JSON ↔ Yjs rule is identical in `web/src/lib/doc/model.ts` and `api/app/services/crdt.py`, so a template built by pycrdt opens in the browser and an edit made in the browser exports on the server.
-2. **Edits are Yjs updates, not JSON.** The browser batches its updates every 300 ms, merges them, and posts one blob. Until the API acknowledges it, the pending update lives in `localStorage` (and goes out via `sendBeacon` on tab close), so a crash or a dead connection loses nothing — re-sending is harmless because applying a Yjs update twice is a no-op.
+2. **Edits are Yjs updates, not JSON.** The browser batches its updates every 100 ms, merges them, and posts one blob. Until the API acknowledges it, the pending update lives in `localStorage` (and goes out via `sendBeacon` on tab close), so a crash or a dead connection loses nothing — re-sending is harmless because applying a Yjs update twice is a no-op.
 3. **The API never holds a document in memory.** It appends each blob to `site_updates` under the site's row lock and, every 50 updates, folds the tail into `sites.snapshot` with pycrdt. Loading the editor returns snapshot + tail.
 4. **Publishing is server-side.** The API compacts, exports the CRDT to JSON with pycrdt, validates it against the section contract (`app/sections.py`, mirrored from the web registry and kept in sync by a snapshot test both suites check), stores it as a new `publications` version and asks web to revalidate. The published page is a pure function of the CRDT — never of what the browser claims (tested in `test_publish_export`).
-5. **v2 is additive.** Undo already tracks only local transactions; a stream applying a teammate's updates with another origin slots in beside the queue.
+5. **Live co-editing is additive.** Every open editor reads `GET /sites/{id}/stream` (Server-Sent Events): the API polls the same update log every 100 ms and pushes new rows, so a teammate's typing lands in ~250 ms. Those updates are applied with a non-local origin, so undo never touches them and they are never queued back. A dropped stream reconnects from the last seq it applied; if compaction folded those rows away, the stream sends the snapshot instead (Yjs replay is idempotent).
 
 ## Stack
 `web/` Next.js 15 (App Router) · TypeScript · Tailwind 4 · Yjs · dnd-kit · zod · vitest — `api/` FastAPI (Python 3.12, uv) · pycrdt · SQLAlchemy 2 + Alembic on Postgres (Neon) · Pillow · pytest — Vercel (deployed from GitHub Actions only), Vercel Blob for uploads (Postgres fallback until the store exists).

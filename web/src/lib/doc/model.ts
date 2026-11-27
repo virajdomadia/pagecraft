@@ -109,6 +109,20 @@ export function replaceText(text: Y.Text, next: string): void {
   if (endNext > start) text.insert(start, next.slice(start, endNext));
 }
 
+/** Where index `i` of a Y.Text moves to after a change: a teammate's edit must not move your caret. */
+export function shiftIndex(delta: Y.YTextEvent["delta"], i: number): number {
+  let pos = 0;
+  let out = i;
+  for (const op of delta) {
+    if (op.retain) pos += op.retain;
+    else if (typeof op.insert === "string") {
+      if (pos < out) out += op.insert.length;
+      pos += op.insert.length;
+    } else if (op.delete && pos < out) out -= Math.min(op.delete, out - pos);
+  }
+  return out;
+}
+
 /** Set a field: Y.Text fields get a minimal text edit, atomic fields a plain set. */
 export function setField(map: Y.Map<unknown>, key: string, value: Json): void {
   const current = map.get(key);

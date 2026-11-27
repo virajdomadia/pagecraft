@@ -1466,6 +1466,80 @@
         ]
       }
     },
+    "/sites/{site_id}/stream": {
+      "get": {
+        "description": "SSE (04 §5): `hello`, then `update` (id = seq) for every change after `from` /\n`Last-Event-ID`, `gone` when access ends, a comment ping every 20 s; closes after ~280 s.",
+        "operationId": "stream_site_sites__site_id__stream_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "in": "header",
+            "name": "last-event-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {}
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Stream Site",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
     "/sites/{site_id}/unpublish": {
       "post": {
         "operationId": "unpublish_site_sites__site_id__unpublish_post",
