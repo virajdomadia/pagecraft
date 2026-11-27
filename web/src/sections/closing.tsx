@@ -152,7 +152,7 @@ export const contact: SectionDef = {
     heading: "Come and see us",
     body: "",
     address: "Street and number\nArea, Bengaluru 560001",
-    hours: "Mon–Sat 9 am – 7 pm",
+    hours: "Mon-Sat 9 am to 7 pm",
     phone: "+91 98450 00000",
     email: "hello@example.com",
     cta: { label: "Get directions", href: "https://www.openstreetmap.org/" },

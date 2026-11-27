@@ -10,7 +10,7 @@ A real CRDT document model (Yjs in the browser, **pycrdt** on the server) · an 
 Four versions: **v1 Solo studio** (this) → **v2 Studio session** (live co-editing over SSE, cursors, invites, history) → **v3 Pro** (Razorpay plan, forms inbox, AI copy, analytics, comments) → **v4 Your domain, your code** (custom domains, static export + GitHub push, import). See [PRD.md](PRD.md) and [docs/](docs/).
 
 ## Try it
-Open the landing page, scroll to **Try the demo**, and sign in as **Deepa** (owner of the *Kaapi Corner* café site) or **Rohan** (her collaborator) — no password. Edit the headline, swap a photo from the library, change the palette, press **Publish changes**, and open `/s/kaapi-corner`. The six templates are also live: `/s/kaapi-corner`, `/s/loop-studio`, `/s/meera-rao`, `/s/ironline`, `/s/nimbus-kettle`, `/s/bistro-nine`.
+Open the landing page and press **Try as the creator** (Deepa, owner of a *Kaapi Corner* café site) or **Try as the collaborator** (Rohan, her editor) — no password. Each click gets its own private copy for 24 hours. Edit the headline, swap a photo from the library, change the palette, press **Publish**, and open the `/s/demo-…` link. The six templates are also live: `/s/kaapi-corner`, `/s/loop-studio`, `/s/meera-rao`, `/s/ironline`, `/s/nimbus-kettle`, `/s/bistro-nine`.
 
 ## How the document pipeline works
 

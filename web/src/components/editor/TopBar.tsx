@@ -9,8 +9,8 @@ import type { Width } from "@/components/editor/Canvas";
 const PILL: Record<SaveStatus, { text: string; dot: string }> = {
   saved: { text: "Saved", dot: "bg-mint" },
   saving: { text: "Saving…", dot: "bg-[#F59E0B]" },
-  offline: { text: "Offline — changes kept locally", dot: "bg-coral" },
-  error: { text: "Not saved — reload the page", dot: "bg-coral" },
+  offline: { text: "Offline: changes kept locally", dot: "bg-coral" },
+  error: { text: "Not saved. Reload the page", dot: "bg-coral" },
 };
 
 const ib =
@@ -21,6 +21,8 @@ export function TopBar({
   siteId,
   slug,
   published,
+  dirty,
+  editingAs,
   protectedSite,
   save,
   canUndo,
@@ -36,6 +38,10 @@ export function TopBar({
   siteId: string;
   slug: string;
   published: boolean;
+  /** The draft differs from what is live. */
+  dirty: boolean;
+  /** "Rohan · Editor": who this session edits as. */
+  editingAs: string;
   protectedSite: boolean;
   save: SaveStatus;
   canUndo: boolean;
@@ -77,10 +83,11 @@ export function TopBar({
         </Link>{" "}
         / <b className="font-semibold text-ink">{name}</b>
       </span>
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 font-mono text-[11px] text-ink-2" role="status" aria-live="polite">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 font-mono text-xs text-ink-2" role="status" aria-live="polite">
         <i key={save} className={`pc-dot-pop h-1.5 w-1.5 rounded-full ${pill.dot}`} aria-hidden="true" />
         {pill.text}
       </span>
+      <span className="hidden rounded-full bg-desk px-2.5 py-1 text-xs text-ink-2 lg:inline">Editing as {editingAs}</span>
 
       <div className="flex items-center gap-0.5 border-l border-line pl-3">
         <button type="button" className={ib} onClick={onUndo} disabled={!canUndo} aria-label="Undo" title={`Undo (${mod}Z)`}>
@@ -103,10 +110,11 @@ export function TopBar({
               type="button"
               aria-pressed={width === w}
               onClick={() => onWidth(w)}
-              className={`px-3 py-1.5 font-mono text-[11.5px] ${width === w ? "bg-ink text-white" : "bg-paper text-ink-2 hover:bg-guide-soft"}`}
+              className={`px-3 py-1.5 text-xs ${width === w ? "bg-ink text-white" : "bg-paper text-ink-2 hover:bg-guide-soft"}`}
             >
-              {w === "desktop" ? "1280" : w === "tablet" ? "834" : "390"}
-              <span className="sr-only"> px ({w})</span>
+              {w === "desktop" ? "Desktop" : w === "tablet" ? "Tablet" : "Phone"}
+              <span className="text-xs opacity-70"> {w === "desktop" ? "1280" : w === "tablet" ? "834" : "390"}</span>
+              <span className="sr-only"> px</span>
             </button>
           ))}
         </div>
@@ -166,7 +174,16 @@ export function TopBar({
           </div>
         )}
       </div>
-      <button type="button" onClick={onPublish} className="min-h-9 rounded-[3px] bg-guide px-4 text-sm font-bold text-white hover:bg-guide-hover">
+      <span className="hidden text-xs text-ink-2 xl:inline" role="status">
+        {!published ? "Not published yet" : dirty ? "Unpublished changes" : "Live is up to date"}
+      </span>
+      <button
+        type="button"
+        onClick={onPublish}
+        className={`min-h-9 rounded-[3px] px-4 text-sm font-bold ${
+          published && !dirty ? "border border-line bg-paper text-ink-2 hover:border-guide" : "bg-guide text-white hover:bg-guide-hover"
+        }`}
+      >
         {published ? "Publish changes" : "Publish"}
       </button>
     </header>

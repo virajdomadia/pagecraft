@@ -14,9 +14,9 @@ import { REGISTRY } from "@/sections/registry";
 import type { SectionType } from "@/sections/types";
 import { useSlugCheck } from "@/lib/useSlugCheck";
 
-const label = "font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted";
+const label = "font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted";
 const input =
-  "mt-1.5 block w-full rounded-[3px] border border-line bg-paper px-3 py-2.5 text-[15px] outline-none focus:border-guide focus:ring-2 focus:ring-guide-soft";
+  "mt-1.5 block w-full rounded-[3px] border border-line bg-paper px-3 py-2.5 text-[15px] outline-none placeholder:text-ink-2 focus:border-guide focus:ring-2 focus:ring-guide-soft";
 
 export function TemplatePicker({
   templates,
@@ -53,20 +53,20 @@ export function TemplatePicker({
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
-      setError("Give your site a name — you can change it later.");
+      setError("Give your site a name. You can change it later.");
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      const site = await api<SiteCard>("/sites", { method: "POST", json: { name: name.trim(), template: key, slug } });
+      const site = await api<SiteCard>("/sites", { method: "POST", json: { name: name.trim(), template: key, slug: demo ? undefined : slug } });
       router.push(`/sites/${site.id}/edit?new=1`);
     } catch (err) {
       setBusy(false);
       if (err instanceof ApiError && err.code === "slug_taken" && typeof err.details.suggestion === "string") {
         setSlugEdited(true);
         setSlugInput(err.details.suggestion);
-        setError(`${slug} is taken — we've suggested ${err.details.suggestion}.`);
+        setError(`${slug} is taken, so we've suggested ${err.details.suggestion}.`);
         return;
       }
       setError(errorMessage(err));
@@ -81,86 +81,6 @@ export function TemplatePicker({
           <h1 className="mt-1 text-[26px] font-extrabold tracking-tight">Pick a template</h1>
           <p className="mt-1 text-sm text-ink-2">Every section, photo and word can be changed afterwards.</p>
         </div>
-
-        <form onSubmit={submit} className="grid gap-4 rounded-[4px] border border-line bg-paper p-4" noValidate>
-          <label className="block">
-            <span className={label}>Site name</span>
-            <input
-              className={input}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={tpl?.business.split(",")[0] ?? "Your business"}
-              maxLength={60}
-              required
-            />
-          </label>
-          <label className="block">
-            <span className={label}>Address</span>
-            <span className="mt-1.5 flex items-stretch overflow-hidden rounded-[3px] border border-line focus-within:border-guide focus-within:ring-2 focus-within:ring-guide-soft">
-              <input
-                className="min-w-0 flex-1 bg-paper px-3 py-2.5 font-mono text-sm outline-none"
-                value={slug}
-                onChange={(e) => {
-                  setSlugEdited(true);
-                  setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
-                }}
-                placeholder="your-site"
-                maxLength={40}
-                aria-describedby="slug-help"
-                spellCheck={false}
-              />
-              <span className="hidden items-center bg-desk px-2 font-mono text-[11px] text-muted sm:flex">.pagecraft…</span>
-            </span>
-            <span id="slug-help" className="mt-1.5 block min-h-5 text-xs" aria-live="polite">
-              {check.state === "checking" && <span className="text-muted">Checking…</span>}
-              {check.state === "ok" && <span className="text-mint-ink">✓ {prettyHost(slug)} is available</span>}
-              {check.state === "bad" && (
-                <span className="text-coral-ink">
-                  {check.message}
-                  {check.suggestion && (
-                    <>
-                      {" — "}
-                      <button
-                        type="button"
-                        className="font-semibold text-guide underline underline-offset-2"
-                        onClick={() => {
-                          setSlugEdited(true);
-                          setSlugInput(check.suggestion!);
-                        }}
-                      >
-                        use {check.suggestion}
-                      </button>
-                    </>
-                  )}
-                </span>
-              )}
-              {check.state === "idle" && <span className="text-muted">Lower-case letters, digits and dashes.</span>}
-            </span>
-          </label>
-          {error && (
-            <p role="alert" className="rounded-[3px] border border-coral/40 bg-coral/10 px-3 py-2 text-sm text-coral-ink">
-              {error}
-            </p>
-          )}
-          {atLimit ? (
-            <p className="rounded-[3px] bg-guide-soft px-3 py-2 text-sm text-ink-2">
-              The free plan includes {limit} sites and you&apos;re using all of them.{" "}
-              <Link href="/sites" className="font-semibold text-guide">
-                Back to your sites
-              </Link>{" "}
-              to delete one.
-            </p>
-          ) : (
-            <button
-              type="submit"
-              disabled={busy || check.state === "bad"}
-              className="min-h-11 rounded-[3px] bg-guide px-4 font-bold text-white transition hover:bg-guide-hover disabled:opacity-60"
-            >
-              {busy ? "Creating…" : `Create from ${tpl?.name ?? "template"}`}
-            </button>
-          )}
-          {demo && <p className="text-xs text-muted">Demo account: the oldest site you made is recycled when you hit the limit.</p>}
-        </form>
 
         <fieldset>
           <legend className={label}>Templates</legend>
@@ -194,20 +114,103 @@ export function TemplatePicker({
             })}
           </div>
         </fieldset>
+
+        <form onSubmit={submit} className="grid gap-4 rounded-[4px] border border-line bg-paper p-4" noValidate>
+          <label className="block">
+            <span className={label}>Site name</span>
+            <input
+              className={input}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={tpl?.business.split(",")[0] ?? "Your business"}
+              maxLength={60}
+              required
+            />
+          </label>
+          {!demo && (
+          <label className="block">
+            <span className={label}>Address</span>
+            <span className="mt-1.5 flex items-stretch overflow-hidden rounded-[3px] border border-line focus-within:border-guide focus-within:ring-2 focus-within:ring-guide-soft">
+              <input
+                className="min-w-0 flex-1 bg-paper px-3 py-2.5 font-mono text-sm outline-none placeholder:text-ink-2"
+                value={slug}
+                onChange={(e) => {
+                  setSlugEdited(true);
+                  setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+                }}
+                placeholder="your-site"
+                maxLength={40}
+                aria-describedby="slug-help"
+                spellCheck={false}
+              />
+            </span>
+            <span id="slug-help" className="mt-1.5 block min-h-5 text-xs" aria-live="polite">
+              {check.state === "checking" && <span className="text-muted">Checking…</span>}
+              {check.state === "ok" && <span className="text-mint-ink">✓ {prettyHost(slug)} is available</span>}
+              {check.state === "bad" && (
+                <span className="text-coral-ink">
+                  {check.message}
+                  {check.suggestion && (
+                    <>
+                      {" "}
+                      <button
+                        type="button"
+                        className="font-semibold text-guide underline underline-offset-2"
+                        onClick={() => {
+                          setSlugEdited(true);
+                          setSlugInput(check.suggestion!);
+                        }}
+                      >
+                        use {check.suggestion}
+                      </button>
+                    </>
+                  )}
+                </span>
+              )}
+              {check.state === "idle" && <span className="text-muted">Lower-case letters, digits and dashes.</span>}
+            </span>
+            {slug && check.state !== "ok" && <span className="block break-all font-mono text-xs text-ink-2">{prettyHost(slug)}</span>}
+          </label>
+          )}
+          {error && (
+            <p role="alert" className="rounded-[3px] border border-coral/40 bg-coral/10 px-3 py-2 text-sm text-coral-ink">
+              {error}
+            </p>
+          )}
+          {atLimit ? (
+            <p className="rounded-[3px] bg-guide-soft px-3 py-2 text-sm text-ink-2">
+              The free plan includes {limit} sites and you&apos;re using all of them.{" "}
+              <Link href="/sites" className="font-semibold text-guide">
+                Back to your sites
+              </Link>{" "}
+              to delete one.
+            </p>
+          ) : (
+            <button
+              type="submit"
+              disabled={busy || (!demo && check.state === "bad")}
+              className="min-h-11 rounded-[3px] bg-guide px-4 font-bold text-white transition hover:bg-guide-hover disabled:bg-line disabled:text-ink-2"
+            >
+              {busy ? "Creating…" : `Create from ${tpl?.name ?? "template"}`}
+            </button>
+          )}
+          {demo && <p className="text-xs text-muted">Demo sites get an automatic demo-… address and are deleted after 24 hours.</p>}
+        </form>
+
       </div>
 
       <section aria-label={`${tpl?.name} preview`} className="min-w-0">
         <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
           <p className="text-sm">
-            <b>{tpl?.business}</b> <span className="text-ink-2">— {tpl?.description}</span>
+            <b>{tpl?.business}</b> <span className="text-ink-2">{tpl?.description} Sample photos.</span>
           </p>
           {tpl?.preview_url && (
-            <a href={tpl.preview_url} target="_blank" rel="noopener" className="font-mono text-[11px] text-guide">
+            <a href={tpl.preview_url} target="_blank" rel="noopener" className="font-mono text-xs text-guide">
               Open the live example ↗
             </a>
           )}
         </div>
-        <p className="mb-3 font-mono text-[11px] text-muted">{sectionsLine}</p>
+        <p className="mb-3 font-mono text-xs text-muted">{sectionsLine}</p>
         <div key={key} className="pc-rise bp-grid rounded-[4px] border border-line p-3 sm:p-5">
           <div className="max-h-[78vh] overflow-y-auto rounded-[3px] bg-paper shadow-[0_20px_50px_-30px_rgba(27,27,47,.5)]">
             {content && (

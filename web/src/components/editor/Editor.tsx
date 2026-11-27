@@ -10,7 +10,7 @@ import { PublishDialog } from "@/components/editor/PublishDialog";
 import { ThemePanel } from "@/components/editor/ThemePanel";
 import { TopBar } from "@/components/editor/TopBar";
 import { SiteRenderer } from "@/components/renderer/SiteRenderer";
-import { api, errorMessage, type SiteDetail } from "@/lib/api";
+import { api, errorMessage, type Me, type SiteDetail } from "@/lib/api";
 import { roots } from "@/lib/doc/model";
 import { deleteSection, duplicateSection, insertSection, moveSection, sectionIndex, setSeo, setTheme } from "@/lib/doc/ops";
 import { useSiteDoc } from "@/lib/doc/useSiteDoc";
@@ -38,7 +38,7 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 /** S5: the editor — layers · canvas · inspector over one Y.Doc. */
-export function Editor({ site, fresh }: { site: SiteDetail; fresh: boolean }) {
+export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: boolean }) {
   const sd = useSiteDoc(site.id);
   const { content, doc, change } = sd;
   const wide = useWide();
@@ -50,6 +50,13 @@ export function Editor({ site, fresh }: { site: SiteDetail; fresh: boolean }) {
   const [published, setPublished] = useState(site.status === "published");
   const [slug, setSlug] = useState(site.slug);
   const [toast, setToast] = useState<Toast | null>(null);
+  // Edited since the last publish: the server's timestamps (5 s of clock-skew slack), then any save in this session.
+  const [dirty, setDirty] = useState(
+    !!site.published_at && new Date(site.updated_at).getTime() > new Date(site.published_at).getTime() + 5000,
+  );
+  useEffect(() => {
+    if (sd.save === "saving") setDirty(true);
+  }, [sd.save]);
 
   useEffect(() => {
     if (!toast) return;
@@ -59,7 +66,7 @@ export function Editor({ site, fresh }: { site: SiteDetail; fresh: boolean }) {
 
   useEffect(() => {
     if (fresh && sd.status === "ready") {
-      setToast({ message: "Your site is ready — click any text on the page to edit it." });
+      setToast({ message: "Your site is ready. Click any text on the page to edit it." });
       window.history.replaceState(null, "", `/sites/${site.id}/edit`);
     }
   }, [fresh, sd.status, site.id]);
@@ -151,7 +158,7 @@ export function Editor({ site, fresh }: { site: SiteDetail; fresh: boolean }) {
     try {
       await api(`/sites/${site.id}/unpublish`, { method: "POST" });
       setPublished(false);
-      setToast({ message: `Unpublished — /s/${slug} now shows “not published”.` });
+      setToast({ message: `Unpublished: /s/${slug} now shows “not published”.` });
     } catch (err) {
       setToast({ message: errorMessage(err), tone: "error" });
     }
@@ -188,7 +195,7 @@ export function Editor({ site, fresh }: { site: SiteDetail; fresh: boolean }) {
           </p>
         </div>
         <p className="border-b border-line bg-guide-soft px-4 py-2.5 text-sm text-ink-2">
-          The editor needs a screen at least 1024 px wide. Here&apos;s a live preview — open this page on a desktop to edit.
+          The editor needs a screen at least 1024 px wide. Here&apos;s a live preview; open this page on a desktop to edit.
         </p>
         <SiteRenderer content={content} as="div" />
       </div>
@@ -201,6 +208,8 @@ export function Editor({ site, fresh }: { site: SiteDetail; fresh: boolean }) {
         siteId={site.id}
         slug={slug}
         published={published}
+        dirty={dirty}
+        editingAs={`${me.name} · ${site.role === "owner" ? "Owner" : "Editor"}`}
         protectedSite={site.protected}
         save={sd.save}
         canUndo={sd.canUndo}
@@ -268,6 +277,7 @@ export function Editor({ site, fresh }: { site: SiteDetail; fresh: boolean }) {
           }}
           onDone={(res) => {
             setPublished(true);
+            setDirty(false);
             setSlug(res.slug);
           }}
           onInvalid={(id, message) => {

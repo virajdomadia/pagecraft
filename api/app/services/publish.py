@@ -1,7 +1,8 @@
 """Publish (04 §6): compact → pycrdt export → validation → `publications` v(n) → revalidate.
 
-The published page is a pure function of the CRDT: `publications.content` is exactly what
-pycrdt exports from the compacted document (tested), never anything the browser sent.
+The published page is a pure function of the CRDT: `publications.content` is what pycrdt exports
+from the compacted document, as validated and normalised (tested), never anything the browser
+sent.
 """
 
 import datetime as dt
@@ -84,7 +85,7 @@ async def publish_site(
     await compact_locked(db, site)
     content = crdt.export(crdt.load(site.snapshot))
     try:
-        validate_content(content)
+        content = validate_content(content)
     except ContentError as exc:
         raise ApiError(
             "invalid_content",

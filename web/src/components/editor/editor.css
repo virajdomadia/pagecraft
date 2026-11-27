@@ -24,20 +24,18 @@
   position: absolute;
   left: 0;
   top: 0;
+  /* Above the section's top edge, not over its content; readable at any canvas scale. */
+  transform: translateY(-100%);
+  font-size: calc(12px / var(--pc-scale, 1)) !important;
   z-index: 6;
   display: none;
-  padding: 3px 8px;
+  padding: 0.25em 0.7em;
   background: #4338ca;
   color: #fff;
   font: 500 11px/1.4 var(--font-jetbrains), ui-monospace, monospace;
   letter-spacing: 0;
   text-transform: none;
   pointer-events: none;
-}
-.pc-frame__label i {
-  font-style: normal;
-  opacity: 0.75;
-  margin-left: 6px;
 }
 .pc-frame:hover .pc-frame__label {
   display: block;

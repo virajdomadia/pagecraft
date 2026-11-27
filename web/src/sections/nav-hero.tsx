@@ -25,7 +25,8 @@ function Nav({ props, variant, edit }: SectionProps<NavProps>) {
           <ul>{items}</ul>
         </nav>
         <Btn link={props.cta} edit={edit} path={["cta"]} className="pc-nav__cta" />
-        {links.length > 0 && !edit && (
+        {/* Also in the editor, so the phone preview matches the live site (clicks are swallowed there). */}
+        {links.length > 0 && (
           <details className="pc-nav__menu">
             <summary>Menu</summary>
             <ul>
@@ -161,7 +162,7 @@ export const hero: SectionDef = {
     tone: "default",
     eyebrow: "New in Bengaluru",
     headline: "Say what you do in one honest line.",
-    body: "Then add a sentence about who it's for and why they'll like it. Keep it short — people scan.",
+    body: "Then add a sentence about who it's for and why they'll like it. Keep it short: people scan.",
     image: { url: "", alt: "" },
     cta: { label: "Get started", href: "#contact" },
     cta2: { label: "", href: "" },

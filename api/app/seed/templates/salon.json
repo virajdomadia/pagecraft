@@ -46,21 +46,21 @@
         "id": "s_serv01", "type": "features", "variant": "grid-3",
         "props": {
           "anchor": "services", "tone": "default",
-          "kicker": "Services",
+          "kicker": "",
           "heading": "Three things we do all day",
           "intro": "Every appointment starts with a ten-minute consultation, free, with the stylist who will do the work.",
           "items": [
-            { "id": "i_s1", "icon": "scissors", "title": "Cut and finish", "body": "A cut designed around how your hair grows and how much time you have in the morning.", "meta": "45–60 min" },
-            { "id": "i_s2", "icon": "palette", "title": "Colour", "body": "Balayage, global colour and grey blending with ammonia-free Olaplex-bonded colour.", "meta": "2–4 hours" },
-            { "id": "i_s3", "icon": "sparkle", "title": "Bridal and events", "body": "Trials at the studio, then we come to you on the day — anywhere in Bengaluru.", "meta": "On location" }
+            { "id": "i_s1", "icon": "scissors", "title": "Cut and finish", "body": "A cut designed around how your hair grows and how much time you have in the morning.", "meta": "45-60 min" },
+            { "id": "i_s2", "icon": "palette", "title": "Colour", "body": "Balayage, global colour and grey blending with ammonia-free Olaplex-bonded colour.", "meta": "2-4 hours" },
+            { "id": "i_s3", "icon": "sparkle", "title": "Bridal and events", "body": "Trials at the studio, then we come to you on the day, anywhere in Bengaluru.", "meta": "On location" }
           ]
         }
       },
       {
-        "id": "s_price01", "type": "pricing", "variant": "cards",
+        "id": "s_price01", "type": "pricing", "variant": "table",
         "props": {
           "anchor": "prices", "tone": "surface",
-          "kicker": "Prices",
+          "kicker": "",
           "heading": "Clear prices, no surprises at the counter",
           "intro": "Prices include GST. Long or very thick hair may take longer; we will tell you before we start.",
           "plans": [
@@ -75,7 +75,7 @@
         "id": "s_work01", "type": "gallery", "variant": "grid",
         "props": {
           "anchor": "work", "tone": "default",
-          "kicker": "Work",
+          "kicker": "",
           "heading": "From the chair this month",
           "images": [
             { "id": "i_g1", "url": "/templates/salon/cut.jpg", "alt": "A stylist cutting a client's hair", "caption": "" },
@@ -90,7 +90,7 @@
         "props": {
           "anchor": "", "tone": "accent",
           "heading": "Saturdays fill up by Wednesday.",
-          "body": "Message us your hair goals and a photo — we reply within the hour, 10 am to 8 pm.",
+          "body": "Message us your hair goals and a photo, we reply within the hour, 10 am to 8 pm.",
           "cta": { "label": "Book on WhatsApp", "href": "https://wa.me/919845012345" }
         }
       },
@@ -99,7 +99,7 @@
         "props": {
           "anchor": "", "tone": "default",
           "brand": "Loop Studio",
-          "tagline": "1st floor, 22 80 Feet Road, Koramangala 5th Block, Bengaluru 560095 · Tue–Sun 10 am – 8 pm",
+          "tagline": "1st floor, 22 80 Feet Road, Koramangala 5th Block, Bengaluru 560095 · Tue-Sun 10 am to 8 pm",
           "links": [
             { "id": "i_f1", "label": "Instagram", "href": "https://www.instagram.com/" },
             { "id": "i_f2", "label": "WhatsApp", "href": "https://wa.me/919845012345" },

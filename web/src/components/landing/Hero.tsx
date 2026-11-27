@@ -1,38 +1,41 @@
+import { DemoButtons } from "@/components/auth/DemoButtons";
+
 export function Hero() {
   return (
     <section className="wrap hero">
-      <h1>Build the page together. Publish it in one click.</h1>
-      <p className="lede">Pick a template, edit every section right on the page, and publish a fast, SEO-clean site to its own address. Co-editing with a teammate in the same page arrives next.</p>
-      <div className="actions"><a className="btn btn-indigo" href="/sign-up">Start a page, free</a><a className="btn btn-line" href="#try">Try the demo — no sign-up</a></div>
+      <h1>Pick a template. Publish it in one click.</h1>
+      <p className="lede">Edit every section right on the page, change the palette and fonts, and publish a fast, SEO-clean site to its own address.</p>
+      <DemoButtons tone="landing" />
+      <p className="hero-note">
+        No sign-up: you get your own copy of the demo café for 24 hours. Or <a href="/sign-up">create an account</a>.
+      </p>
 
-      <div className="editor" role="img" aria-label="Preview of the Pagecraft editor: two people editing a café landing page at the same time">
+      <div className="editor" role="img" aria-label="Preview of the Pagecraft editor: the Kaapi Corner café page with its hero section selected">
         <div className="topbar" aria-hidden="true">
           <div className="dots"><i></i><i></i><i></i></div>
-          <div className="url">pagecraft.virajdomadia.com/edit/chai-house</div>
-          <div className="who"><span className="av m">V</span><span className="av c">M</span></div>
-          <span className="pub">Publish<span className="toast">Published to chai-house.pagecraft.virajdomadia.com</span></span>
+          <div className="url">pagecraft.virajdomadia.com/s/kaapi-corner</div>
+          <div className="who"><span className="av m">D</span></div>
+          <span className="pub">Publish<span className="toast">Published to /s/kaapi-corner</span></span>
         </div>
         <div className="body" aria-hidden="true">
           <aside className="side">
-            <div className="lbl">Sections</div>
-            <ul><li className="on"><i></i>Hero</li><li><i></i>Menu highlights</li><li><i></i>Gallery</li><li><i></i>Opening hours</li><li><i></i>Find us</li><li><i></i>Footer</li></ul>
+            <div className="lbl">Layers</div>
+            <ul><li><i></i>Navigation</li><li className="on"><i></i>Hero</li><li><i></i>Features</li><li><i></i>Gallery</li><li><i></i>Testimonials</li><li><i></i>Contact</li><li><i></i>Footer</li></ul>
           </aside>
           <div className="canvas">
             <div className="page">
-              <div className="pnav"><span>Chai House</span><span>Order ahead</span></div>
-              <div className="ph">Slow chai, fast wifi<span className="caret"></span><span className="sel" aria-hidden="true"></span></div>
-              <p className="sub">A neighbourhood café in Indiranagar. Open 7am to 11pm, every day.</p>
-              <div className="row3"><div></div><div><span className="sel2" aria-hidden="true"></span></div><div></div></div>
+              <div className="pnav"><span>Kaapi Corner</span><span>See the menu</span></div>
+              <div className="ph">Filter coffee, done properly.<span className="caret"></span><span className="sel" aria-hidden="true"></span></div>
+              <p className="sub">Filter coffee, idli and fresh bakes on 12th Main, Indiranagar. Open 7 am to 10 pm, every day.</p>
+              <div className="row3"><div></div><div></div><div></div></div>
             </div>
-            <svg className="cursor c1" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 2 L16 8 L9 10 L7 17 Z" fill="#FF6B6B" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/></svg>
-            <svg className="cursor c2" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 2 L16 8 L9 10 L7 17 Z" fill="#2EC4B6" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/></svg>
           </div>
           <aside className="props">
             <div className="lbl">Hero</div>
-            <div className="prop"><span>Theme</span><span className="sw"><i style={{background: '#1B1B2F'} as React.CSSProperties}></i><i style={{background: '#F4B183'} as React.CSSProperties}></i><i style={{background: '#FFF'} as React.CSSProperties}></i></span></div>
-            <div className="prop"><span>Font pair</span><span>Manrope / Fraunces</span></div>
-            <div className="prop"><span>Align</span><span>Left</span></div>
-            <div className="prop"><span>Button</span><span>Order ahead</span></div>
+            <div className="prop"><span>Palette</span><span className="sw"><i style={{background: '#2B1B12'} as React.CSSProperties}></i><i style={{background: '#2F5D45'} as React.CSSProperties}></i><i style={{background: '#F7F1E8'} as React.CSSProperties}></i></span></div>
+            <div className="prop"><span>Fonts</span><span>Fraunces / Inter</span></div>
+            <div className="prop"><span>Layout</span><span>Split</span></div>
+            <div className="prop"><span>Button</span><span>See the menu</span></div>
           </aside>
         </div>
       </div>

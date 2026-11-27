@@ -1,6 +1,7 @@
 """`/templates`, `/sites/*` and `/uploads` (06 §C). Every `/sites/{id}/*` route resolves the
 member row first; a non-member gets 404, never a hint that the site exists."""
 
+import asyncio
 import uuid
 from typing import Annotated
 
@@ -27,12 +28,12 @@ from app.schemas.models import (
     UpdatesIn,
     UploadOut,
 )
-from app.services import crdt, documents, publish, sites, slugs, uploads
+from app.services import crdt, documents, limits, publish, sites, slugs, uploads
 from app.services.revalidate import revalidate, site_tag
 
 router = APIRouter(tags=["sites"])
 
-PROTECTED = "The demo site's address stays fixed — create your own site to try this"
+PROTECTED = "Demo sites keep the address they were given — sign up to choose your own"
 
 
 @router.get("/templates", response_model=list[TemplateOut])
@@ -96,6 +97,7 @@ async def slug_check(
 async def create_site(
     body: CreateSite, db: Db, user: CurrentUser, settings: AppSettings
 ) -> SiteCard:
+    await limits.hit(db, f"create-site:{user.id}", 20, limits.HOUR)
     site = await sites.create_site(
         db, user, name=body.name, template_key=body.template, slug=body.slug
     )
@@ -134,8 +136,11 @@ async def post_updates(body: UpdatesIn, access: Member, db: Db) -> SeqOut:
 async def publish_site(
     body: PublishIn, access: Member, db: Db, settings: AppSettings
 ) -> PublishOut:
-    if access.protected and body.slug.strip().lower() != access.site.slug:
-        raise ApiError("forbidden", PROTECTED)
+    if body.slug.strip().lower() != access.site.slug:
+        if access.protected:
+            raise ApiError("forbidden", PROTECTED)
+        if not access.is_owner:
+            raise ApiError("forbidden", "Only the site's owner can change its address")
     pub = await publish.publish_site(
         db,
         access.site.id,
@@ -155,7 +160,9 @@ async def publish_site(
 @router.post("/sites/{site_id}/unpublish", status_code=204)
 async def unpublish_site(access: Member, db: Db, settings: AppSettings) -> Response:
     if access.protected:
-        raise ApiError("forbidden", "The demo site stays published — create your own to try this")
+        raise ApiError(
+            "forbidden", "Demo sites stay up until the demo resets — sign up to try this"
+        )
     await publish.unpublish_site(db, access.site, settings)
     return Response(status_code=204)
 
@@ -200,11 +207,12 @@ async def patch_site(body: PatchSite, access: Owner, db: Db, settings: AppSettin
 @router.delete("/sites/{site_id}", status_code=204)
 async def delete_site(access: Owner, db: Db, settings: AppSettings) -> Response:
     if access.protected:
-        raise ApiError("forbidden", "The demo site can't be deleted — create your own to try this")
+        raise ApiError(
+            "forbidden", "Demo sites are deleted when the demo resets — sign up to try this"
+        )
     site = access.site
     slug = site.slug if site.published_at else None
-    await uploads.delete_prefix(site.id, settings)
-    await sites.delete_site(db, site)
+    await sites.delete_site(db, site, settings)
     if slug:
         await revalidate([site_tag(slug)], settings)
     return Response(status_code=204)
@@ -219,10 +227,11 @@ async def upload_image(
     file: Annotated[UploadFile, File()],
 ) -> UploadOut:
     access = await load_access(db, site_id, user)
+    await limits.hit(db, f"upload:{user.id}", 60, limits.HOUR)  # M2: bounds what one user stores
     data = await file.read(uploads.MAX_BYTES + 1)
     if len(data) > uploads.MAX_BYTES:
         size = file.size or len(data)
         raise ApiError("file_too_large", uploads.too_large_message(size), status=413)
-    image = uploads.process(data)
+    image = await asyncio.to_thread(uploads.process, data)  # decoding must not stall the loop
     url = await uploads.store(db, access.site.id, image, settings)
     return UploadOut(url=url, width=image.width, height=image.height)

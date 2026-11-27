@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { slugForHost } from "@/lib/hosts";
+import { safeNext, slugForHost } from "@/lib/hosts";
 import { slugify, slugProblem } from "@/lib/slug";
 import { contrast, PALETTE_KEYS, PALETTES } from "@/lib/themes";
 
@@ -42,5 +42,15 @@ describe("host → slug (middleware)", () => {
   it("leaves Pagecraft's own hosts and strangers alone", () => {
     for (const h of [host, "www.pagecraft.virajdomadia.com", "api.pagecraft.virajdomadia.com", "a.b.pagecraft.virajdomadia.com", "localhost:3000", "evil.com", null])
       expect(slugForHost(h, host)).toBeNull();
+  });
+});
+
+describe("safeNext (sign-in redirect)", () => {
+  it("keeps same-origin paths", () => {
+    expect(safeNext("/sites/abc/edit?x=1#y")).toBe("/sites/abc/edit?x=1#y");
+  });
+  it("refuses anything that resolves off-site", () => {
+    for (const n of ["//evil.example", "/\\evil.example", "/\t/evil.example","https://evil.example", "javascript:alert(1)", ""])
+      expect(safeNext(n)).toBe("/sites");
   });
 });

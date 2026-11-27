@@ -3,21 +3,15 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, Response
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import AppSettings, Db, current_user
 from app.errors import ApiError
 from app.models import User
 from app.schemas.models import DemoSignIn, Me, SignIn, SignUp
-from app.services import auth
+from app.services import auth, limits, sites
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-DEMO_EMAILS = {
-    "creator": "creator@demo.pagecraft.app",
-    "collaborator": "collaborator@demo.pagecraft.app",
-}
 
 
 def me(user: User) -> Me:
@@ -25,7 +19,10 @@ def me(user: User) -> Me:
 
 
 @router.post("/sign-up", response_model=Me, status_code=201)
-async def sign_up(body: SignUp, response: Response, db: Db, settings: AppSettings) -> Me:
+async def sign_up(
+    body: SignUp, request: Request, response: Response, db: Db, settings: AppSettings
+) -> Me:
+    await limits.hit(db, f"sign-up:{limits.client_ip(request)}", 10, limits.HOUR)
     email = auth.normalise_email(body.email)
     user = User(
         email=email,
@@ -47,7 +44,11 @@ async def sign_up(body: SignUp, response: Response, db: Db, settings: AppSetting
 
 
 @router.post("/sign-in", response_model=Me)
-async def sign_in(body: SignIn, response: Response, db: Db, settings: AppSettings) -> Me:
+async def sign_in(
+    body: SignIn, request: Request, response: Response, db: Db, settings: AppSettings
+) -> Me:
+    await limits.hit(db, f"sign-in:{limits.client_ip(request)}", 30, limits.QUARTER)
+    await limits.hit(db, f"sign-in:{auth.normalise_email(body.email)}", 10, limits.QUARTER)
     result = await auth.login(db, body.email, body.password)
     if result is None:
         raise ApiError("unauthorized", "That email and password don't match")
@@ -57,12 +58,11 @@ async def sign_in(body: SignIn, response: Response, db: Db, settings: AppSetting
 
 
 @router.post("/demo", response_model=Me)
-async def demo(body: DemoSignIn, response: Response, db: Db, settings: AppSettings) -> Me:
-    user = (
-        await db.execute(select(User).where(User.email == DEMO_EMAILS[body.as_]))
-    ).scalar_one_or_none()
-    if user is None:
-        raise ApiError("unavailable", "The demo accounts aren't set up yet")
+async def demo(
+    body: DemoSignIn, request: Request, response: Response, db: Db, settings: AppSettings
+) -> Me:
+    await limits.hit(db, f"demo:{limits.client_ip(request)}", 20, limits.HOUR)
+    user = await sites.open_demo(db, body.as_, settings)
     session, token = await auth.open_session(db, user)
     auth.set_session_cookie(response, token, session.expires_at, settings)
     return me(user)

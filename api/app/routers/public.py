@@ -5,12 +5,14 @@ import re
 import uuid
 
 from fastapi import APIRouter, Response
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
+from sqlalchemy.orm import aliased
 
 from app.deps import Db
 from app.errors import ApiError
 from app.models import Publication, Site, SiteMember, Upload, User
 from app.schemas.models import Health, PublishedSite, SeoIn, SiteContentModel
+from app.services.sites import DEMO_TTL
 
 router = APIRouter(tags=["public"])
 
@@ -25,9 +27,10 @@ async def health() -> Health:
 
 @router.get("/public/sites/{slug}", response_model=PublishedSite)
 async def published_site(slug: str, response: Response, db: Db) -> PublishedSite:
+    creator = aliased(User)
     row = (
         await db.execute(
-            select(Site, Publication, User.plan)
+            select(Site, Publication, User.plan, creator.demo)
             .join(Publication, Publication.site_id == Site.id)
             .join(
                 SiteMember,
@@ -35,8 +38,11 @@ async def published_site(slug: str, response: Response, db: Db) -> PublishedSite
                 isouter=True,
             )
             .join(User, User.id == SiteMember.user_id, isouter=True)
+            .join(creator, creator.id == Site.created_by, isouter=True)
             .where(
                 Site.slug == slug.lower(),
+                # A demo sandbox's pages go dark with it, even before the sweep deletes them.
+                or_(creator.demo.is_not(True), Site.created_at > func.now() - DEMO_TTL),
                 Site.published_at.is_not(None),
                 Publication.version == Site.published_version,
             )
@@ -44,7 +50,7 @@ async def published_site(slug: str, response: Response, db: Db) -> PublishedSite
     ).first()
     if row is None:
         raise ApiError("not_published", "This site is not published", status=404)
-    site, pub, plan = row
+    site, pub, plan, demo = row
     response.headers["Cache-Control"] = PUBLIC_CACHE
     return PublishedSite(
         slug=site.slug,
@@ -53,6 +59,7 @@ async def published_site(slug: str, response: Response, db: Db) -> PublishedSite
         seo=SeoIn(**pub.seo),
         plan="pro" if plan == "pro" else "free",
         template=site.template,
+        demo=bool(demo),
         published_at=site.published_at,  # type: ignore[arg-type]
     )
 

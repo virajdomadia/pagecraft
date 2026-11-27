@@ -71,7 +71,7 @@ export function Canvas({
           ref={sheet}
           data-pc-sheet
           className="bp-corners origin-top-left bg-paper shadow-[0_1px_2px_rgba(27,27,47,.08),0_30px_70px_-40px_rgba(27,27,47,.5)]"
-          style={{ width: w, transform: `scale(${scale})`, viewTransitionName: "pc-canvas" }}
+          style={{ width: w, transform: `scale(${scale})`, viewTransitionName: "pc-canvas", ["--pc-scale" as string]: scale }}
           onClickCapture={(e) => {
             // A canvas is for editing: links and buttons inside the site never navigate here.
             if ((e.target as Element).closest("a, summary")) e.preventDefault();
@@ -161,7 +161,7 @@ function SectionFrame({
       onClick={() => onSelect(section.id)}
     >
       <span className="pc-frame__label" aria-hidden="true">
-        {def?.label ?? section.type} · {variantLabel} <i>{section.id}</i>
+        {def?.label ?? section.type} · {variantLabel}
       </span>
       <div className={drawIn ? "pc-drawin-content" : undefined}>
         <SectionView section={section} edit={edit} priority={priority} />

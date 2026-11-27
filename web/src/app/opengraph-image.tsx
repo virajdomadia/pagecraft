@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-export const alt = "Pagecraft — build the page together, publish it in one click";
+export const alt = "Pagecraft: pick a template, publish it in one click";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -34,7 +34,7 @@ export default async function OgImage() {
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 84, fontWeight: 800, letterSpacing: "-0.035em", lineHeight: 1.04, maxWidth: 940 }}>
-            Build the page together. Publish it in one click.
+            Pick a template. Publish it in one click.
           </div>
           <div style={{ fontSize: 30, fontWeight: 600, color: "#4A4A66", marginTop: 24, maxWidth: 900 }}>
             A landing-page editor two people can use at the same time.

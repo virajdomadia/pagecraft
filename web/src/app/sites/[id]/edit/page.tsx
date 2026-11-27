@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function EditPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { new: fresh } = await searchParams;
-  await requireMe(`/sites/${id}/edit`);
+  const me = await requireMe(`/sites/${id}/edit`);
   const site = await loadOr404<SiteDetail>(`/sites/${id}`);
-  return <Editor site={site} fresh={fresh === "1"} />;
+  return <Editor site={site} me={me} fresh={fresh === "1"} />;
 }

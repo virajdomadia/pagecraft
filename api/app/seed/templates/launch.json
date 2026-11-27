@@ -2,7 +2,7 @@
   "meta": {
     "key": "launch",
     "name": "Product launch",
-    "business": "Nimbus — a pour-over kettle",
+    "business": "Nimbus, a pour-over kettle",
     "description": "One product, launched properly: what it does, the details, bundles and the questions buyers ask.",
     "sort": 5,
     "showcase_slug": "nimbus-kettle"
@@ -46,11 +46,11 @@
         "id": "s_why01", "type": "features", "variant": "icons",
         "props": {
           "anchor": "why", "tone": "surface",
-          "kicker": "Why Nimbus",
+          "kicker": "",
           "heading": "Three things a good pour needs",
           "intro": "",
           "items": [
-            { "id": "i_w1", "icon": "bolt", "title": "Exact temperature", "body": "Set 80–100 °C on the base dial; Nimbus holds it within one degree for sixty minutes.", "meta": "" },
+            { "id": "i_w1", "icon": "bolt", "title": "Exact temperature", "body": "Set 80-100 °C on the base dial; Nimbus holds it within one degree for sixty minutes.", "meta": "" },
             { "id": "i_w2", "icon": "pen", "title": "Control of the stream", "body": "A 6 mm gooseneck outlet with a cut lip, so the flow starts and stops when you do.", "meta": "" },
             { "id": "i_w3", "icon": "clock", "title": "A built-in timer", "body": "Lift the kettle and the base starts timing your brew. Set it down to stop.", "meta": "" }
           ]
@@ -60,7 +60,7 @@
         "id": "s_gal01", "type": "gallery", "variant": "strip",
         "props": {
           "anchor": "details", "tone": "default",
-          "kicker": "Details",
+          "kicker": "",
           "heading": "Brushed steel, walnut handle, nothing extra",
           "images": [
             { "id": "i_g1", "url": "/templates/launch/carafe.jpg", "alt": "A glass pour-over carafe on a wooden counter", "caption": "Pairs with any dripper" },
@@ -70,10 +70,10 @@
         }
       },
       {
-        "id": "s_price01", "type": "pricing", "variant": "cards",
+        "id": "s_price01", "type": "pricing", "variant": "table",
         "props": {
           "anchor": "bundles", "tone": "default",
-          "kicker": "Pre-order",
+          "kicker": "",
           "heading": "Pick a bundle",
           "intro": "Pre-orders ship in December in the order they were placed. Free delivery anywhere in India.",
           "plans": [
@@ -88,7 +88,7 @@
         "id": "s_faq01", "type": "faq", "variant": "accordion",
         "props": {
           "anchor": "faq", "tone": "surface",
-          "kicker": "FAQ",
+          "kicker": "",
           "heading": "Before you order",
           "items": [
             { "id": "i_q1", "question": "What power does the base need?", "answer": "A regular Indian 6 A socket. The base draws 1200 W while heating and under 5 W while holding temperature." },

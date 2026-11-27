@@ -10,7 +10,7 @@
   "content": {
     "site": {
       "name": "Bistro Nine",
-      "theme": { "palette": "bistro", "fonts": "playfair-karla", "radius": "soft" },
+      "theme": { "palette": "sage", "fonts": "playfair-karla", "radius": "soft" },
       "seo": {
         "title": "Bistro Nine · Modern South Indian in Jayanagar",
         "description": "Dosas, thalis and coastal plates from a small open kitchen on 9th Block, Jayanagar. Tables from 12 to 3:30 and 7 to 11.",
@@ -43,16 +43,15 @@
         }
       },
       {
-        "id": "s_food01", "type": "gallery", "variant": "mosaic",
+        "id": "s_food01", "type": "gallery", "variant": "grid",
         "props": {
           "anchor": "food", "tone": "default",
-          "kicker": "From the kitchen",
+          "kicker": "",
           "heading": "What's on the table this week",
           "images": [
             { "id": "i_g1", "url": "/templates/restaurant/thali.jpg", "alt": "A South Indian thali with rice, sambar and vegetable dishes", "caption": "Thursday thali" },
             { "id": "i_g2", "url": "/templates/restaurant/vada.jpg", "alt": "A masala dosa with medu vada and chutneys", "caption": "" },
-            { "id": "i_g3", "url": "/templates/restaurant/jamun.jpg", "alt": "Gulab jamun in a bowl", "caption": "" },
-            { "id": "i_g4", "url": "/templates/restaurant/room.jpg", "alt": "A laid table inside a restaurant", "caption": "The dining room" }
+            { "id": "i_g3", "url": "/templates/restaurant/jamun.jpg", "alt": "Gulab jamun in a bowl", "caption": "" }
           ]
         }
       },
@@ -60,7 +59,7 @@
         "id": "s_menu01", "type": "features", "variant": "rows",
         "props": {
           "anchor": "menu", "tone": "surface",
-          "kicker": "Menu",
+          "kicker": "",
           "heading": "Six we're known for",
           "intro": "The full menu changes with the market. Tell us about allergies when you book.",
           "items": [
@@ -77,7 +76,7 @@
         "id": "s_rev01", "type": "testimonials", "variant": "cards",
         "props": {
           "anchor": "", "tone": "default",
-          "kicker": "Diners",
+          "kicker": "",
           "heading": "Worth the wait for a table",
           "items": [
             { "id": "i_r1", "quote": "The benne dosa is as good as Davangere, and the kori gassi made my Mangalorean father go quiet. High praise.", "name": "Shreya K.", "role": "Zomato review" },
@@ -90,11 +89,11 @@
         "id": "s_book01", "type": "contact", "variant": "split",
         "props": {
           "anchor": "book", "tone": "default",
-          "kicker": "Book",
+          "kicker": "",
           "heading": "Book a table",
           "body": "We hold tables for fifteen minutes. Groups of eight or more, please call a day ahead.",
           "address": "No. 9, 30th Cross, 9th Block\nJayanagar, Bengaluru 560069",
-          "hours": "Tue–Sun 12 – 3:30 pm, 7 – 11 pm\nClosed Mondays",
+          "hours": "Tue-Sun 12 to 3:30 pm, 7 to 11 pm\nClosed Mondays",
           "phone": "+91 80 2663 4999",
           "email": "table@bistronine.in",
           "cta": { "label": "Call to book", "href": "tel:+918026634999" },

@@ -12,7 +12,7 @@ import type { SectionType } from "@/sections/types";
 
 type Change = (fn: (r: ReturnType<typeof roots>) => void) => void;
 
-const lbl = "font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] text-muted";
+const lbl = "font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted";
 const inp =
   "mt-1 block w-full rounded-[3px] border border-line bg-paper px-2.5 py-1.5 text-[13px] text-ink outline-none transition focus:border-guide focus:ring-2 focus:ring-guide-soft";
 
@@ -40,12 +40,12 @@ export function Inspector({
       <header>
         <p className={lbl}>Section</p>
         <h2 className="text-[17px] font-extrabold tracking-tight">{def.label}</h2>
-        <p className="font-mono text-[10.5px] text-muted">{section.id}</p>
+        <p className="font-mono text-xs text-muted">{section.id}</p>
       </header>
 
       {issue && (
         <p role="status" className="rounded-[3px] border border-coral/40 bg-coral/10 px-2.5 py-2 text-xs text-coral-ink">
-          Won&apos;t publish yet — {issue.message.replace(`${def.label}: `, "")}
+          Won&apos;t publish yet: {issue.message.replace(`${def.label}: `, "")}
         </p>
       )}
 
@@ -64,7 +64,7 @@ export function Inspector({
                 className={`grid gap-1 rounded-[3px] border p-1 text-center transition ${on ? "border-guide bg-guide-soft" : "border-line bg-paper hover:border-guide/60"}`}
               >
                 <Thumb boxes={v.thumb} />
-                <span className="text-[11px] font-semibold">{v.label}</span>
+                <span className="text-xs font-semibold">{v.label}</span>
               </button>
             );
           })}
@@ -145,7 +145,7 @@ function FieldInput({
         <label className="block">
           <span className="flex justify-between">
             <span className={lbl}>{f.label}</span>
-            <span className={`font-mono text-[10px] ${s.length > f.max * 0.9 ? "text-coral-ink" : "text-muted"}`}>
+            <span className={`font-mono text-xs ${s.length > f.max * 0.9 ? "text-coral-ink" : "text-muted"}`}>
               {s.length}/{f.max}
             </span>
           </span>
@@ -179,7 +179,7 @@ function FieldInput({
               onChange={(e) => set(here, e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
             />
           </span>
-          {f.hint && <span className="mt-1 block text-[11px] text-muted">{f.hint}</span>}
+          {f.hint && <span className="mt-1 block text-xs text-muted">{f.hint}</span>}
         </label>
       );
     }
@@ -190,7 +190,7 @@ function FieldInput({
         <div className="grid gap-2 rounded-[3px] border border-line bg-desk/60 p-2.5">
           <span className={lbl}>{f.label}</span>
           <label className="block">
-            <span className="text-[11px] text-ink-2">Label {f.key !== "cta" && "(leave empty to hide)"}</span>
+            <span className="text-xs text-ink-2">Label {f.key !== "cta" && "(leave empty to hide)"}</span>
             <input className={inp} value={l.label ?? ""} maxLength={32} onChange={(e) => set([...here, "label"], e.target.value)} />
           </label>
           <HrefInput label="Goes to" value={l.href ?? ""} bad={bad} onChange={(x) => set([...here, "href"], x)} small />
@@ -248,7 +248,7 @@ function FieldInput({
                 type="button"
                 aria-pressed={o.value === s}
                 onClick={() => set(here, o.value)}
-                className={`flex-1 px-2 py-1.5 font-mono text-[11px] ${o.value === s ? "bg-guide text-white" : "bg-paper text-ink-2 hover:bg-guide-soft"}`}
+                className={`flex-1 px-2 py-1.5 font-mono text-xs ${o.value === s ? "bg-guide text-white" : "bg-paper text-ink-2 hover:bg-guide-soft"}`}
               >
                 {o.label}
               </button>
@@ -286,7 +286,7 @@ function HrefInput({
 }) {
   return (
     <label className="block">
-      <span className={small ? "text-[11px] text-ink-2" : lbl}>{label}</span>
+      <span className={small ? "text-xs text-ink-2" : lbl}>{label}</span>
       <input
         className={`${inp} font-mono ${bad ? "border-coral" : ""}`}
         value={value}
@@ -297,9 +297,9 @@ function HrefInput({
         aria-invalid={bad}
       />
       {bad ? (
-        <span className="mt-1 block text-[11px] text-coral-ink">Links start with #, https://, mailto: or tel:</span>
+        <span className="mt-1 block text-xs text-coral-ink">Links start with #, https://, mailto: or tel:</span>
       ) : (
-        hint && <span className="mt-1 block text-[11px] text-muted">{hint}</span>
+        hint && <span className="mt-1 block text-xs text-muted">{hint}</span>
       )}
     </label>
   );
@@ -341,7 +341,7 @@ function ListInput({
             <li key={id} className={`rounded-[3px] border bg-paper ${expanded ? "border-guide" : "border-line"}`}>
               <div className="flex items-center gap-1 pl-2 pr-1">
                 <button type="button" className="min-w-0 flex-1 truncate py-1.5 text-left text-[12.5px] font-semibold" aria-expanded={expanded} onClick={() => setOpen(expanded ? null : id)}>
-                  <span className="mr-1.5 font-mono text-[10px] text-muted">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="mr-1.5 font-mono text-xs text-muted">{String(i + 1).padStart(2, "0")}</span>
                   {field.itemLabel(item, i)}
                 </button>
                 <button type="button" className={btn} aria-label="Move up" disabled={i === 0} onClick={() => change((r) => moveItem(r, section.id, path, i, i - 1))}>

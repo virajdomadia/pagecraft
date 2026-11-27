@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 import { fontVars, siteFontVariables } from "@/lib/site-fonts";
 import { FONT_PAIR_KEYS, FONT_PAIRS, normaliseTheme, PALETTE_KEYS, PALETTES, RADII } from "@/lib/themes";
 
-const lbl = "font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] text-muted";
+const lbl = "font-mono text-xs font-medium uppercase tracking-[0.08em] text-muted";
 
 /**
  * The theme panel (S7, nothing selected): 8 palettes, 6 font pairs, radius. A palette change runs
@@ -65,7 +65,7 @@ export function ThemePanel({
                   <span className="w-5" style={{ background: p.accent }} />
                   <span className="w-5" style={{ background: p.ink }} />
                 </span>
-                <span className="mt-1 block text-[11.5px] font-semibold">{p.name}</span>
+                <span className="mt-1 block text-xs font-semibold">{p.name}</span>
               </button>
             );
           })}
@@ -95,7 +95,7 @@ export function ThemePanel({
                   <span className="block truncate text-[12.5px] font-semibold" style={{ fontFamily: "var(--pc-font-head)" }}>
                     {pair.heading}
                   </span>
-                  <span className="block truncate text-[11px] text-ink-2" style={{ fontFamily: "var(--pc-font-body)" }}>
+                  <span className="block truncate text-xs text-ink-2" style={{ fontFamily: "var(--pc-font-body)" }}>
                     with {pair.body}
                   </span>
                 </span>
@@ -117,7 +117,7 @@ export function ThemePanel({
                 type="button"
                 aria-pressed={on}
                 onClick={(e) => ripple(e, "radius", r)}
-                className={`grid justify-items-center gap-1 rounded-[3px] border p-2 text-[11.5px] font-semibold capitalize ${on ? "border-guide bg-guide-soft" : "border-line bg-paper hover:border-guide/60"}`}
+                className={`grid justify-items-center gap-1 rounded-[3px] border p-2 text-xs font-semibold capitalize ${on ? "border-guide bg-guide-soft" : "border-line bg-paper hover:border-guide/60"}`}
               >
                 <span className="h-6 w-10 border-2 border-ink" style={{ borderRadius: px }} aria-hidden="true" />
                 {r}

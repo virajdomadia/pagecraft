@@ -14,7 +14,7 @@ export function Avatar({ name, colour, size = 30 }: { name: string; colour: stri
   return (
     <span
       aria-hidden="true"
-      className="inline-grid shrink-0 place-items-center rounded-full font-mono text-[11px] font-bold text-ink ring-2 ring-paper"
+      className="inline-grid shrink-0 place-items-center rounded-full font-mono text-xs font-bold text-ink ring-2 ring-paper"
       style={{ width: size, height: size, background: colour }}
     >
       {initials}
@@ -68,9 +68,9 @@ export function UserMenu({ me }: { me: Me }) {
         <div id={id} className="pc-rise absolute right-0 top-[calc(100%+6px)] z-40 w-64 rounded-[4px] border border-line bg-paper p-2 shadow-lg">
           <div className="border-b border-line px-2 pb-2">
             <p className="text-sm font-bold">{me.name}</p>
-            <p className="truncate font-mono text-[11px] text-muted">{me.email}</p>
-            <p className="mt-1 font-mono text-[11px] text-muted">
-              {me.demo ? "Shared demo account" : `${me.plan === "pro" ? "Pro" : "Free"} plan`}
+            <p className="truncate font-mono text-xs text-muted">{me.email}</p>
+            <p className="mt-1 font-mono text-xs text-muted">
+              {me.demo ? "Demo sandbox · resets after 24 hours" : `${me.plan === "pro" ? "Pro" : "Free"} plan`}
             </p>
           </div>
           <Link href="/" className="mt-1 block rounded-[3px] px-2 py-2 text-sm no-underline hover:bg-guide-soft">

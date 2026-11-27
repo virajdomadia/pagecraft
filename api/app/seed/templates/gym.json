@@ -34,7 +34,7 @@
         "id": "s_hero01", "type": "hero", "variant": "full",
         "props": {
           "anchor": "", "tone": "default",
-          "eyebrow": "HSR Layout · open 5:30 am – 10 pm",
+          "eyebrow": "HSR Layout · open 5:30 am to 10 pm",
           "headline": "Get strong. Stay consistent.",
           "body": "Coached strength classes of eight people or fewer, an open floor with competition racks, and a programme that tells you exactly what to lift today.",
           "image": { "url": "/templates/gym/hero.jpg", "alt": "Rows of squat racks and dumbbells in a large gym" },
@@ -65,7 +65,7 @@
           "heading": "Pick how you want to train",
           "intro": "No joining fee. Pause twice a year for travel or illness.",
           "plans": [
-            { "id": "i_p1", "name": "Open gym", "price": "₹2,499", "period": "per month", "features": "Floor access 5:30 am – 10 pm\nProgramme in the app\nLockers and showers", "cta": { "label": "Start free week", "href": "#trial" }, "featured": false },
+            { "id": "i_p1", "name": "Open gym", "price": "₹2,499", "period": "per month", "features": "Floor access 5:30 am to 10 pm\nProgramme in the app\nLockers and showers", "cta": { "label": "Start free week", "href": "#trial" }, "featured": false },
             { "id": "i_p2", "name": "Coached", "price": "₹4,999", "period": "per month", "features": "Unlimited coached classes\nEverything in Open gym\nMonthly progress check-in\nPhysio sessions", "cta": { "label": "Start free week", "href": "#trial" }, "featured": true },
             { "id": "i_p3", "name": "1:1 coaching", "price": "₹12,000", "period": "per month", "features": "Three private sessions a week\nNutrition plan\nEverything in Coached", "cta": { "label": "Talk to a coach", "href": "tel:+918067123456" }, "featured": false }
           ],
@@ -79,7 +79,7 @@
           "kicker": "FAQ",
           "heading": "Questions before your first class",
           "items": [
-            { "id": "i_q1", "question": "I have never lifted. Is that a problem?", "answer": "No — most members start that way. Your first three classes are fundamentals: we teach the squat, hinge, press and pull with an empty bar before adding weight." },
+            { "id": "i_q1", "question": "I have never lifted. Is that a problem?", "answer": "No, most members start that way. Your first three classes are fundamentals: we teach the squat, hinge, press and pull with an empty bar before adding weight." },
             { "id": "i_q2", "question": "What should I bring?", "answer": "Flat shoes, a water bottle and something you can move in. We have towels, chalk and lockers." },
             { "id": "i_q3", "question": "Is there parking?", "answer": "Yes, basement parking for 30 cars and covered two-wheeler parking, free for members." },
             { "id": "i_q4", "question": "Can I freeze my membership?", "answer": "Twice a year, for up to a month each time, from the app. Medical freezes have no limit with a doctor's note." }
@@ -91,7 +91,7 @@
         "props": {
           "anchor": "trial", "tone": "accent",
           "heading": "Your first week is free.",
-          "body": "Seven days of classes and open gym. No card, no contract — just turn up at the front desk.",
+          "body": "Seven days of classes and open gym. No card, no contract, just turn up at the front desk.",
           "cta": { "label": "Book your first class", "href": "tel:+918067123456" }
         }
       },

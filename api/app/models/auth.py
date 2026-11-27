@@ -4,7 +4,7 @@ constraints (see the migration), so v3's plan change needs no `ALTER TYPE`."""
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Identity, Index, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -41,3 +41,16 @@ class Session(UuidMixin, CreatedMixin, Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     user: Mapped[User] = relationship(back_populates="sessions")
+
+
+class RateHit(Base):
+    """One counted request for `services/limits.py` (key = action + IP / email / user)."""
+
+    __tablename__ = "rate_hits"
+    __table_args__ = (Index("ix_rate_hits_key_at", "key", "at"), Index("ix_rate_hits_at", "at"))
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    key: Mapped[str] = mapped_column(Text, nullable=False)
+    at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )

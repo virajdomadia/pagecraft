@@ -50,6 +50,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     icons: { icon: "/icon.svg" },
     openGraph: { title, description, type: "website", url: `/s/${slug}`, siteName: content.site.name, images: image ? [image] : undefined },
     twitter: { card: image ? "summary_large_image" : "summary", title, description, images: image ? [image] : undefined },
+    // A landing-page demo sandbox: anyone could have written it, so search engines never see it.
+    ...(site.demo ? { robots: { index: false, follow: false } } : {}),
   };
 }
 
@@ -67,6 +69,11 @@ export default async function PublishedPage({ params }: Props) {
   const content = site.content as unknown as SiteContent;
   return (
     <>
+      {site.demo && (
+        <p role="note" className="m-0 bg-[#1B1B2F] px-4 py-2.5 text-center text-sm text-white">
+          A visitor made this page in the Pagecraft demo. It is deleted within 24 hours. Don&apos;t enter passwords or payment details because of it.
+        </p>
+      )}
       <SiteRenderer content={content}>
         {site.plan !== "pro" && <Badge />}
       </SiteRenderer>

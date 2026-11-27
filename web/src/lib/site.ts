@@ -1,9 +1,9 @@
 export const site = {
   name: "Pagecraft",
   url: "https://pagecraft.virajdomadia.com",
-  title: "Pagecraft — build it together",
+  title: "Pagecraft: pick a template, publish in one click",
   description:
-    "A landing-page editor two people can use at the same time, published to its own address in one click.",
+    "A landing-page editor: start from a template, edit right on the page and publish to its own address in one click.",
   repo: "https://github.com/virajdomadia/pagecraft",
   author: "Viraj Domadia",
   authorUrl: "https://virajdomadia.com",

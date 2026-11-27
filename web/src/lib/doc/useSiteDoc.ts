@@ -41,7 +41,8 @@ async function send(siteId: string, b64: string): Promise<SendResult> {
       credentials: "same-origin",
     });
     if (res.ok) return "ok";
-    if ([401, 403, 404, 413, 422].includes(res.status)) return "fatal";
+    if ([409, 413, 422].includes(res.status)) return "rejected";
+    if ([401, 403, 404].includes(res.status)) return "fatal";
     return "retry";
   } catch {
     return "retry";

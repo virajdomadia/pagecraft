@@ -16,7 +16,7 @@ export function TryIt() {
     <>
       <section className="wrap examples" id="examples" aria-labelledby="examples-h">
         <h2 id="examples-h">Six templates, published and live</h2>
-        <p className="sub">Every one is a real Pagecraft site rendered from its document — open them on your phone.</p>
+        <p className="sub">Every one is a real Pagecraft site rendered from its document. Open them on your phone.</p>
         <ul className="ex-grid">
           {EXAMPLES.map((e) => (
             <li key={e.slug}>
@@ -37,8 +37,8 @@ export function TryIt() {
           <h2 id="try-h">Open the editor as a demo user</h2>
           <p>
             Sign in as <b>Deepa</b>, who owns the Kaapi Corner café site, or as <b>Rohan</b>, her collaborator. Edit the
-            headline, swap a photo, change the palette, publish — the live page updates in seconds. Demo accounts are shared,
-            so sites you create may be recycled.
+            headline, swap a photo, change the palette, publish. Each click opens your own private copy of the site; it and
+            anything you publish (marked as a visitor demo) are deleted after 24 hours.
           </p>
           <DemoButtons tone="landing" />
           <p className="try-foot">
