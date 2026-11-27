@@ -15,7 +15,11 @@ import { LOAD, LOCAL, replaceText, shiftIndex } from "@/lib/doc/model";
  * element is rewritten and the caret placed where the change happened.
  */
 
-function caretOffsets(el: HTMLElement): [number, number] | null {
+/** Which element shows which Y.Text, both ways: presence draws remote carets and reads ours. */
+export const textElements = new WeakMap<Y.Text, HTMLElement>();
+export const elementTexts = new WeakMap<HTMLElement, Y.Text>();
+
+export function caretOffsets(el: HTMLElement): [number, number] | null {
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0 || !el.contains(sel.anchorNode)) return null;
   const range = sel.getRangeAt(0);
@@ -76,6 +80,8 @@ export function Editable({
     if (!el) return;
     const value = text.toString();
     if (el.textContent !== value) el.textContent = value;
+    textElements.set(text, el);
+    elementTexts.set(el, text);
     const observer = (event: Y.YTextEvent) => {
       const next = text.toString();
       if (el.textContent === next) return;
@@ -88,7 +94,10 @@ export function Editable({
       else if (focused && !remote) placeCaret(el, caretAfter(event.delta));
     };
     text.observe(observer);
-    return () => text.unobserve(observer);
+    return () => {
+      text.unobserve(observer);
+      if (textElements.get(text) === el) textElements.delete(text);
+    };
   }, [text]);
 
   const doc = () => text.doc;

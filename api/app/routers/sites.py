@@ -15,6 +15,7 @@ from app.deps import AppSettings, CurrentUser, Db, Member, Owner, load_access, s
 from app.errors import ApiError
 from app.models import Template
 from app.schemas.models import (
+    AwarenessIn,
     CreateSite,
     DocOut,
     PatchSite,
@@ -30,7 +31,17 @@ from app.schemas.models import (
     UpdatesIn,
     UploadOut,
 )
-from app.services import crdt, documents, limits, publish, sites, slugs, stream, uploads
+from app.services import (
+    crdt,
+    documents,
+    limits,
+    presence,
+    publish,
+    sites,
+    slugs,
+    stream,
+    uploads,
+)
 from app.services.auth import hash_token
 from app.services.revalidate import revalidate, site_tag
 
@@ -161,6 +172,15 @@ async def stream_site(
         # no-transform: a compressing proxy (Next's own server does) would buffer the stream.
         headers={"Cache-Control": "no-store, no-transform", "X-Accel-Buffering": "no"},
     )
+
+
+@router.post("/sites/{site_id}/awareness", status_code=204)
+async def post_awareness(body: AwarenessIn, access: Member, db: Db) -> Response:
+    """Presence (L2): this tab's pointer / selected section / caret, or null when it leaves.
+    Never stored past a minute; fanned out by the stream with the poster's name and colour."""
+    state = body.state.model_dump(exclude_none=True) if body.state else None
+    await presence.publish(db, access.site.id, access.user.id, body.client, body.n, state)
+    return Response(status_code=204)
 
 
 @router.post("/sites/{site_id}/publish", response_model=PublishOut)

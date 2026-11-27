@@ -180,6 +180,27 @@ export interface paths {
         patch: operations["patch_site_sites__site_id__patch"];
         trace?: never;
     };
+    "/sites/{site_id}/awareness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post Awareness
+         * @description Presence (L2): this tab's pointer / selected section / caret, or null when it leaves.
+         *     Never stored past a minute; fanned out by the stream with the poster's name and colour.
+         */
+        post: operations["post_awareness_sites__site_id__awareness_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sites/{site_id}/doc": {
         parameters: {
             query?: never;
@@ -332,6 +353,14 @@ export interface components {
         ApiErrorResponse: {
             error: components["schemas"]["ApiErrorBody"];
         };
+        /** AwarenessIn */
+        AwarenessIn: {
+            /** Client */
+            client: number;
+            /** N */
+            n: number;
+            state: components["schemas"]["PresenceState"] | null;
+        };
         /** Body_upload_image_uploads_post */
         Body_upload_image_uploads_post: {
             /** File */
@@ -341,6 +370,11 @@ export interface components {
              * Format: uuid
              */
             site_id: string;
+        };
+        /** Caret */
+        Caret: {
+            anchor: components["schemas"]["RelPos"];
+            head: components["schemas"]["RelPos"];
         };
         /** CreateSite */
         CreateSite: {
@@ -425,6 +459,22 @@ export interface components {
             /** Slug */
             slug?: string | null;
         };
+        /** Pointer */
+        Pointer: {
+            /** S */
+            s: string;
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+        };
+        /** PresenceState */
+        PresenceState: {
+            caret?: components["schemas"]["Caret"] | null;
+            pointer?: components["schemas"]["Pointer"] | null;
+            /** Section */
+            section?: string | null;
+        };
         /** PublishIn */
         PublishIn: {
             seo: components["schemas"]["SeoIn"];
@@ -464,6 +514,21 @@ export interface components {
             template: string;
             /** Version */
             version: number;
+        };
+        /**
+         * RelPos
+         * @description `Y.relativePositionToJSON` output: where a caret sits, stable under concurrent edits.
+         */
+        RelPos: {
+            /**
+             * Assoc
+             * @default 0
+             */
+            assoc: number;
+            item?: components["schemas"]["YId"] | null;
+            /** Tname */
+            tname?: string | null;
+            type?: components["schemas"]["YId"] | null;
         };
         /** SeoIn */
         SeoIn: {
@@ -653,6 +718,13 @@ export interface components {
             url: string;
             /** Width */
             width: number;
+        };
+        /** YId */
+        YId: {
+            /** Client */
+            client: number;
+            /** Clock */
+            clock: number;
         };
     };
     responses: never;
@@ -1055,6 +1127,39 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SiteDetail"];
                 };
+            };
+            /** @description Error envelope (06 §C) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    post_awareness_sites__site_id__awareness_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                site_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AwarenessIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error envelope (06 §C) */
             default: {

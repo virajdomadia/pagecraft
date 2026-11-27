@@ -19,14 +19,16 @@ import uuid
 from collections.abc import AsyncIterator
 
 from sqlalchemy import exists, func, select
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
-from app.models import Session, Site, SiteMember, SiteUpdate
+from app.models import Session, Site, SiteAwareness, SiteMember, SiteUpdate, User
 from app.services.documents import b64
+from app.services.presence import LIVE
 
 POLL = 0.1  # seconds between reads: with the 100 ms autosave, edits show up in ~250 ms
 IDLE_POLL = 0.5  # once nothing has changed for IDLE_AFTER seconds
 IDLE_AFTER = 30.0
+OVERLAP = 20  # presence revs re-read each time, see _presence
 PING = 20.0  # keep proxies from closing an idle stream
 LIFETIME = 280.0  # under Vercel's 300 s maxDuration; the client reconnects with `from=`
 
@@ -37,10 +39,16 @@ def event(name: str, data: object, event_id: int | None = None) -> str:
 
 
 async def _tick(
-    engine: AsyncEngine, site_id: uuid.UUID, user_id: uuid.UUID, session: str, last: int
-) -> tuple[list[str], int] | None:
-    """New events since `last`, and the new `last`; None once the user is no longer a member
-    or the session that opened the stream has ended (signed out, expired)."""
+    engine: AsyncEngine,
+    site_id: uuid.UUID,
+    user_id: uuid.UUID,
+    session: str,
+    last: int,
+    last_aw: int,
+) -> tuple[list[str], int, int] | None:
+    """New events since `last` (updates) / `last_aw` (presence rev), and the new cursors; None
+    once the user is no longer a member or the session that opened the stream has ended."""
+    aw_rev = select(func.max(SiteAwareness.rev)).where(SiteAwareness.site_id == site_id)
     live = exists().where(
         Session.token_hash == session, Session.user_id == user_id, Session.expires_at > func.now()
     )
@@ -49,17 +57,20 @@ async def _tick(
         async with conn.begin():
             row = (
                 await conn.execute(
-                    select(Site.seq, Site.snapshot_seq)
+                    select(Site.seq, Site.snapshot_seq, aw_rev.scalar_subquery())
                     .join(SiteMember, SiteMember.site_id == Site.id)
                     .where(Site.id == site_id, SiteMember.user_id == user_id, live)
                 )
             ).first()
             if row is None:
                 return None
-            seq, snapshot_seq = row
-            if seq <= last:
-                return [], last
+            seq, snapshot_seq, rev = row
             out: list[str] = []
+            if rev and rev > last_aw:
+                out += await _presence(conn, site_id, last_aw)
+                last_aw = rev
+            if seq <= last:
+                return out, last, last_aw
             if last < snapshot_seq:  # compacted past the reader: send the snapshot first
                 snapshot = (
                     await conn.execute(select(Site.snapshot).where(Site.id == site_id))
@@ -81,25 +92,51 @@ async def _tick(
                 out.append(
                     event("update", {"seq": r_seq, "author": author_id, "data": b64(update)}, r_seq)
                 )
-            return out, seq
+            return out, seq, last_aw
+
+
+async def _presence(conn: AsyncConnection, site_id: uuid.UUID, after: int) -> list[str]:
+    rows = await conn.execute(
+        select(SiteAwareness.client_id, SiteAwareness.state, User.id, User.name, User.avatar_colour)
+        .join(User, User.id == SiteAwareness.user_id)
+        .where(
+            SiteAwareness.site_id == site_id,
+            # Overlap: a write that took its rev earlier but committed later is not skipped
+            # (re-sending a row is harmless; the client keeps the latest per tab).
+            SiteAwareness.rev > after - OVERLAP,
+            SiteAwareness.updated_at > func.now() - LIVE,
+        )
+        .order_by(SiteAwareness.rev)
+    )
+    return [
+        event(
+            "aw",
+            {
+                "client": client,
+                "user": {"id": str(uid), "name": name, "colour": colour},
+                "state": state,
+            },
+        )
+        for client, state, uid, name, colour in rows
+    ]
 
 
 async def events(
     engine: AsyncEngine, site_id: uuid.UUID, user_id: uuid.UUID, session: str, since: int
 ) -> AsyncIterator[str]:
-    last = since
+    last, last_aw = since, 0
     started = pinged = changed = time.monotonic()
     yield event("hello", {"seq": last})
     while time.monotonic() - started < LIFETIME:
-        result = await _tick(engine, site_id, user_id, session, last)
+        result = await _tick(engine, site_id, user_id, session, last, last_aw)
         if result is None:
             yield event("gone", {})
             return
-        out, last = result
+        out, last, last_aw = result
         for item in out:
             yield item
         now = time.monotonic()
-        if out:
+        if any(item.startswith("id:") for item in out):  # an edit, not just a presence beat
             changed = now
         if now - pinged >= PING:
             pinged = now
