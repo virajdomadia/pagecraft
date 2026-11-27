@@ -93,8 +93,9 @@ function measure(peer: Peer, sheet: HTMLElement, doc: Y.Doc): Drawn {
           range.setStart(node, at);
           range.setEnd(node, at);
         } else range.selectNodeContents(el);
-        const rects = range.getClientRects();
-        const r = rects[rects.length - 1] ?? el.getBoundingClientRect();
+        // At a line wrap a collapsed range has two rects; the first (end of the line) is where
+        // the typist's caret sits.
+        const r = range.getClientRects()[0] ?? el.getBoundingClientRect();
         const b = local(r);
         out.caret = { x: b.x, y: b.y, w: 0, h: Math.max(b.h, 14) };
       }

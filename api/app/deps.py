@@ -25,13 +25,24 @@ def get_settings_dep(request: Request) -> Settings:
 AppSettings = Annotated[Settings, Depends(get_settings_dep)]
 
 
+# "Open as your teammate" (L3): a second tab of the same browser signs in as the demo
+# teammate without replacing this tab's cookie, by sending its session in this header.
+TAB_HEADER = "x-pagecraft-session"
+
+
 def session_token(request: Request) -> str:
-    return request.cookies.get(COOKIE_NAME, "")
+    """The token `current_user` authenticated this request with ("" if none)."""
+    return getattr(request.state, "session_token", "")
 
 
 async def current_user(request: Request, db: Db) -> User | None:
-    token = session_token(request)
-    session = await find_session(db, token) if token else None
+    tab = request.headers.get(TAB_HEADER, "")
+    session = await find_session(db, tab) if tab else None
+    # Only demo sessions may travel in a script-readable header; a real account's never does.
+    if session is None or not session.user.demo:
+        tab = request.cookies.get(COOKIE_NAME, "")
+        session = await find_session(db, tab) if tab else None
+    request.state.session_token = tab if session else ""
     return session.user if session else None
 
 

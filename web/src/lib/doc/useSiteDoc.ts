@@ -6,6 +6,7 @@ import { exportDoc, LOAD, LOCAL, roots, type SiteContent } from "@/lib/doc/model
 import { fromBase64, type SaveStatus, type SendResult, UpdateQueue } from "@/lib/doc/persistence";
 import { type AwarenessEvent, Presence } from "@/lib/doc/awareness";
 import { openStream } from "@/lib/doc/stream";
+import { tabHeaders } from "@/lib/tab-session";
 
 /**
  * The editor's document (04 §3): one Y.Doc per open site, loaded from `GET /sites/{id}/doc`
@@ -45,7 +46,7 @@ async function send(siteId: string, b64: string): Promise<SendResult> {
   try {
     const res = await fetch(`/api/sites/${siteId}/updates`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...tabHeaders() },
       body: JSON.stringify({ updates: [b64] }),
       credentials: "same-origin",
     });
@@ -82,7 +83,7 @@ export function useSiteDoc(siteId: string): SiteDoc {
     const presence = new Presence(doc.clientID, (body, leaving) =>
       fetch(`/api/sites/${siteId}/awareness`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...tabHeaders() },
         body: JSON.stringify(body),
         credentials: "same-origin",
         keepalive: leaving, // outlives the tab on pagehide
@@ -103,9 +104,16 @@ export function useSiteDoc(siteId: string): SiteDoc {
 
     const beacon = () => {
       const pending = queue.pendingBase64();
-      if (!pending || typeof navigator.sendBeacon !== "function") return;
-      const blob = new Blob([JSON.stringify({ updates: [pending] })], { type: "application/json" });
-      navigator.sendBeacon(`/api/sites/${siteId}/updates`, blob);
+      if (!pending) return;
+      // keepalive fetch, not sendBeacon: it outlives the tab the same way and can carry the
+      // teammate tab's session header.
+      void fetch(`/api/sites/${siteId}/updates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...tabHeaders() },
+        body: JSON.stringify({ updates: [pending] }),
+        credentials: "same-origin",
+        keepalive: true,
+      }).catch(() => {}); // still in localStorage: the next load re-sends it
     };
     // The live stream: started once the document has loaded, paused while the tab is hidden.
     let applied = 0;
@@ -117,6 +125,7 @@ export function useSiteDoc(siteId: string): SiteDoc {
       closeStream = openStream({
         siteId,
         from: () => applied,
+        headers: tabHeaders,
         onEvent: (e) => {
           if (e.event === "aw") presence.receive(e.data as AwarenessEvent);
           if (e.event !== "update") return;
@@ -153,7 +162,7 @@ export function useSiteDoc(siteId: string): SiteDoc {
 
     (async () => {
       try {
-        const res = await fetch(`/api/sites/${siteId}/doc`, { credentials: "same-origin", cache: "no-store" });
+        const res = await fetch(`/api/sites/${siteId}/doc`, { credentials: "same-origin", cache: "no-store", headers: tabHeaders() });
         if (!res.ok) throw new Error(res.status === 404 ? GONE : "Couldn't load the site.");
         const body = (await res.json()) as { snapshot: string; updates: string[]; seq: number };
         if (disposed) return;

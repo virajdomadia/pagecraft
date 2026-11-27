@@ -5,10 +5,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.exc import IntegrityError
 
-from app.deps import AppSettings, Db, current_user
+from app.deps import AppSettings, CurrentUser, Db, current_user
 from app.errors import ApiError
 from app.models import User
-from app.schemas.models import DemoSignIn, Me, SignIn, SignUp
+from app.schemas.models import DemoSignIn, Me, SignIn, SignUp, TeammateOut
 from app.services import auth, limits, sites
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -66,6 +66,19 @@ async def demo(
     session, token = await auth.open_session(db, user)
     auth.set_session_cookie(response, token, session.expires_at, settings)
     return me(user)
+
+
+@router.post("/demo/teammate", response_model=TeammateOut)
+async def demo_teammate(
+    request: Request, response: Response, db: Db, user: CurrentUser
+) -> TeammateOut:
+    """L3 "Open as your teammate": a session for the other demo user of this sandbox, returned
+    in the body (not as a cookie) so this tab stays signed in as itself."""
+    await limits.hit(db, f"demo-teammate:{limits.client_ip(request)}", 30, limits.HOUR)
+    partner = await sites.demo_teammate(db, user)
+    _, token = await auth.open_session(db, partner)
+    response.headers["Cache-Control"] = "no-store"
+    return TeammateOut(token=token, me=me(partner))
 
 
 @router.post("/sign-out", status_code=204)

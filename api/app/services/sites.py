@@ -209,6 +209,21 @@ async def open_demo(db: AsyncSession, persona: str, settings: Settings) -> User:
     return people[persona]
 
 
+async def demo_teammate(db: AsyncSession, user: User) -> User:
+    """The other half of `user`'s sandbox (Deepa ↔ Rohan): "open as your teammate" (L3).
+    Only ever a demo user of the same sandbox, so it can't reach anyone else's data."""
+    persona, _, rest = user.email.partition("-")
+    other = {"creator": "collaborator", "collaborator": "creator"}.get(persona)
+    if not user.demo or not user.email.endswith(DEMO_DOMAIN) or other is None:
+        raise ApiError("forbidden", "Only the demo has a teammate to open")
+    partner = (
+        await db.execute(select(User).where(User.email == f"{other}-{rest}", User.demo))
+    ).scalar_one_or_none()
+    if partner is None:
+        raise ApiError("not_found", "This demo has expired. Start a new one from the home page")
+    return partner
+
+
 async def sweep_demo(db: AsyncSession, settings: Settings) -> None:
     expired = select(User.id).where(
         User.demo, User.email.endswith(DEMO_DOMAIN), User.created_at < func.now() - DEMO_TTL

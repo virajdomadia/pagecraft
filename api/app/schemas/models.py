@@ -47,6 +47,13 @@ class DemoSignIn(ApiModel):
     as_: Literal["creator", "collaborator"] = Field(alias="as")
 
 
+class TeammateOut(ApiModel):
+    """A session for the demo teammate, for one browser tab (sent as `x-pagecraft-session`)."""
+
+    token: str
+    me: Me
+
+
 # --- templates ----------------------------------------------------------------------------------
 
 

@@ -21,6 +21,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/demo/teammate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Demo Teammate
+         * @description L3 "Open as your teammate": a session for the other demo user of this sandbox, returned
+         *     in the body (not as a cookie) so this tab stays signed in as itself.
+         */
+        post: operations["demo_teammate_auth_demo_teammate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/me": {
         parameters: {
             query?: never;
@@ -687,6 +708,15 @@ export interface components {
             /** Suggestion */
             suggestion: string | null;
         };
+        /**
+         * TeammateOut
+         * @description A session for the demo teammate, for one browser tab (sent as `x-pagecraft-session`).
+         */
+        TeammateOut: {
+            me: components["schemas"]["Me"];
+            /** Token */
+            token: string;
+        };
         /** TemplateOut */
         TemplateOut: {
             /** Business */
@@ -755,6 +785,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+            /** @description Error envelope (06 §C) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    demo_teammate_auth_demo_teammate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeammateOut"];
                 };
             };
             /** @description Error envelope (06 §C) */

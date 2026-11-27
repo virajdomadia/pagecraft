@@ -2,23 +2,35 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api, errorMessage } from "@/lib/api";
+import { api, errorMessage, type SitesOut } from "@/lib/api";
 
 /**
  * The two landing-page demo logins (PRD decision 2): a reviewer never types a password.
- * Creator = Deepa, owner of Kaapi Corner. Collaborator = Rohan, editor on it.
+ * Creator = Deepa, owner of Kaapi Corner. Collaborator = Rohan, editor on it. `together` adds
+ * "Edit together, live" (L3): Deepa's editor, offering to open Rohan's in a second tab.
  */
-export function DemoButtons({ className = "", next = "/sites", tone = "studio" }: { className?: string; next?: string; tone?: "studio" | "landing" }) {
+export function DemoButtons({
+  className = "",
+  next = "/sites",
+  tone = "studio",
+  together = false,
+}: {
+  className?: string;
+  next?: string;
+  tone?: "studio" | "landing";
+  together?: boolean;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function go(as: "creator" | "collaborator") {
-    setBusy(as);
+  async function go(as: "creator" | "collaborator", live = false) {
+    setBusy(live ? "together" : as);
     setError(null);
     try {
       await api("/auth/demo", { method: "POST", json: { as } });
-      router.push(next);
+      const site = live ? (await api<SitesOut>("/sites")).sites[0] : undefined;
+      router.push(site ? `/sites/${site.id}/edit?together=1` : next);
       router.refresh();
     } catch (err) {
       setError(errorMessage(err));
@@ -33,6 +45,11 @@ export function DemoButtons({ className = "", next = "/sites", tone = "studio" }
   return (
     <div className={className}>
       <div className={tone === "landing" ? "demo-buttons" : "flex flex-col gap-2 sm:flex-row"}>
+        {together && (
+          <button type="button" className={btn} onClick={() => go("creator", true)} disabled={busy !== null}>
+            {busy === "together" ? "Opening…" : "Edit together, live"}
+          </button>
+        )}
         <button type="button" className={btn} onClick={() => go("creator")} disabled={busy !== null}>
           {tone === "landing" ? (
             busy === "creator" ? "Opening…" : "Try as the creator"

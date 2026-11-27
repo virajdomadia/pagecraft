@@ -24,6 +24,7 @@ export function TopBar({
   dirty,
   editingAs,
   presence,
+  teammate,
   protectedSite,
   save,
   canUndo,
@@ -45,6 +46,8 @@ export function TopBar({
   editingAs: string;
   /** Who else is here (L2). */
   presence?: React.ReactNode;
+  /** Demo only (L3): open the editor as the sandbox's other user in a new tab. */
+  teammate?: { name: string; open: () => void };
   protectedSite: boolean;
   save: SaveStatus;
   canUndo: boolean;
@@ -92,6 +95,17 @@ export function TopBar({
       </span>
       <span className="hidden rounded-full bg-desk px-2.5 py-1 text-xs text-ink-2 lg:inline">Editing as {editingAs}</span>
       {presence}
+      {teammate && (
+        <button
+          type="button"
+          onClick={teammate.open}
+          className="whitespace-nowrap rounded-[3px] border border-line px-2.5 py-1.5 text-[13px] font-semibold text-ink-2 hover:border-guide hover:text-ink"
+          title={`Opens a new tab signed in as ${teammate.name}, so you can watch live co-editing`}
+        >
+          Open as {teammate.name.split(" ")[0]} <span aria-hidden="true">↗</span>
+          <span className="sr-only"> (new tab)</span>
+        </button>
+      )}
 
       <div className="flex items-center gap-0.5 border-l border-line pl-3">
         <button type="button" className={ib} onClick={onUndo} disabled={!canUndo} aria-label="Undo" title={`Undo (${mod}Z)`}>

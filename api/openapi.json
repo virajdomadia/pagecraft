@@ -913,6 +913,24 @@
         "title": "SlugCheck",
         "type": "object"
       },
+      "TeammateOut": {
+        "description": "A session for the demo teammate, for one browser tab (sent as `x-pagecraft-session`).",
+        "properties": {
+          "me": {
+            "$ref": "#/components/schemas/Me"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "me"
+        ],
+        "title": "TeammateOut",
+        "type": "object"
+      },
       "TemplateOut": {
         "properties": {
           "business": {
@@ -1069,6 +1087,38 @@
           }
         },
         "summary": "Demo",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/demo/teammate": {
+      "post": {
+        "description": "L3 \"Open as your teammate\": a session for the other demo user of this sandbox, returned\nin the body (not as a cookie) so this tab stays signed in as itself.",
+        "operationId": "demo_teammate_auth_demo_teammate_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeammateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Demo Teammate",
         "tags": [
           "auth"
         ]

@@ -37,10 +37,11 @@ export function TryIt() {
           <h2 id="try-h">Open the editor as a demo user</h2>
           <p>
             Sign in as <b>Deepa</b>, who owns the Kaapi Corner café site, or as <b>Rohan</b>, her collaborator. Edit the
-            headline, swap a photo, change the palette, publish. Each click opens your own private copy of the site; it and
-            anything you publish (marked as a visitor demo) are deleted after 24 hours.
+            headline, swap a photo, change the palette, publish. Or edit together: open Rohan in a second tab and watch two
+            cursors type into one headline. Each click opens your own private copy of the site; it and anything you publish
+            (marked as a visitor demo) are deleted after 24 hours.
           </p>
-          <DemoButtons tone="landing" />
+          <DemoButtons tone="landing" together />
           <p className="try-foot">
             A portfolio project by {site.author}. <a href={site.repo}>Read the code on GitHub</a>.
           </p>
