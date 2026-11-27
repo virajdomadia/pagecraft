@@ -38,6 +38,33 @@
         "title": "ApiErrorResponse",
         "type": "object"
       },
+      "AwarenessIn": {
+        "additionalProperties": false,
+        "properties": {
+          "client": {
+            "maximum": 9007199254740992.0,
+            "minimum": 0.0,
+            "title": "Client",
+            "type": "integer"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PresenceState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "client",
+          "state"
+        ],
+        "title": "AwarenessIn",
+        "type": "object"
+      },
       "Body_upload_image_uploads_post": {
         "properties": {
           "file": {
@@ -56,6 +83,23 @@
           "file"
         ],
         "title": "Body_upload_image_uploads_post",
+        "type": "object"
+      },
+      "Caret": {
+        "additionalProperties": false,
+        "properties": {
+          "anchor": {
+            "$ref": "#/components/schemas/RelPos"
+          },
+          "head": {
+            "$ref": "#/components/schemas/RelPos"
+          }
+        },
+        "required": [
+          "anchor",
+          "head"
+        ],
+        "title": "Caret",
         "type": "object"
       },
       "CreateSite": {
@@ -278,6 +322,74 @@
         "title": "PatchSite",
         "type": "object"
       },
+      "Pointer": {
+        "additionalProperties": false,
+        "properties": {
+          "s": {
+            "maxLength": 40,
+            "title": "S",
+            "type": "string"
+          },
+          "x": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "s",
+          "x",
+          "y"
+        ],
+        "title": "Pointer",
+        "type": "object"
+      },
+      "PresenceState": {
+        "additionalProperties": false,
+        "properties": {
+          "caret": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Caret"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pointer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pointer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "section": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          }
+        },
+        "title": "PresenceState",
+        "type": "object"
+      },
       "PublishIn": {
         "properties": {
           "seo": {
@@ -373,6 +485,53 @@
           "published_at"
         ],
         "title": "PublishedSite",
+        "type": "object"
+      },
+      "RelPos": {
+        "additionalProperties": false,
+        "description": "`Y.relativePositionToJSON` output: where a caret sits, stable under concurrent edits.",
+        "properties": {
+          "assoc": {
+            "default": 0,
+            "maximum": 0.0,
+            "minimum": -1.0,
+            "title": "Assoc",
+            "type": "integer"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/YId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tname": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tname"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/YId"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "RelPos",
         "type": "object"
       },
       "SeoIn": {
@@ -833,6 +992,29 @@
           "height"
         ],
         "title": "UploadOut",
+        "type": "object"
+      },
+      "YId": {
+        "additionalProperties": false,
+        "properties": {
+          "client": {
+            "maximum": 9007199254740992.0,
+            "minimum": 0.0,
+            "title": "Client",
+            "type": "integer"
+          },
+          "clock": {
+            "maximum": 9007199254740992.0,
+            "minimum": 0.0,
+            "title": "Clock",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "client",
+          "clock"
+        ],
+        "title": "YId",
         "type": "object"
       }
     }
@@ -1353,6 +1535,53 @@
         ]
       }
     },
+    "/sites/{site_id}/awareness": {
+      "post": {
+        "description": "Presence (L2): this tab's pointer / selected section / caret, or null when it leaves.\nNever stored past a minute; fanned out by the stream with the poster's name and colour.",
+        "operationId": "post_awareness_sites__site_id__awareness_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AwarenessIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Post Awareness",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
     "/sites/{site_id}/doc": {
       "get": {
         "description": "Snapshot + tail (04 §4). With `since` ≥ the snapshot's seq only the newer tail is sent —\nthe v2 polling fallback; otherwise the whole document.",
@@ -1488,6 +1717,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maximum": 9223372036854775807,
                   "minimum": 0,
                   "type": "integer"
                 },
@@ -1505,6 +1735,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maximum": 9223372036854775807,
                   "minimum": 0,
                   "type": "integer"
                 },

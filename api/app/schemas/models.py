@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import Field, field_validator
+from pydantic import ConfigDict, Field, field_validator
 
 from app.schemas import ApiModel
 
@@ -182,3 +182,46 @@ class PublishedSite(ApiModel):
     # Made in a landing-page demo sandbox: the page is noindexed and carries a banner (H1).
     demo: bool
     published_at: datetime
+
+
+# --- presence (L2) ------------------------------------------------------------------------------
+
+
+class Strict(ApiModel):
+    model_config = ConfigDict(from_attributes=True, extra="forbid")
+
+
+class YId(Strict):
+    client: int = Field(ge=0, le=2**53)
+    clock: int = Field(ge=0, le=2**53)
+
+
+class RelPos(Strict):
+    """`Y.relativePositionToJSON` output: where a caret sits, stable under concurrent edits."""
+
+    type: YId | None = None
+    tname: str | None = Field(default=None, max_length=40)
+    item: YId | None = None
+    assoc: int = Field(default=0, ge=-1, le=0)
+
+
+class Caret(Strict):
+    anchor: RelPos
+    head: RelPos
+
+
+class Pointer(Strict):
+    s: str = Field(max_length=40)  # section id; x / y are fractions of that section's box
+    x: float = Field(ge=0, le=1)
+    y: float = Field(ge=0, le=1)
+
+
+class PresenceState(Strict):
+    section: str | None = Field(default=None, max_length=40)
+    pointer: Pointer | None = None
+    caret: Caret | None = None
+
+
+class AwarenessIn(Strict):
+    client: int = Field(ge=0, le=2**53)  # the tab's Y.Doc clientID
+    state: PresenceState | None  # null = this tab is leaving

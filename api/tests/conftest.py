@@ -17,7 +17,7 @@ from alembic import command
 from alembic.config import Config
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -29,7 +29,9 @@ from sqlalchemy.pool import NullPool
 from app import db as db_module
 from app.db import asyncpg_url, get_session
 from app.main import create_app
-from app.models import Base
+from app.models import Base, SiteMember, User
+from app.seed.__main__ import seed
+from tests.live import live_server
 from tests.settings import make_settings
 
 API_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -129,3 +131,35 @@ async def seeded(db: AsyncSession) -> AsyncSession:
 
     await seed(db, make_settings())
     return db
+
+
+# --- live server (L1/L2 two-client tests) -------------------------------------------------------
+
+
+@pytest.fixture
+def base_url(migrated_database_url: str) -> Iterator[str]:
+    with live_server(migrated_database_url) as url:
+        yield url
+
+
+@pytest.fixture
+async def site(db: AsyncSession, base_url: str) -> AsyncIterator[dict]:
+    """Asha (owner) and Ravi (editor) on one café site, each with their own client."""
+    await seed(db, make_settings())
+    async with AsyncClient(base_url=base_url) as asha, AsyncClient(base_url=base_url) as ravi:
+        for client, email, name in (
+            (asha, "asha@example.com", "Asha"),
+            (ravi, "ravi@example.com", "Ravi"),
+        ):
+            res = await client.post(
+                "/auth/sign-up", json={"email": email, "password": "correct horse", "name": name}
+            )
+            assert res.status_code == 201, res.text
+        res = await asha.post("/sites", json={"name": "Chai Point", "template": "cafe"})
+        site_id = res.json()["id"]
+        ravi_id = (
+            await db.execute(select(User.id).where(User.email == "ravi@example.com"))
+        ).scalar_one()
+        db.add(SiteMember(site_id=site_id, user_id=ravi_id, role="editor"))
+        await db.commit()
+        yield {"id": site_id, "asha": asha, "ravi": ravi, "ravi_id": ravi_id}

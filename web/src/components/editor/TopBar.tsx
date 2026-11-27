@@ -23,6 +23,7 @@ export function TopBar({
   published,
   dirty,
   editingAs,
+  presence,
   protectedSite,
   save,
   canUndo,
@@ -42,6 +43,8 @@ export function TopBar({
   dirty: boolean;
   /** "Rohan · Editor": who this session edits as. */
   editingAs: string;
+  /** Who else is here (L2). */
+  presence?: React.ReactNode;
   protectedSite: boolean;
   save: SaveStatus;
   canUndo: boolean;
@@ -88,6 +91,7 @@ export function TopBar({
         {pill.text}
       </span>
       <span className="hidden rounded-full bg-desk px-2.5 py-1 text-xs text-ink-2 lg:inline">Editing as {editingAs}</span>
+      {presence}
 
       <div className="flex items-center gap-0.5 border-l border-line pl-3">
         <button type="button" className={ib} onClick={onUndo} disabled={!canUndo} aria-label="Undo" title={`Undo (${mod}Z)`}>

@@ -4,6 +4,8 @@ import { type ReactNode, useLayoutEffect, useMemo, useRef, useState } from "reac
 import * as Y from "yjs";
 import { ThemeRoot, SectionView } from "@/components/renderer/SiteRenderer";
 import { Editable } from "@/components/editor/Editable";
+import { PeerLayer, usePublishPresence } from "@/components/editor/Peers";
+import type { Peer, Presence } from "@/lib/doc/awareness";
 import { getAt, type SectionJson, type SiteContent } from "@/lib/doc/model";
 import { fieldFor, REGISTRY } from "@/sections/registry";
 import type { SectionType } from "@/sections/types";
@@ -25,6 +27,10 @@ export function Canvas({
   onSelect,
   drawIn,
   onDrawn,
+  doc,
+  presence,
+  peers,
+  labelFor,
 }: {
   content: SiteContent;
   sections: Y.Array<Y.Map<unknown>>;
@@ -33,12 +39,17 @@ export function Canvas({
   onSelect: (id: string | null) => void;
   drawIn: string | null;
   onDrawn: () => void;
+  doc: Y.Doc;
+  presence: Presence | null;
+  peers: Peer[];
+  labelFor: (sectionId: string) => string;
 }) {
   const outer = useRef<HTMLDivElement>(null);
   const sheet = useRef<HTMLDivElement>(null);
   const [avail, setAvail] = useState(0);
   const [sheetH, setSheetH] = useState(0);
   const w = WIDTHS[width];
+  usePublishPresence(presence, selected, sheet);
 
   useLayoutEffect(() => {
     const o = outer.current;
@@ -70,7 +81,7 @@ export function Canvas({
         <div
           ref={sheet}
           data-pc-sheet
-          className="bp-corners origin-top-left bg-paper shadow-[0_1px_2px_rgba(27,27,47,.08),0_30px_70px_-40px_rgba(27,27,47,.5)]"
+          className="bp-corners relative origin-top-left bg-paper shadow-[0_1px_2px_rgba(27,27,47,.08),0_30px_70px_-40px_rgba(27,27,47,.5)]"
           style={{ width: w, transform: `scale(${scale})`, viewTransitionName: "pc-canvas", ["--pc-scale" as string]: scale }}
           onClickCapture={(e) => {
             // A canvas is for editing: links and buttons inside the site never navigate here.
@@ -98,6 +109,7 @@ export function Canvas({
               />
             ))}
           </ThemeRoot>
+          <PeerLayer peers={peers} sheet={sheet} doc={doc} version={content} labelFor={labelFor} />
         </div>
       </div>
     </div>

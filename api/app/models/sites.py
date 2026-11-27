@@ -19,6 +19,8 @@ from sqlalchemy import (
     LargeBinary,
     Text,
     UniqueConstraint,
+    func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -85,6 +87,28 @@ class SiteUpdate(CreatedMixin, Base):
     update: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     author_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+
+
+class SiteAwareness(Base):
+    """Presence of one open editor tab (L2): pointer, selected section, caret. Ephemeral."""
+
+    __tablename__ = "site_awareness"
+    __table_args__ = (Index("ix_site_awareness_site_id_rev", "site_id", "rev"),)
+
+    site_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("sites.id", ondelete="CASCADE"), primary_key=True
+    )
+    client_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)  # the tab's Y.Doc clientID
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    state: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))  # null: tab left
+    rev: Mapped[int] = mapped_column(
+        BigInteger, nullable=False, server_default=text("nextval('site_awareness_rev')")
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
 

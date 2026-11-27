@@ -3,51 +3,19 @@
 removed member's stream ends. Covers 04 §12's `test_stream_replays_after_reconnect`."""
 
 import base64
-from collections.abc import AsyncIterator, Iterator
 
 import pytest
 from httpx import AsyncClient
 from pycrdt import Doc, Text
-from sqlalchemy import delete, select
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import SiteMember, User
-from app.seed.__main__ import seed
+from app.models import SiteMember
 from app.services import crdt
 from app.services.documents import COMPACT_EVERY
-from tests.live import apply_events, collect, edit_update, live_server, sse
-from tests.settings import make_settings
+from tests.live import apply_events, collect, edit_update, sse
 
 pytestmark = pytest.mark.db
-
-
-@pytest.fixture
-def base_url(migrated_database_url: str) -> Iterator[str]:
-    with live_server(migrated_database_url) as url:
-        yield url
-
-
-@pytest.fixture
-async def site(db: AsyncSession, base_url: str) -> AsyncIterator[dict]:
-    """Asha (owner) and Ravi (editor) on one café site, each with their own client."""
-    await seed(db, make_settings())
-    async with AsyncClient(base_url=base_url) as asha, AsyncClient(base_url=base_url) as ravi:
-        for client, email, name in (
-            (asha, "asha@example.com", "Asha"),
-            (ravi, "ravi@example.com", "Ravi"),
-        ):
-            res = await client.post(
-                "/auth/sign-up", json={"email": email, "password": "correct horse", "name": name}
-            )
-            assert res.status_code == 201, res.text
-        res = await asha.post("/sites", json={"name": "Chai Point", "template": "cafe"})
-        site_id = res.json()["id"]
-        ravi_id = (
-            await db.execute(select(User.id).where(User.email == "ravi@example.com"))
-        ).scalar_one()
-        db.add(SiteMember(site_id=site_id, user_id=ravi_id, role="editor"))
-        await db.commit()
-        yield {"id": site_id, "asha": asha, "ravi": ravi, "ravi_id": ravi_id}
 
 
 async def open_doc(client: AsyncClient, site_id: str) -> tuple[Doc, int]:

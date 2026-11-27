@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Canvas, type Width } from "@/components/editor/Canvas";
 import { Inspector } from "@/components/editor/Inspector";
 import { Layers } from "@/components/editor/Layers";
+import { PresenceList, usePeers } from "@/components/editor/Peers";
 import { Library } from "@/components/editor/Library";
 import { PublishDialog } from "@/components/editor/PublishDialog";
 import { ThemePanel } from "@/components/editor/ThemePanel";
@@ -75,6 +76,15 @@ export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: b
   useEffect(() => {
     if (selected && content && !content.sections.some((s) => s.id === selected)) setSelected(null);
   }, [content, selected]);
+
+  const peers = usePeers(sd.presence);
+  const labelFor = useCallback(
+    (id: string) => {
+      const s = content?.sections.find((x) => x.id === id);
+      return s ? (REGISTRY[s.type as SectionType]?.label ?? s.type) : "a section";
+    },
+    [content],
+  );
 
   const sectionsY = useMemo(() => (doc ? roots(doc).sections : null), [doc]);
   // Stable: draw-in completion must not restart the animation effect.
@@ -210,6 +220,7 @@ export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: b
         published={published}
         dirty={dirty}
         editingAs={`${me.name} · ${site.role === "owner" ? "Owner" : "Editor"}`}
+        presence={<PresenceList peers={peers} meId={me.id} labelFor={labelFor} />}
         protectedSite={site.protected}
         save={sd.save}
         canUndo={sd.canUndo}
@@ -250,6 +261,10 @@ export function Editor({ site, me, fresh }: { site: SiteDetail; me: Me; fresh: b
             onSelect={setSelected}
             drawIn={drawIn}
             onDrawn={onDrawn}
+            doc={doc!}
+            presence={sd.presence}
+            peers={peers}
+            labelFor={labelFor}
           />
         </main>
         <aside className="min-h-0 overflow-y-auto border-l border-line bg-paper" aria-label="Inspector">

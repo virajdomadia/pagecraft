@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import * as Y from "yjs";
 import { exportDoc, LOAD, LOCAL, roots, type SiteContent } from "@/lib/doc/model";
 import { fromBase64, type SaveStatus, type SendResult, UpdateQueue } from "@/lib/doc/persistence";
+import { type AwarenessEvent, Presence } from "@/lib/doc/awareness";
 import { openStream } from "@/lib/doc/stream";
 
 /**
@@ -18,12 +19,14 @@ const HIDDEN_CLOSE_MS = 60_000;
 
 const GONE = "This site doesn't exist or you no longer have access.";
 
-type Loaded ={ doc: Y.Doc; undo: Y.UndoManager; queue: UpdateQueue };
+type Loaded = { doc: Y.Doc; undo: Y.UndoManager; queue: UpdateQueue; presence: Presence };
 
 export type SiteDoc = {
   status: "loading" | "ready" | "error";
   error: string | null;
   doc: Y.Doc | null;
+  /** Who else is here (L2): peers in, this tab's pointer / section / caret out. */
+  presence: Presence | null;
   content: SiteContent | null;
   save: SaveStatus;
   canUndo: boolean;
@@ -76,6 +79,15 @@ export function useSiteDoc(siteId: string): SiteDoc {
     const doc = new Y.Doc();
     const queue = new UpdateQueue(siteId, (b) => send(siteId, b), localStore());
     const unsubscribeSave = queue.subscribe(setSave);
+    const presence = new Presence(doc.clientID, (body, leaving) => {
+      void fetch(`/api/sites/${siteId}/awareness`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        credentials: "same-origin",
+        keepalive: leaving, // outlives the tab on pagehide
+      }).catch(() => {}); // presence is best effort: the next heartbeat repairs it
+    });
 
     const bump = () => {
       version.current++;
@@ -103,6 +115,7 @@ export function useSiteDoc(siteId: string): SiteDoc {
         siteId,
         from: () => applied,
         onEvent: (e) => {
+          if (e.event === "aw") presence.receive(e.data as AwarenessEvent);
           if (e.event !== "update") return;
           const { seq, data } = e.data as { seq: number; data: string };
           Y.applyUpdate(doc, fromBase64(data), LOAD);
@@ -114,6 +127,11 @@ export function useSiteDoc(siteId: string): SiteDoc {
     const stopStream = () => {
       closeStream?.();
       closeStream = null;
+      presence.leave();
+    };
+    const leave = () => {
+      beacon();
+      presence.leave();
     };
 
     const onVisibility = () => {
@@ -122,9 +140,12 @@ export function useSiteDoc(siteId: string): SiteDoc {
       if (document.visibilityState === "hidden") {
         beacon();
         hiddenTimer = setTimeout(stopStream, HIDDEN_CLOSE_MS);
-      } else if (ready) startStream();
+      } else if (ready) {
+        startStream();
+        presence.start();
+      }
     };
-    window.addEventListener("pagehide", beacon);
+    window.addEventListener("pagehide", leave);
     document.addEventListener("visibilitychange", onVisibility);
 
     (async () => {
@@ -147,10 +168,13 @@ export function useSiteDoc(siteId: string): SiteDoc {
         undo.on("stack-item-added", onStack);
         undo.on("stack-item-popped", onStack);
         bump();
-        setLoaded({ doc, undo, queue });
+        setLoaded({ doc, undo, queue, presence });
         applied = body.seq;
         ready = true;
-        if (document.visibilityState !== "hidden") startStream();
+        if (document.visibilityState !== "hidden") {
+          startStream();
+          presence.start();
+        }
       } catch (err) {
         if (!disposed) setError(err instanceof Error ? err.message : "Couldn't load the site.");
       }
@@ -161,7 +185,8 @@ export function useSiteDoc(siteId: string): SiteDoc {
       stopStream();
       if (hiddenTimer) clearTimeout(hiddenTimer);
       beacon();
-      window.removeEventListener("pagehide", beacon);
+      presence.leave();
+      window.removeEventListener("pagehide", leave);
       document.removeEventListener("visibilitychange", onVisibility);
       unsubscribeSave();
       queue.dispose();
@@ -194,6 +219,7 @@ export function useSiteDoc(siteId: string): SiteDoc {
     status: error ? "error" : loaded ? "ready" : "loading",
     error,
     doc: loaded?.doc ?? null,
+    presence: loaded?.presence ?? null,
     content,
     save,
     canUndo: stacks.undo > 0,
