@@ -26,11 +26,13 @@ export function parseSse(buffer: string, emit: (e: StreamEvent) => void): string
       else if (field === "id") id = value;
     }
     if (!data) continue;
+    let parsed: unknown;
     try {
-      emit({ event, data: JSON.parse(data), id });
+      parsed = JSON.parse(data);
     } catch {
-      /* a malformed event is skipped, never fatal */
+      continue; // a malformed event is skipped, never fatal
     }
+    emit({ event, data: parsed, id }); // a throwing handler ends this connection (see openStream)
   }
   return rest;
 }
@@ -46,6 +48,8 @@ export type StreamOptions = {
 };
 
 const MAX_BACKOFF_MS = 15_000;
+/** A connection that lasted this long (or delivered an update) was healthy: reconnect at once. */
+const HEALTHY_MS = 5_000;
 
 /** Open the stream and keep it open until the returned function is called. */
 export function openStream(opts: StreamOptions): () => void {
@@ -56,7 +60,8 @@ export function openStream(opts: StreamOptions): () => void {
   const run = async () => {
     while (!stopped) {
       controller = new AbortController();
-      let healthy = false;
+      const opened = Date.now();
+      let delivered = false;
       try {
         const res = await fetch(`/api/sites/${opts.siteId}/stream?from=${opts.from()}`, {
           credentials: "same-origin",
@@ -75,26 +80,29 @@ export function openStream(opts: StreamOptions): () => void {
         for (;;) {
           const { value, done } = await reader.read();
           if (done) break;
+          // onEvent throwing (an update that won't apply) lands in the catch: reconnect from the
+          // last seq that did apply, with backoff, rather than skip past it.
           buffer = parseSse(buffer + value, (e) => {
-            if (e.event === "hello") {
-              healthy = true;
-              backoff = 500;
-            }
+            if (stopped) return;
             if (e.event === "gone") {
               stopped = true;
               opts.onGone();
-            } else opts.onEvent(e);
+              return;
+            }
+            opts.onEvent(e);
+            if (e.event === "update") delivered = true;
           });
           if (stopped) return;
         }
       } catch {
         if (stopped) return;
       }
-      // A clean close (lifetime reached) reconnects at once; failures back off.
-      if (!healthy) {
-        await new Promise((r) => setTimeout(r, backoff));
-        backoff = Math.min(backoff * 2, MAX_BACKOFF_MS);
-      }
+      // A healthy connection that ended (lifetime reached) reconnects almost at once; one that
+      // failed fast backs off, so a broken API is never hammered.
+      const healthy = delivered || Date.now() - opened >= HEALTHY_MS;
+      if (healthy) backoff = 500;
+      await new Promise((r) => setTimeout(r, (healthy ? 250 : backoff) + Math.random() * 250));
+      if (!healthy) backoff = Math.min(backoff * 2, MAX_BACKOFF_MS);
     }
   };
   void run();

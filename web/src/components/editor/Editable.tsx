@@ -81,10 +81,11 @@ export function Editable({
       if (el.textContent === next) return;
       const focused = document.activeElement === el;
       // A teammate's edit keeps your caret on its character; undo / redo jump to the change.
-      const mine = focused && event.transaction.origin === LOAD ? caretOffsets(el) : null;
+      const remote = event.transaction.origin === LOAD;
+      const mine = focused && remote ? caretOffsets(el) : null;
       el.textContent = next;
       if (mine) placeCaret(el, shiftIndex(event.delta, mine[0]), shiftIndex(event.delta, mine[1]));
-      else if (focused) placeCaret(el, caretAfter(event.delta));
+      else if (focused && !remote) placeCaret(el, caretAfter(event.delta));
     };
     text.observe(observer);
     return () => text.unobserve(observer);

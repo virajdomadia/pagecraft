@@ -5,13 +5,13 @@ import asyncio
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, Header, Query, Response, UploadFile
+from fastapi import APIRouter, File, Form, Header, Query, Request, Response, UploadFile
 from fastapi.responses import StreamingResponse
 from pycrdt import Array, Map
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from app.deps import AppSettings, CurrentUser, Db, Member, Owner, load_access
+from app.deps import AppSettings, CurrentUser, Db, Member, Owner, load_access, session_token
 from app.errors import ApiError
 from app.models import Template
 from app.schemas.models import (
@@ -31,10 +31,12 @@ from app.schemas.models import (
     UploadOut,
 )
 from app.services import crdt, documents, limits, publish, sites, slugs, stream, uploads
+from app.services.auth import hash_token
 from app.services.revalidate import revalidate, site_tag
 
 router = APIRouter(tags=["sites"])
 
+MAX_SEQ = 2**63 - 1  # bigint
 PROTECTED = "Demo sites keep the address they were given — sign up to choose your own"
 
 
@@ -140,10 +142,11 @@ async def post_updates(body: UpdatesIn, access: Member, db: Db) -> SeqOut:
     responses={200: {"content": {"text/event-stream": {}}}},
 )
 async def stream_site(
+    request: Request,
     access: Member,
     db: Db,
-    from_: Annotated[int | None, Query(alias="from", ge=0)] = None,
-    last_event_id: Annotated[int | None, Header(ge=0)] = None,
+    from_: Annotated[int | None, Query(alias="from", ge=0, le=MAX_SEQ)] = None,
+    last_event_id: Annotated[int | None, Header(ge=0, le=MAX_SEQ)] = None,
 ) -> StreamingResponse:
     """SSE (04 §5): `hello`, then `update` (id = seq) for every change after `from` /
     `Last-Event-ID`, `gone` when access ends, a comment ping every 20 s; closes after ~280 s."""
@@ -153,7 +156,7 @@ async def stream_site(
     site_id, user_id = access.site.id, access.user.id
     await db.close()  # don't hold a pooled connection for the stream's lifetime
     return StreamingResponse(
-        stream.events(engine, site_id, user_id, since),
+        stream.events(engine, site_id, user_id, hash_token(session_token(request)), since),
         media_type="text/event-stream",
         # no-transform: a compressing proxy (Next's own server does) would buffer the stream.
         headers={"Cache-Control": "no-store, no-transform", "X-Accel-Buffering": "no"},

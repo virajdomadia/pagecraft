@@ -116,6 +116,8 @@ async def test_stream_replays_after_reconnect(site: dict) -> None:
         stream = sse(ravi, f"/sites/{sid}/stream", **kw)
         got = await collect(stream, updates(1))
         assert [d["seq"] for n, d in got if n == "update"] == [seqs[2]]
+        with pytest.raises(TimeoutError):  # and nothing else follows
+            await collect(stream, updates(1), timeout=0.5)
         await stream.aclose()
 
 
@@ -142,3 +144,12 @@ async def test_removed_editor_stream_ends(site: dict, db: AsyncSession) -> None:
     got = await collect(stream, lambda g: g[-1][0] == "gone")
     assert got[-1] == ("gone", {})
     assert (await ravi.get(f"/sites/{sid}/stream")).status_code == 404
+
+
+async def test_signing_out_ends_the_stream(site: dict) -> None:
+    sid, ravi = site["id"], site["ravi"]
+    stream = sse(ravi, f"/sites/{sid}/stream")
+    await collect(stream, lambda g: len(g) == 1)
+    await ravi.post("/auth/sign-out")
+    got = await collect(stream, lambda g: g[-1][0] == "gone")
+    assert got[-1] == ("gone", {})
