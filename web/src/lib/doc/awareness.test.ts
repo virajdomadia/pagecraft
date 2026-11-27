@@ -9,7 +9,7 @@ describe("Presence", () => {
 
   it("sends at most one post per THROTTLE_MS, always the latest state", async () => {
     const sent: (PresenceState | null)[] = [];
-    const p = new Presence(7, (b) => sent.push(b.state));
+    const p = new Presence(7, async (b) => (sent.push(b.state), 204));
     p.start();
     expect(sent).toHaveLength(1);
     for (let i = 0; i < 20; i++) p.set({ pointer: { s: "s_a", x: i / 20, y: 0.5 } });
@@ -28,7 +28,7 @@ describe("Presence", () => {
   });
 
   it("tracks other tabs, ignores its own echo, and drops quiet or departed peers", async () => {
-    const p = new Presence(7, () => {});
+    const p = new Presence(7, async () => 204);
     p.start();
     p.receive({ client: 7, user: rohan, state: { section: "mine" } });
     expect(p.list()).toHaveLength(0);
@@ -39,6 +39,29 @@ describe("Presence", () => {
     expect(p.list().map((x) => x.client)).toEqual([9]);
     await vi.advanceTimersByTimeAsync(EXPIRE_MS + 5_000);
     expect(p.list()).toHaveLength(0);
+    p.stop();
+  });
+});
+
+describe("Presence posting", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("numbers every post, resends the latest after a 429, and stays silent before start()", async () => {
+    const bodies: { n: number; section?: string }[] = [];
+    const answers = [429, 204];
+    const p = new Presence(7, async (b) => (bodies.push({ n: b.n, section: b.state?.section }), answers.shift() ?? 204));
+    p.set({ section: "s_a" });
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(bodies).toHaveLength(0); // hidden tab: not started
+    p.start();
+    await vi.advanceTimersByTimeAsync(999);
+    expect(bodies).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(bodies).toEqual([
+      { n: 1, section: "s_a" },
+      { n: 2, section: "s_a" },
+    ]);
     p.stop();
   });
 });

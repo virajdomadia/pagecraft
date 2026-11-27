@@ -224,4 +224,5 @@ class PresenceState(Strict):
 
 class AwarenessIn(Strict):
     client: int = Field(ge=0, le=2**53)  # the tab's Y.Doc clientID
+    n: int = Field(ge=1, le=2**53)  # the tab's post counter: later posts win
     state: PresenceState | None  # null = this tab is leaving

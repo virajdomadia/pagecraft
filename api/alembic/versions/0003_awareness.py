@@ -29,6 +29,7 @@ def upgrade() -> None:
         sa.Column("client_id", sa.BigInteger(), nullable=False),
         sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("state", postgresql.JSONB()),
+        sa.Column("n", sa.BigInteger(), server_default="0", nullable=False),
         sa.Column(
             "rev",
             sa.BigInteger(),

@@ -124,7 +124,8 @@ export function PeerLayer({
 
   useLayoutEffect(() => {
     const el = sheet.current;
-    setDrawn(el ? peers.map((p) => measure(p, el, doc)) : []);
+    if (!el || peers.length === 0) setDrawn((d) => (d.length ? [] : d)); // alone: no layout reads
+    else setDrawn(peers.map((p) => measure(p, el, doc)));
   }, [peers, sheet, doc, version, tick]);
 
   useEffect(() => {
@@ -164,16 +165,16 @@ export function PeerLayer({
 
 /** A pointer that glides to each new position and leaves a short comet trail behind it. */
 function Cursor({ x, y, name }: { x: number; y: number; name: string }) {
-  const trail = useRef<{ x: number; y: number; k: number }[]>([]);
-  const last = useRef<{ x: number; y: number } | null>(null);
-  const k = useRef(0);
-  if (last.current && (last.current.x !== x || last.current.y !== y)) {
-    trail.current = [...trail.current.slice(-5), { ...last.current, k: k.current++ }];
-  }
-  last.current = { x, y };
+  const [trail, setTrail] = useState<{ x: number; y: number; k: number }[]>([]);
+  const last = useRef<{ x: number; y: number; k: number } | null>(null);
+  useEffect(() => {
+    const prev = last.current;
+    last.current = { x, y, k: (prev?.k ?? 0) + 1 };
+    if (prev) setTrail((t) => [...t.slice(-5), prev]);
+  }, [x, y]);
   return (
     <>
-      {trail.current.map((t) => (
+      {trail.map((t) => (
         <i key={t.k} className="pc-peer-trail" style={{ transform: `translate(${t.x}px, ${t.y}px) scale(calc(1 / var(--pc-scale, 1)))` }} />
       ))}
       <div className="pc-peer-cursor" style={{ transform: `translate(${x}px, ${y}px) scale(calc(1 / var(--pc-scale, 1)))` }}>

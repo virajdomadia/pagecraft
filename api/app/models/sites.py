@@ -104,6 +104,7 @@ class SiteAwareness(Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     state: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))  # null: tab left
+    n: Mapped[int] = mapped_column(BigInteger, nullable=False, server_default="0")  # tab's counter
     rev: Mapped[int] = mapped_column(
         BigInteger, nullable=False, server_default=text("nextval('site_awareness_rev')")
     )

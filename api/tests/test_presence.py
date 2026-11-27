@@ -2,12 +2,15 @@
 with the server's idea of who it is, a tab id can't be hijacked, leaving is announced, and the
 payload is validated."""
 
+import datetime as dt
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import SiteAwareness
+from app.services import presence
 from app.services.presence import MAX_TABS
 from tests.live import collect, sse
 
@@ -20,7 +23,11 @@ def aw(got: list) -> list[dict]:
     return [d for name, d in got if name == "aw"]
 
 
+_n = iter(range(1, 10**6))
+
+
 async def post(client: AsyncClient, sid: str, body: dict) -> int:
+    body = {"n": next(_n), **body}
     return (await client.post(f"/sites/{sid}/awareness", json=body)).status_code
 
 
@@ -76,8 +83,33 @@ async def test_presence_is_validated_and_member_only(site: dict, base_url: str) 
         assert await post(stranger, sid, {"client": 1, "state": STATE}) == 404
 
 
-async def test_one_user_cannot_flood_a_site_with_tabs(site: dict) -> None:
+async def test_one_user_cannot_flood_a_site_with_tabs(site: dict, db: AsyncSession) -> None:
     sid, asha = site["id"], site["asha"]
+    # Leaving never creates a row, and a tab that left still counts while recent.
+    assert await post(asha, sid, {"client": 50, "state": None}) == 204
     for client in range(MAX_TABS):
         assert await post(asha, sid, {"client": 100 + client, "state": STATE}) == 204
+        assert await post(asha, sid, {"client": 100 + client, "state": None}) == 204
     assert await post(asha, sid, {"client": 999, "state": STATE}) == 429
+    rows = (await db.execute(select(SiteAwareness.client_id))).scalars().all()
+    assert 50 not in rows and len(rows) == MAX_TABS
+
+
+async def test_a_late_post_never_overwrites_a_newer_one(
+    site: dict, db: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        presence, "MIN_GAP", dt.timedelta(seconds=30)
+    )  # every rewrite is "too soon"
+    sid, asha = site["id"], site["asha"]
+    url = f"/sites/{sid}/awareness"
+    assert (await asha.post(url, json={"client": 21, "n": 5, "state": STATE})).status_code == 204
+    old = {"client": 21, "n": 4, "state": {"section": "s_old001"}}
+    assert (await asha.post(url, json=old)).status_code == 204
+    row = (
+        await db.execute(select(SiteAwareness).where(SiteAwareness.client_id == 21))
+    ).scalar_one()
+    assert row.state == STATE
+    # Too soon after the last write: 429, so the tab sends its latest state again shortly.
+    soon = {"client": 21, "n": 6, "state": {"section": "s_new001"}}
+    assert (await asha.post(url, json=soon)).status_code == 429

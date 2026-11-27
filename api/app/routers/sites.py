@@ -179,7 +179,7 @@ async def post_awareness(body: AwarenessIn, access: Member, db: Db) -> Response:
     """Presence (L2): this tab's pointer / selected section / caret, or null when it leaves.
     Never stored past a minute; fanned out by the stream with the poster's name and colour."""
     state = body.state.model_dump(exclude_none=True) if body.state else None
-    await presence.publish(db, access.site.id, access.user.id, body.client, state)
+    await presence.publish(db, access.site.id, access.user.id, body.client, body.n, state)
     return Response(status_code=204)
 
 

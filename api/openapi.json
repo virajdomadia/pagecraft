@@ -47,6 +47,12 @@
             "title": "Client",
             "type": "integer"
           },
+          "n": {
+            "maximum": 9007199254740992.0,
+            "minimum": 1.0,
+            "title": "N",
+            "type": "integer"
+          },
           "state": {
             "anyOf": [
               {
@@ -60,6 +66,7 @@
         },
         "required": [
           "client",
+          "n",
           "state"
         ],
         "title": "AwarenessIn",

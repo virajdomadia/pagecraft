@@ -21,7 +21,9 @@ export const THROTTLE_MS = 100;
 export const HEARTBEAT_MS = 15_000;
 export const EXPIRE_MS = 30_000;
 
-type Post = (body: { client: number; state: PresenceState | null }, leaving: boolean) => void;
+export type PresenceBody = { client: number; n: number; state: PresenceState | null };
+/** Resolves to the HTTP status (0 when offline). */
+type Post = (body: PresenceBody, leaving: boolean) => Promise<number>;
 
 export class Presence {
   private peers = new Map<number, Peer>();
@@ -33,6 +35,8 @@ export class Presence {
   private sweep: ReturnType<typeof setInterval> | null = null;
   private listeners = new Set<() => void>();
   private left = false;
+  private started = false;
+  private n = 0;
 
   constructor(
     readonly client: number,
@@ -41,6 +45,7 @@ export class Presence {
 
   start(): void {
     this.left = false;
+    this.started = true;
     this.send();
     this.beat ??= setInterval(() => this.send(), HEARTBEAT_MS);
     this.sweep ??= setInterval(() => this.expire(), 5_000);
@@ -60,7 +65,7 @@ export class Presence {
     if (this.left) return;
     this.left = true;
     this.stop();
-    this.post({ client: this.client, state: null }, true);
+    void this.post({ client: this.client, n: ++this.n, state: null }, true);
   }
 
   stop(): void {
@@ -68,6 +73,7 @@ export class Presence {
     if (this.beat) clearInterval(this.beat);
     if (this.sweep) clearInterval(this.sweep);
     this.timer = this.beat = this.sweep = null;
+    this.started = false;
   }
 
   receive(e: AwarenessEvent): void {
@@ -95,9 +101,13 @@ export class Presence {
   private send(): void {
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
-    if (this.left) return;
+    if (this.left || !this.started) return; // a tab opened in the background stays invisible
     this.lastSent = Date.now();
-    this.post({ client: this.client, state: this.local }, false);
+    const n = ++this.n;
+    void this.post({ client: this.client, n, state: this.local }, false).then((status) => {
+      // 429: the server dropped it as too soon (or too many tabs); send the latest again later.
+      if (status === 429 && n === this.n && !this.timer && !this.left) this.timer = setTimeout(() => this.send(), 1_000);
+    });
   }
 
   private changed(): void {

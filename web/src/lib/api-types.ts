@@ -357,6 +357,8 @@ export interface components {
         AwarenessIn: {
             /** Client */
             client: number;
+            /** N */
+            n: number;
             state: components["schemas"]["PresenceState"] | null;
         };
         /** Body_upload_image_uploads_post */

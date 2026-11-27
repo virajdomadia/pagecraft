@@ -79,15 +79,18 @@ export function useSiteDoc(siteId: string): SiteDoc {
     const doc = new Y.Doc();
     const queue = new UpdateQueue(siteId, (b) => send(siteId, b), localStore());
     const unsubscribeSave = queue.subscribe(setSave);
-    const presence = new Presence(doc.clientID, (body, leaving) => {
-      void fetch(`/api/sites/${siteId}/awareness`, {
+    const presence = new Presence(doc.clientID, (body, leaving) =>
+      fetch(`/api/sites/${siteId}/awareness`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
         credentials: "same-origin",
         keepalive: leaving, // outlives the tab on pagehide
-      }).catch(() => {}); // presence is best effort: the next heartbeat repairs it
-    });
+      }).then(
+        (r) => r.status,
+        () => 0, // presence is best effort: the next heartbeat repairs it
+      ),
+    );
 
     const bump = () => {
       version.current++;

@@ -28,6 +28,7 @@ from app.services.presence import LIVE
 POLL = 0.1  # seconds between reads: with the 100 ms autosave, edits show up in ~250 ms
 IDLE_POLL = 0.5  # once nothing has changed for IDLE_AFTER seconds
 IDLE_AFTER = 30.0
+OVERLAP = 20  # presence revs re-read each time, see _presence
 PING = 20.0  # keep proxies from closing an idle stream
 LIFETIME = 280.0  # under Vercel's 300 s maxDuration; the client reconnects with `from=`
 
@@ -100,7 +101,9 @@ async def _presence(conn: AsyncConnection, site_id: uuid.UUID, after: int) -> li
         .join(User, User.id == SiteAwareness.user_id)
         .where(
             SiteAwareness.site_id == site_id,
-            SiteAwareness.rev > after,
+            # Overlap: a write that took its rev earlier but committed later is not skipped
+            # (re-sending a row is harmless; the client keeps the latest per tab).
+            SiteAwareness.rev > after - OVERLAP,
             SiteAwareness.updated_at > func.now() - LIVE,
         )
         .order_by(SiteAwareness.rev)
@@ -133,7 +136,7 @@ async def events(
         for item in out:
             yield item
         now = time.monotonic()
-        if out:
+        if any(item.startswith("id:") for item in out):  # an edit, not just a presence beat
             changed = now
         if now - pinged >= PING:
             pinged = now
