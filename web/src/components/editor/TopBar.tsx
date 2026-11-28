@@ -31,6 +31,8 @@ export function TopBar({
   canRedo,
   onUndo,
   onRedo,
+  historyOpen = false,
+  onHistory,
   width,
   onWidth,
   onPublish,
@@ -54,6 +56,8 @@ export function TopBar({
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  historyOpen?: boolean;
+  onHistory?: () => void;
   width: Width;
   onWidth: (w: Width) => void;
   onPublish: () => void;
@@ -93,7 +97,11 @@ export function TopBar({
         <i key={save} className={`pc-dot-pop h-1.5 w-1.5 rounded-full ${pill.dot}`} aria-hidden="true" />
         {pill.text}
       </span>
-      <span className="hidden rounded-full bg-desk px-2.5 py-1 text-xs text-ink-2 lg:inline">Editing as {editingAs}</span>
+      <span className="hidden whitespace-nowrap rounded-full bg-desk px-2.5 py-1 text-xs text-ink-2 lg:inline">
+        <span className="hidden 2xl:inline">Editing as </span>
+        <span className="sr-only 2xl:hidden">Editing as </span>
+        {editingAs}
+      </span>
       {presence}
       {teammate && (
         <button
@@ -118,6 +126,13 @@ export function TopBar({
             <path d="M10.5 3.5l3 3-3 3M13 6.5H6.5a4 4 0 0 0 0 8H9" />
           </svg>
         </button>
+        {onHistory && (
+          <button type="button" className={`${ib} ${historyOpen ? "!border-line bg-guide-soft" : ""}`} onClick={onHistory} aria-pressed={historyOpen} aria-label="Version history" title="Version history">
+            <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+              <path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9M2.5 2.5v2.6h2.6M8 5v3.2l2 1.3" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="flex flex-1 justify-center">
@@ -128,7 +143,7 @@ export function TopBar({
               type="button"
               aria-pressed={width === w}
               onClick={() => onWidth(w)}
-              className={`px-3 py-1.5 text-xs ${width === w ? "bg-ink text-white" : "bg-paper text-ink-2 hover:bg-guide-soft"}`}
+              className={`whitespace-nowrap px-3 py-1.5 text-xs ${width === w ? "bg-ink text-white" : "bg-paper text-ink-2 hover:bg-guide-soft"}`}
             >
               {w === "desktop" ? "Desktop" : w === "tablet" ? "Tablet" : "Phone"}
               <span className="text-xs opacity-70"> {w === "desktop" ? "1280" : w === "tablet" ? "834" : "390"}</span>

@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.errors import ApiError
 from app.models import Site, SiteUpdate
 from app.sections import shape_problem
-from app.services import crdt
+from app.services import crdt, history
 
 COMPACT_EVERY = 50
 MAX_BATCH_BYTES = 256 * 1024
@@ -94,10 +94,12 @@ async def append(
         raise ApiError("conflict", "This site changed since you opened it — reload to keep editing")
     if len(doc.get_update()) > MAX_DOC_BYTES:
         raise ApiError("too_large", "This site is too large to save", status=413)
-    problem = shape_problem(crdt.export(doc))
+    content = crdt.export(doc)
+    problem = shape_problem(content)
     if problem is not None:
         raise ApiError("validation", problem)
     seq = await _append_locked(db, site, update, author_id)
+    await history.maybe_autosave(db, site.id, content, author_id)
     await db.commit()
     return seq
 

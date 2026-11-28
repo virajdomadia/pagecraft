@@ -50,6 +50,8 @@ export type StreamOptions = {
 const MAX_BACKOFF_MS = 15_000;
 /** A connection that lasted this long (or delivered an update) was healthy: reconnect at once. */
 const HEALTHY_MS = 5_000;
+/** The server pings every 20 s; this much silence means a dead connection nobody closed. */
+export const SILENCE_MS = 45_000;
 
 /** Open the stream and keep it open until the returned function is called. */
 export function openStream(opts: StreamOptions): () => void {
@@ -62,6 +64,8 @@ export function openStream(opts: StreamOptions): () => void {
       controller = new AbortController();
       const opened = Date.now();
       let delivered = false;
+      const ctrl = controller;
+      let silence = setTimeout(() => ctrl.abort(), SILENCE_MS);
       try {
         const res = await fetch(`/api/sites/${opts.siteId}/stream?from=${opts.from()}`, {
           credentials: "same-origin",
@@ -80,6 +84,8 @@ export function openStream(opts: StreamOptions): () => void {
         for (;;) {
           const { value, done } = await reader.read();
           if (done) break;
+          clearTimeout(silence);
+          silence = setTimeout(() => ctrl.abort(), SILENCE_MS);
           // onEvent throwing (an update that won't apply) lands in the catch: reconnect from the
           // last seq that did apply, with backoff, rather than skip past it.
           buffer = parseSse(buffer + value, (e) => {
@@ -96,6 +102,8 @@ export function openStream(opts: StreamOptions): () => void {
         }
       } catch {
         if (stopped) return;
+      } finally {
+        clearTimeout(silence);
       }
       // A healthy connection that ended (lifetime reached) reconnects almost at once; one that
       // failed fast backs off, so a broken API is never hammered.

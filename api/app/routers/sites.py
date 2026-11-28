@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.deps import AppSettings, CurrentUser, Db, Member, Owner, load_access, session_token
 from app.errors import ApiError
-from app.models import Template
+from app.models import SiteSnapshot, Template, User
 from app.schemas.models import (
     AwarenessIn,
     CreateSite,
@@ -30,6 +30,8 @@ from app.schemas.models import (
     SiteDetail,
     SitesOut,
     SlugCheck,
+    SnapshotContent,
+    SnapshotOut,
     TemplateOut,
     UpdatesIn,
     UploadOut,
@@ -37,6 +39,7 @@ from app.schemas.models import (
 from app.services import (
     crdt,
     documents,
+    history,
     invites,
     limits,
     presence,
@@ -214,6 +217,45 @@ async def revoke_invite(invite_id: uuid.UUID, access: Owner, db: Db) -> Response
 async def remove_member(user_id: uuid.UUID, access: Owner, db: Db) -> Response:
     """L4. Their next request is 404; an open editor of theirs gets `gone` on the stream."""
     await invites.remove_member(db, access, user_id)
+    return Response(status_code=204)
+
+
+@router.get("/sites/{site_id}/snapshots", response_model=list[SnapshotOut])
+async def list_snapshots(access: Member, db: Db) -> list[SnapshotOut]:
+    """L5: the newest versions first."""
+    rows = await db.execute(
+        select(SiteSnapshot, User.name)
+        .outerjoin(User, User.id == SiteSnapshot.author_id)
+        .where(SiteSnapshot.site_id == access.site.id)
+        .order_by(SiteSnapshot.created_at.desc())
+    )
+    return [
+        SnapshotOut(id=s.id, label=s.label, author=name, created_at=s.created_at)
+        for s, name in rows
+    ]
+
+
+@router.get("/sites/{site_id}/snapshots/{snapshot_id}", response_model=SnapshotContent)
+async def get_snapshot(snapshot_id: uuid.UUID, access: Member, db: Db) -> SnapshotContent:
+    snap = await db.get(SiteSnapshot, snapshot_id)
+    if snap is None or snap.site_id != access.site.id:
+        raise ApiError("not_found", "That version is gone")
+    return SnapshotContent(
+        id=snap.id,
+        label=snap.label,
+        created_at=snap.created_at,
+        content=SiteContentModel(**snap.content),
+    )
+
+
+@router.post("/sites/{site_id}/snapshots", status_code=204)
+async def save_snapshot(access: Member, db: Db) -> Response:
+    """L5: keep the current state as "Before restore" (the browser calls this before it
+    restores an older version, so the restore itself can be undone from history too)."""
+    await limits.hit(db, f"snapshot:{access.user.id}", 30, limits.HOUR)
+    content = await documents.current_content(db, access.site)
+    await history.take(db, access.site.id, content, "Before restore", access.user.id)
+    await db.commit()
     return Response(status_code=204)
 
 

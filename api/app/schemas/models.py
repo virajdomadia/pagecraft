@@ -275,3 +275,20 @@ class ForgotOut(ApiModel):
 class ResetIn(ApiModel):
     token: str = Field(min_length=10, max_length=100)
     password: str = Field(min_length=8, max_length=200)
+
+
+# --- version history (L5) -----------------------------------------------------------------------
+
+
+class SnapshotOut(ApiModel):
+    id: uuid.UUID
+    label: str
+    author: str | None
+    created_at: datetime
+
+
+class SnapshotContent(ApiModel):
+    id: uuid.UUID
+    label: str
+    created_at: datetime
+    content: SiteContentModel
