@@ -16,7 +16,7 @@ from app.config import Settings
 from app.errors import ApiError
 from app.models import Publication, Site
 from app.sections import ContentError, Seo, validate_content
-from app.services import crdt, slugs
+from app.services import crdt, history, slugs
 from app.services.documents import compact_locked, lock_site
 from app.services.revalidate import revalidate, site_tag
 
@@ -83,7 +83,7 @@ async def publish_site(
 
     site = await lock_site(db, site_id)
     await compact_locked(db, site)
-    content = crdt.export(crdt.load(site.snapshot))
+    draft = content = crdt.export(crdt.load(site.snapshot))
     try:
         content = validate_content(content)
     except ContentError as exc:
@@ -105,6 +105,7 @@ async def publish_site(
         published_by=user_id,
     )
     db.add(publication)
+    await history.take(db, site.id, draft, f"Published v{site.published_version}", user_id)
     site.slug = slug
     site.published_at = dt.datetime.now(dt.UTC)
     await db.commit()

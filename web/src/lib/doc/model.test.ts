@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as Y from "yjs";
+import { replaceContent } from "@/lib/doc/ops";
 import { buildDoc, exportDoc, getAt, LOAD, LOCAL, replaceText, roots, setField, shiftIndex, type SiteContent, withFreshIds } from "@/lib/doc/model";
 
 const content: SiteContent = {
@@ -125,4 +126,29 @@ describe("the document model", () => {
     remote(() => text.delete(3, 6)); // a deletion across the caret lands it at the cut
     expect(seen).toBe(3);
   });
+
+  it("replaceContent restores a version exactly, syncs as an update, and one undo brings the edit back", () => {
+    const doc = buildDoc(content);
+    const r = roots(doc);
+    const undo = new Y.UndoManager([r.site, r.sections], { trackedOrigins: new Set([LOCAL]) });
+    const edited: SiteContent = {
+      ...content,
+      site: { ...content.site, name: "Kaapi Corner 2", extra: "x" },
+      sections: [{ ...content.sections[0], props: { ...content.sections[0].props, headline: "New" } }, { id: "s_new001", type: "cta", variant: "band", props: {} }],
+    };
+    doc.transact(() => replaceContent(r, edited), LOCAL);
+    expect(exportDoc(doc)).toEqual(edited);
+
+    const peer = new Y.Doc();
+    Y.applyUpdate(peer, Y.encodeStateAsUpdate(doc));
+    undo.stopCapturing();
+    doc.transact(() => replaceContent(r, content), LOCAL);
+    expect(exportDoc(doc)).toEqual(content);
+    Y.applyUpdate(peer, Y.encodeStateAsUpdate(doc));
+    expect(exportDoc(peer)).toEqual(content);
+
+    undo.undo();
+    expect(exportDoc(doc)).toEqual(edited);
+  });
 });
+

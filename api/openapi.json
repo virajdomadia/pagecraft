@@ -1077,6 +1077,72 @@
         "title": "SlugCheck",
         "type": "object"
       },
+      "SnapshotContent": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/SiteContentModel"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "created_at",
+          "content"
+        ],
+        "title": "SnapshotContent",
+        "type": "object"
+      },
+      "SnapshotOut": {
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "author",
+          "created_at"
+        ],
+        "title": "SnapshotOut",
+        "type": "object"
+      },
       "TeammateOut": {
         "description": "A session for the demo teammate, for one browser tab (sent as `x-pagecraft-session`).",
         "properties": {
@@ -1290,7 +1356,7 @@
     },
     "/auth/forgot": {
       "post": {
-        "description": "L4. Emails a one-hour reset link if a real account has this address; the answer is the\nsame either way, and the link is never in a response.",
+        "description": "L4. Emails a one-hour reset link if a real account has this address. The answer and its\ntiming are the same either way (the email goes after the response), and the link is never\nin a response.",
         "operationId": "forgot_auth_forgot_post",
         "requestBody": {
           "content": {
@@ -2271,6 +2337,142 @@
           }
         },
         "summary": "Publish Site",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/sites/{site_id}/snapshots": {
+      "get": {
+        "description": "L5: the newest versions first.",
+        "operationId": "list_snapshots_sites__site_id__snapshots_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SnapshotOut"
+                  },
+                  "title": "Response List Snapshots Sites  Site Id  Snapshots Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "List Snapshots",
+        "tags": [
+          "sites"
+        ]
+      },
+      "post": {
+        "description": "L5: keep the current state as \"Before restore\" (the browser calls this before it\nrestores an older version, so the restore itself can be undone from history too).",
+        "operationId": "save_snapshot_sites__site_id__snapshots_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Save Snapshot",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/sites/{site_id}/snapshots/{snapshot_id}": {
+      "get": {
+        "operationId": "get_snapshot_sites__site_id__snapshots__snapshot_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "snapshot_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Snapshot Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SnapshotContent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Error envelope (06 §C)"
+          }
+        },
+        "summary": "Get Snapshot",
         "tags": [
           "sites"
         ]

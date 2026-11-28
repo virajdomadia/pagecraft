@@ -53,8 +53,9 @@ export interface paths {
         put?: never;
         /**
          * Forgot
-         * @description L4. Emails a one-hour reset link if a real account has this address; the answer is the
-         *     same either way, and the link is never in a response.
+         * @description L4. Emails a one-hour reset link if a real account has this address. The answer and its
+         *     timing are the same either way (the email goes after the response), and the link is never
+         *     in a response.
          */
         post: operations["forgot_auth_forgot_post"];
         delete?: never;
@@ -388,6 +389,48 @@ export interface paths {
         put?: never;
         /** Publish Site */
         post: operations["publish_site_sites__site_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sites/{site_id}/snapshots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Snapshots
+         * @description L5: the newest versions first.
+         */
+        get: operations["list_snapshots_sites__site_id__snapshots_get"];
+        put?: never;
+        /**
+         * Save Snapshot
+         * @description L5: keep the current state as "Before restore" (the browser calls this before it
+         *     restores an older version, so the restore itself can be undone from history too).
+         */
+        post: operations["save_snapshot_sites__site_id__snapshots_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sites/{site_id}/snapshots/{snapshot_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Snapshot */
+        get: operations["get_snapshot_sites__site_id__snapshots__snapshot_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -902,6 +945,39 @@ export interface components {
             slug: string;
             /** Suggestion */
             suggestion: string | null;
+        };
+        /** SnapshotContent */
+        SnapshotContent: {
+            content: components["schemas"]["SiteContentModel"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string;
+        };
+        /** SnapshotOut */
+        SnapshotOut: {
+            /** Author */
+            author: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string;
         };
         /**
          * TeammateOut
@@ -1735,6 +1811,98 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PublishOut"];
+                };
+            };
+            /** @description Error envelope (06 §C) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    list_snapshots_sites__site_id__snapshots_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                site_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SnapshotOut"][];
+                };
+            };
+            /** @description Error envelope (06 §C) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    save_snapshot_sites__site_id__snapshots_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                site_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error envelope (06 §C) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    get_snapshot_sites__site_id__snapshots__snapshot_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                snapshot_id: string;
+                site_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SnapshotContent"];
                 };
             };
             /** @description Error envelope (06 §C) */

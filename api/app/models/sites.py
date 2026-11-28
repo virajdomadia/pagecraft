@@ -113,6 +113,22 @@ class SiteAwareness(Base):
     )
 
 
+class SiteSnapshot(UuidMixin, CreatedMixin, Base):
+    """Version history (L5): the site's content as JSON at one moment. Newest 10 kept."""
+
+    __tablename__ = "site_snapshots"
+    __table_args__ = (Index("ix_site_snapshots_site_id_created_at", "site_id", "created_at"),)
+
+    site_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("sites.id", ondelete="CASCADE"), nullable=False
+    )
+    content: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    author_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+
+
 class Invite(UuidMixin, CreatedMixin, Base):
     """An invitation to edit a site (L4). Only the token's SHA-256 is stored."""
 

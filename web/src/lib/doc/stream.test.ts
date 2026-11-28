@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { openStream, parseSse, type StreamEvent } from "@/lib/doc/stream";
+import { openStream, parseSse, SILENCE_MS, type StreamEvent } from "@/lib/doc/stream";
 
 describe("parseSse", () => {
   it("parses events split across network chunks, skipping pings and bad JSON", () => {
@@ -48,4 +48,27 @@ describe("openStream", () => {
     await vi.advanceTimersByTimeAsync(60_000);
     expect(urls).toHaveLength(3);
   });
+
+  it("drops a connection that has gone silent and reconnects", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    let calls = 0;
+    vi.stubGlobal("fetch", (_url: string, init: RequestInit) => {
+      calls++;
+      // A body that never sends a byte, until aborted.
+      const body = new ReadableStream({
+        start(c) {
+          init.signal?.addEventListener("abort", () => c.error(new Error("aborted")));
+        },
+      });
+      return Promise.resolve(new Response(body, { status: 200 }));
+    });
+    const stop = openStream({ siteId: "s", from: () => 1, onEvent: () => {}, onGone: () => {} });
+    await vi.advanceTimersByTimeAsync(SILENCE_MS - 1);
+    expect(calls).toBe(1);
+    await vi.advanceTimersByTimeAsync(1 + 250);
+    expect(calls).toBe(2);
+    stop();
+  });
 });
+

@@ -1,5 +1,5 @@
 import * as Y from "yjs";
-import { getAt, type Json, type Path, type roots, type SectionJson, setField, toY, withFreshIds } from "@/lib/doc/model";
+import { getAt, type Json, type Path, type roots, type SectionJson, setField, type SiteContent, toY, withFreshIds } from "@/lib/doc/model";
 
 /**
  * Document operations. Every one runs inside the caller's `change(...)` transaction (origin
@@ -98,4 +98,15 @@ export function setSeo(r: Roots, seo: { title: string; description: string; og_i
   setField(m, "title", seo.title);
   setField(m, "description", seo.description);
   setField(m, "og_image", seo.og_image);
+}
+
+/**
+ * Restore a version (L5): the whole document becomes `content`, as one local transaction, so it
+ * syncs to every open editor and one undo brings back what was there.
+ */
+export function replaceContent(r: Roots, content: SiteContent): void {
+  for (const k of [...r.site.keys()]) if (!(k in content.site)) r.site.delete(k);
+  for (const [k, v] of Object.entries(content.site)) r.site.set(k, toY(v as Json, k));
+  r.sections.delete(0, r.sections.length);
+  r.sections.push(content.sections.map((sec) => toY(sec as unknown as Json) as Y.Map<unknown>));
 }

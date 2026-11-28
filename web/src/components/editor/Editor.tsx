@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Canvas, type Width } from "@/components/editor/Canvas";
 import { Inspector } from "@/components/editor/Inspector";
+import { History, type SnapshotContent } from "@/components/editor/History";
 import { Layers } from "@/components/editor/Layers";
 import { PresenceList, usePeers } from "@/components/editor/Peers";
 import { Library } from "@/components/editor/Library";
@@ -12,8 +13,8 @@ import { ThemePanel } from "@/components/editor/ThemePanel";
 import { TopBar } from "@/components/editor/TopBar";
 import { SiteRenderer } from "@/components/renderer/SiteRenderer";
 import { api, errorMessage, type Me, type SiteDetail, type TeammateOut } from "@/lib/api";
-import { roots } from "@/lib/doc/model";
-import { deleteSection, duplicateSection, insertSection, moveSection, sectionIndex, setSeo, setTheme } from "@/lib/doc/ops";
+import { roots, type SiteContent } from "@/lib/doc/model";
+import { deleteSection, duplicateSection, insertSection, moveSection, replaceContent, sectionIndex, setSeo, setTheme } from "@/lib/doc/ops";
 import { useSiteDoc } from "@/lib/doc/useSiteDoc";
 import { MAX_SECTIONS, newSection, REGISTRY } from "@/sections/registry";
 import type { SectionType } from "@/sections/types";
@@ -45,7 +46,8 @@ export function Editor({ site, me, fresh, together = false }: { site: SiteDetail
   const wide = useWide();
   const [selected, setSelected] = useState<string | null>(null);
   const [width, setWidth] = useState<Width>("desktop");
-  const [panel, setPanel] = useState<"layers" | "library">("layers");
+  const [panel, setPanel] = useState<"layers" | "library" | "history">("layers");
+  const [preview, setPreview] = useState<SnapshotContent | null>(null);
   const [drawIn, setDrawIn] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState(site.status === "published");
@@ -184,6 +186,24 @@ export function Editor({ site, me, fresh, together = false }: { site: SiteDetail
     return () => window.removeEventListener("keydown", onKey);
   }, [sd, selected, publishing, remove]);
 
+  // L5: restoring is a local edit (synced to everyone, one undo step), after saving the current
+  // state as "Before restore" so it stays in the history too.
+  async function restore(snap: SnapshotContent) {
+    try {
+      await api(`/sites/${site.id}/snapshots`, { method: "POST" });
+    } catch (err) {
+      setToast({ message: errorMessage(err), tone: "error" });
+      return;
+    }
+    sd.stopCapturing();
+    change((r) => replaceContent(r, snap.content as unknown as SiteContent));
+    sd.stopCapturing();
+    setPreview(null);
+    setPanel("layers");
+    setSelected(null);
+    setToast({ message: `Restored “${snap.label}”.`, action: { label: "Undo", run: sd.undo } });
+  }
+
   async function unpublish() {
     try {
       await api(`/sites/${site.id}/unpublish`, { method: "POST" });
@@ -248,6 +268,11 @@ export function Editor({ site, me, fresh, together = false }: { site: SiteDetail
         canRedo={sd.canRedo}
         onUndo={sd.undo}
         onRedo={sd.redo}
+        historyOpen={panel === "history"}
+        onHistory={() => {
+          setPreview(null);
+          setPanel((p) => (p === "history" ? "layers" : "history"));
+        }}
         width={width}
         onWidth={setWidth}
         onPublish={() => setPublishing(true)}
@@ -255,7 +280,17 @@ export function Editor({ site, me, fresh, together = false }: { site: SiteDetail
       />
       <div className="grid min-h-0 flex-1 grid-cols-[236px_minmax(0,1fr)_300px]">
         <aside className="min-h-0 border-r border-line bg-paper" aria-label="Layers">
-          {panel === "library" ? (
+          {panel === "history" ? (
+            <History
+              siteId={site.id}
+              previewing={preview?.id ?? null}
+              onPreview={setPreview}
+              onClose={() => {
+                setPreview(null);
+                setPanel("layers");
+              }}
+            />
+          ) : panel === "library" ? (
             <Library onPick={add} onClose={() => setPanel("layers")} below={selected} />
           ) : (
             <Layers
@@ -273,7 +308,27 @@ export function Editor({ site, me, fresh, together = false }: { site: SiteDetail
             />
           )}
         </aside>
-        <main id="main" className="min-h-0" aria-label="Canvas">
+        <main id="main" className="min-h-0" aria-label={preview ? "Version preview" : "Canvas"}>
+          {preview ? (
+            <div className="flex h-full flex-col">
+              <div className="flex flex-wrap items-center gap-3 border-b border-line bg-guide-soft px-4 py-2.5" role="status">
+                <p className="min-w-0 flex-1 text-sm text-ink-2">
+                  Previewing <b className="text-ink">{preview.label}</b>, read-only. Restoring replaces the page for everyone editing; you can undo it.
+                </p>
+                <button type="button" onClick={() => setPreview(null)} className="min-h-9 rounded-[3px] border border-line bg-paper px-3 text-sm font-semibold text-ink-2 hover:border-guide">
+                  Back to editing
+                </button>
+                <button type="button" onClick={() => restore(preview)} className="min-h-9 rounded-[3px] bg-guide px-3 text-sm font-bold text-white hover:bg-guide-hover">
+                  Restore this version
+                </button>
+              </div>
+              <div className="bp-grid min-h-0 flex-1 overflow-auto px-6 py-8">
+                <div className="mx-auto max-w-[1280px] bg-paper shadow-[0_1px_2px_rgba(27,27,47,.08)]">
+                  <SiteRenderer content={preview.content as unknown as SiteContent} as="div" />
+                </div>
+              </div>
+            </div>
+          ) : (
           <Canvas
             content={content}
             sections={sectionsY}
@@ -287,9 +342,12 @@ export function Editor({ site, me, fresh, together = false }: { site: SiteDetail
             peers={peers}
             labelFor={labelFor}
           />
+          )}
         </main>
         <aside className="min-h-0 overflow-y-auto border-l border-line bg-paper" aria-label="Inspector">
-          {current ? (
+          {preview ? (
+            <p className="p-4 text-sm text-ink-2">You&apos;re previewing an older version. Go back to editing to change the page.</p>
+          ) : current ? (
             <Inspector key={current.id} section={current} siteId={site.id} change={change} onDuplicate={() => duplicate(current.id)} onDelete={() => remove(current.id)} />
           ) : (
             <ThemePanel theme={content.site.theme} onChange={(k, v) => change((r) => setTheme(r, k, v))} />
